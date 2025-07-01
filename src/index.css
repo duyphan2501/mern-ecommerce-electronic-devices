@@ -1,0 +1,262 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900");
+@import "tailwindcss";
+
+:root {
+  --primary-color: #0d68f3;
+  --secondary-color: #50e3c2;
+  --background-color: #f6f5fa;
+  --text-color: #505050;
+  --highlight-color: #f75654;
+}
+
+body {
+  background-color: rgba(85, 84, 84, 0.063);
+  color: var(--text-color);
+  font-family: "Outfit", sans-serif;
+  overflow-x: hidden;
+}
+
+.bg-secondary {
+  background-color: var(--secondary-color);
+}
+
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.text-secondary {
+  color: var(--secondary-color) !important;
+}
+
+.text-highlight {
+  color: var(--highlight-color) !important;
+}
+
+header {
+  background-color: var(--background-color);
+}
+
+.HomeSlider {
+  overflow: inherit !important;
+}
+
+.container {
+  margin: auto;
+  width: 90%;
+}
+
+@media screen and (max-width: 1024px) {
+  .container {
+    width: 95%;
+  }
+}
+
+.text-content {
+  color: var(--text-color) !important;
+}
+
+.link:hover {
+  color: var(--primary-color) !important;
+  transition: all 0.1s ease-in-out;
+  cursor: pointer;
+}
+
+.link {
+  text-wrap: nowrap;
+}
+
+.search-input:focus {
+  outline: none;
+}
+
+.MuiBadge-badge {
+  background-color: var(--secondary-color) !important;
+}
+
+nav ul li .MuiButton-text {
+  color: var(--text-color) !important;
+  font-weight: 500 !important;
+}
+
+.submenu li .MuiButton-text {
+  text-transform: capitalize !important;
+  color: var(--text-color) !important;
+  border-radius: 0 !important;
+  min-width: 150px;
+  text-align: left !important;
+  display: inline-block !important;
+}
+
+.submenu li .MuiButton-text:hover {
+  color: var(--primary-color) !important;
+}
+
+nav ul li .submenu {
+  top: 120%;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+nav ul li:hover .submenu {
+  top: 100%;
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.2s ease-in-out;
+}
+
+.swiper-pagination {
+  bottom: 0px !important;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 45px;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  background-color: #fff;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+  font-size: 25px !important;
+  font-weight: 700 !important;
+}
+
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.HomeCardSlider .swiper-button-prev,
+.HomeCardSlider .swiper-button-next {
+  min-width: 30px;
+  width: 30px;
+  height: 30px;
+  display: none !important;
+}
+
+.HomeCardSlider .swiper-button-prev::after,
+.HomeCardSlider .swiper-button-next::after {
+  font-size: 15px !important;
+}
+
+.HomeCardSlider:hover .swiper-button-prev,
+.HomeCardSlider:hover .swiper-button-next {
+  display: flex !important;
+}
+
+.HomeCardSlider .item {
+  cursor: pointer;
+}
+
+.HomeCardSlider .item:hover img {
+  transform: scale(1.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.MuiTab-root .MuiTab-textColorPrimary {
+  color: var(--primary-color) !important;
+}
+
+/* Loại bỏ chiều cao cố định của slide */
+.swiper-wrapper .swiper-slide {
+  height: auto;
+}
+
+/* Bật stretch để các slide có chiều cao đồng đều */
+.swiper-wrapper {
+  align-items: stretch !important;
+}
+
+.support li:hover a {
+  color: var(--primary-color) !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.AdsSlider .swiper-slide-active .info,
+.AdsSlider .swiper-slide-active .info h4,
+.AdsSlider .swiper-slide-active .info h3,
+.AdsSlider .swiper-slide-active .info p,
+.AdsSlider .swiper-slide-active .info div {
+  opacity: 1;
+  right: 0;
+}
+
+.AdsSlider .info h4 {
+  transition-duration: 1.2s;
+}
+.AdsSlider .info h3 {
+  transition-duration: 1.7s;
+}
+.AdsSlider .info p {
+  transition-duration: 2.2s;
+}
+.AdsSlider .info div {
+  transition-duration: 2.4s;
+}
+
+.MuiFormControlLabel-label {
+  font-size: 15px !important;
+}
+
+.MuiCheckbox-root {
+  padding: 4px 8px !important;
+}
+
+.scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 3px;
+}
+
+.scroll::-webkit-scrollbar-track {
+  background: none; /* màu nền của track (phần thanh cuộn rãnh) */
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background-color: #d4d2d2; /* màu của thanh kéo */
+  border-radius: 10px;
+  height: 3px !important;
+}
+
+.MuiSlider-rail {
+  background-color: #a9a9a9 !important;
+}
+
+.MuiSlider-track {
+  background-color: var(--primary-color) !important;
+  border: 0 !important;
+}
+
+.css-1xcmt9q-MuiSlider-thumb {
+  background-color: var(--primary-color) !important;
+  width: 13px !important;
+  height: 13px !important;
+  border-radius: 100% !important;
+  box-shadow: none !important;
+}
+
+.css-1xcmt9q-MuiSlider-thumb:hover {
+  box-shadow: none !important;
+}
+
+.MuiPaginationItem-root.Mui-selected {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+
+.MuiPaper-root {
+  max-width: 1200px !important;
+}
+
+.loginForm .MuiOutlinedInput-inpu {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+} 

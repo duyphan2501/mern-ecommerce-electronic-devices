@@ -1,0 +1,58 @@
+import "react-inner-image-zoom/lib/styles.min.css";
+import InnerImageZoom from "react-inner-image-zoom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import { useRef, useState } from "react";
+
+const ProductZoom = ({imageAddress}) => {
+    const [slideIndex, setSlideIndex] = useState(0)
+    const largeSlideRef = useRef()
+
+    const changeSlideTo = (index) => {
+        setSlideIndex(index)
+        largeSlideRef.current.swiper.slideTo(index)
+    }
+
+  return (
+    <div>
+      <div className="p-2">
+        <div className="flex gap-3 lg:border-r-2">
+          <div className="">
+            <Swiper className="" slidesPerView={4} direction={"vertical"}>
+              {imageAddress.map((image, index) => {
+                return (
+                  <SwiperSlide className={`!size-[100px] cursor-pointer ${slideIndex !== index && "opacity-40"}`} onClick={() => changeSlideTo(index)}>
+                    <img
+                      src={image}
+                      alt=""
+                      className="object-contain h-full w-full"
+                    />
+                  </SwiperSlide>
+                );
+              })}
+            </Swiper>   
+          </div>
+          <div className="">
+            <Swiper className="w-[350px]" slidesPerView={1} ref={largeSlideRef}>
+              {imageAddress.map((image) => {
+                return (
+                  <SwiperSlide>
+                    <InnerImageZoom
+                      src={image}
+                      zoomScale={1}
+                      zoomType="hover"
+                    />
+                  </SwiperSlide>
+                );
+              })}
+            </Swiper>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  );
+};
+
+export default ProductZoom;
