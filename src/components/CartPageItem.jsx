@@ -2,7 +2,6 @@ import { Rating, Stack } from "@mui/material";
 import { Link } from "react-router-dom";
 import formatMoney from "../utils/MoneyFormat";
 import { FaX } from "react-icons/fa6";
-import QuantityButton from "./QuantityButton";
 import QuantityCartBtn from "./QuantityCartBtn";
 
 const CartPageItem = ({ product }) => {
