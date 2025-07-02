@@ -14,6 +14,7 @@ import { Toaster } from "react-hot-toast";
 import CartDrawer from "./components/CartDrawer";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import AddressForm from "./components/AddressForm";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
         </Routes>
         <CartDrawer />
         <ViewMoreDialog />
+        <AddressForm />
       </BrowserRouter>
       <Footer />
     </>

@@ -12,6 +12,10 @@ export const MyContextProvider = ({ children }) => {
   const openCart = () => setIsOpenCart(true)
   const closeCart = () => setIsOpenCart(false)
 
+  const [isOpenAddrFrm, setIsOpenAddrFrm] = useState(false)
+  const openAddrFrm = () => setIsOpenAddrFrm(true)
+  const closeAddrFrm = () => setIsOpenAddrFrm(false)
+  
   const notify = (status, message) => {
     if (status === "success")
       toast.success(message)
@@ -19,7 +23,7 @@ export const MyContextProvider = ({ children }) => {
       toast.error(message)
   }
 
-  const values = {isOpenModal, openModal, closeModal, notify, isOpenCart, openCart, closeCart }
+  const values = {isOpenModal, openModal, closeModal, notify, isOpenCart, openCart, closeCart, isOpenAddrFrm, openAddrFrm, closeAddrFrm }
   return (
     <MyContext.Provider value={values}>
       {children}

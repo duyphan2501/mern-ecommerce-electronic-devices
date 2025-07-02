@@ -5,14 +5,14 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { useRef, useState } from "react";
 
-const ProductZoom = ({imageAddress}) => {
-    const [slideIndex, setSlideIndex] = useState(0)
-    const largeSlideRef = useRef()
+const ProductZoom = ({ imageAddress }) => {
+  const [slideIndex, setSlideIndex] = useState(0);
+  const largeSlideRef = useRef();
 
-    const changeSlideTo = (index) => {
-        setSlideIndex(index)
-        largeSlideRef.current.swiper.slideTo(index)
-    }
+  const changeSlideTo = (index) => {
+    setSlideIndex(index);
+    largeSlideRef.current.swiper.slideTo(index);
+  };
 
   return (
     <div>
@@ -22,7 +22,12 @@ const ProductZoom = ({imageAddress}) => {
             <Swiper className="" slidesPerView={4} direction={"vertical"}>
               {imageAddress.map((image, index) => {
                 return (
-                  <SwiperSlide className={`!size-[100px] cursor-pointer ${slideIndex !== index && "opacity-40"}`} onClick={() => changeSlideTo(index)}>
+                  <SwiperSlide
+                    className={`!size-[100px] cursor-pointer ${
+                      slideIndex !== index && "opacity-40"
+                    }`}
+                    onClick={() => changeSlideTo(index)}
+                  >
                     <img
                       src={image}
                       alt=""
@@ -31,25 +36,27 @@ const ProductZoom = ({imageAddress}) => {
                   </SwiperSlide>
                 );
               })}
-            </Swiper>   
+            </Swiper>
           </div>
           <div className="">
             <Swiper className="w-[350px]" slidesPerView={1} ref={largeSlideRef}>
-              {imageAddress.map((image) => {
+              {imageAddress.map((image, index) => {
                 return (
-                  <SwiperSlide>
-                    <InnerImageZoom
-                      src={image}
-                      zoomScale={1}
-                      zoomType="hover"
-                    />
+                  <SwiperSlide key={index}>
+                    {index === slideIndex && (
+                      <InnerImageZoom
+                        src={image}
+                        zoomScale={1}
+                        zoomType="hover"
+                        zoomPreload={true} 
+                      />
+                    )}
                   </SwiperSlide>
                 );
               })}
             </Swiper>
           </div>
         </div>
-        
       </div>
     </div>
   );

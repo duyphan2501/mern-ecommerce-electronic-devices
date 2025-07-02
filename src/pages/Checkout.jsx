@@ -3,7 +3,8 @@ import { FaPlus } from "react-icons/fa6";
 import AddressCard from "../components/AddressCard";
 import CheckoutItem from "../components/CheckoutItem";
 import formatMoney from "../utils/MoneyFormat";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import MyContext from "../Context/MyContext";
 
 const addresses = [
   {
@@ -83,6 +84,8 @@ const Checkout = () => {
     setSelectedId(id);
   };
 
+  const {openAddrFrm} = useContext(MyContext)
+
   return (
     <div className="py-10 flex justify-center ">
       <div className="2xl:w-7/10 xl:w-8/10 lg:w-9/10 sm:w-9/10">
@@ -93,7 +96,7 @@ const Checkout = () => {
                 Chọn địa chỉ giao hàng
               </h4>
               <div className="">
-                <Button className="!gap-1 !bg-white !border-1 !font-semibold  !border-blue-500 !rounded-md">
+                <Button className="!gap-1 !bg-white !border-1 !font-semibold  !border-blue-500 !rounded-md" onClick={openAddrFrm}>
                   <FaPlus />
                   Thêm đia chỉ mới
                 </Button>
