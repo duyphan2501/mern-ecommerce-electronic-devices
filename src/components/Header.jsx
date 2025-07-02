@@ -9,6 +9,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { useContext, useState } from "react";
 import CategoryDrawer from "./CategoryDrawer";
 import MyContext from "../Context/MyContext";
+import NavLinkHeader from "./NavLinkHeader";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -18,6 +19,8 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
     padding: "0 4px",
   },
 }));
+
+const isLogin = true;
 
 const Header = () => {
   const [open, setOpen] = useState(false);
@@ -56,6 +59,9 @@ const Header = () => {
           </div>
           <div className="col3 w-[25%] flex items-center justify-end">
             <ul className="flex items-center justify-end lg:gap-5 w-full">
+              {isLogin? <li>
+                
+              </li>:
               <li>
                 <Link className="text-gray-500 text-[15px] link" to={"/login"}>
                   Đăng nhập
@@ -67,7 +73,8 @@ const Header = () => {
                 >
                   Đăng ký
                 </Link>
-              </li>
+              </li>}
+              
               <li>
                 <Link to={"/wishlist"}>
                   <Tooltip title="Đơn hàng" arrow>
@@ -99,68 +106,7 @@ const Header = () => {
               <CategoryDrawer isOpenDrawer={open} setOpenDrawer={setOpen}/>
             </div>
             <div className="col2 xl:w-[50%]">
-              <ul className=" flex items-center justify-center xl:gap-x-3 lg:gap-x-2 gap-x-1">
-                <li>
-                  <Link className="" to={"/gioi-thieu"}>
-                    <Button className="link !py-3">Giới thiệu</Button>
-                  </Link>
-                </li>
-                <li className="relative">
-                  <Link className="" to={"/san-pham"}>
-                    <Button className="link !py-3">Sản phẩm</Button>
-                  </Link>
-                  <ul className="submenu absolute top-[100%] left-0 bg-white shadow-sm z-10">
-                    <li>
-                      <Link className="" to={"/san-pham/linh-kien"}>
-                        <Button className="link">
-                          Linh kiện
-                        </Button>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="" to={"/san-pham/thiet-bi-dien"}>
-                        <Button className="link">
-                          Thiết bị điện
-                        </Button>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="" to={"/san-pham/mo-đun"}>
-                        <Button className="link">
-                          Mô-đun
-                        </Button>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="" to={"/san-pham/chi-tiet-may"}>
-                        <Button className="link">
-                          Chi tiết máy
-                        </Button>
-                      </Link>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <Link className="" to={"/dich-vu"}>
-                    <Button className="link !py-3">Dịch vụ</Button>
-                  </Link>
-                </li>
-                <li>
-                  <Link className="" to={"/dich-vu"}>
-                    <Button className="link !py-3">Tài liệu kỹ thuật</Button>
-                  </Link> 
-                </li>
-                <li>
-                  <Link className="" to={"/tin-tuc"}>
-                    <Button className="link !py-3">Tin tức</Button>
-                  </Link>
-                </li>
-                <li>
-                  <Link className="" to={"/lien-he"}>
-                    <Button className="link !py-3">Liên hệ</Button>
-                  </Link>
-                </li>
-              </ul>
+              <NavLinkHeader />
             </div>
             <div className="col3 xl:flex items-center gap-2 hidden text-content">
               <MdOutlineRocketLaunch size={20} />

@@ -1,8 +1,9 @@
-import { Button, IconButton, Rating, Stack, Tooltip } from "@mui/material";
+import {  IconButton, Rating, Stack, Tooltip } from "@mui/material";
 import { HiOutlineArrowsExpand } from "react-icons/hi";
-import { IoCartOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import AddToCartBtn from "./AddToCartBtn";
+import { useContext } from "react";
+import MyContext from "../Context/MyContext";
 
 const ProductListShape = ({
   image1,
@@ -24,6 +25,8 @@ const ProductListShape = ({
     currency: "VND",
   }).format(discountPrice);
 
+  const {openModal} = useContext(MyContext)
+
   return (
     <div className="p-4 rounded-md shadow-md bg-gray-100 flex items-center gap-10 relative border border-gray-200">
       {isNew && (
@@ -31,8 +34,9 @@ const ProductListShape = ({
           New!
         </span>
       )}
-      <Link to={"/san-pham/chi-tiet"}>
+    
         <div className="relative group h-[300px] overflow-hidden rounded-lg">
+            <Link to={"/san-pham/chi-tiet"}>
           <img
             src={image1}
             alt=""
@@ -45,10 +49,12 @@ const ProductListShape = ({
               className="w-full object-contain h-full rounded-lg absolute top-0 left-0 opacity-0 group-hover:opacity-100 transition duration-500 ease-in-out cursor-pointer group-hover:scale-105"
             />
           )}
+          </Link>
           <Tooltip title="Xem thêm" placement="top" arrow>
             <IconButton
               variant="text"
-              className="!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-gray-200 !text-black !absolute hover:!bg-[#0d68f3] hover:!text-white !transition-all top-[-30px] opacity-0 duration-200 group-hover:top-3 group-hover:opacity-100 right-3"
+              className="!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-gray-200 !text-black !absolute hover:!bg-[#0d68f3] hover:!text-white !transition-all top-[-30px] opacity-0 duration-200 group-hover:top-3 group-hover:opacity-100 right-3 z-50"
+              onClick={openModal}
             >
               <HiOutlineArrowsExpand
                 size={20}
@@ -57,7 +63,7 @@ const ProductListShape = ({
             </IconButton>
           </Tooltip>
         </div>
-      </Link>
+
       <div className="flex flex-col justify-between flex-1 gap-2">
         <h4 className="text-2xl text-black font-semibold font-sans">{name}</h4>
         <p className="w-[95%]">{description}</p>

@@ -5,6 +5,7 @@ import CheckoutItem from "../components/CheckoutItem";
 import formatMoney from "../utils/MoneyFormat";
 import { useContext, useState } from "react";
 import MyContext from "../Context/MyContext";
+import AddressForm from "../components/AddressForm";
 
 const addresses = [
   {
@@ -84,7 +85,7 @@ const Checkout = () => {
     setSelectedId(id);
   };
 
-  const {openAddrFrm} = useContext(MyContext)
+  const {isOpenAddrFrm, openAddrFrm} = useContext(MyContext)
 
   return (
     <div className="py-10 flex justify-center ">
@@ -132,12 +133,13 @@ const Checkout = () => {
                 {formatMoney(totalCost)}
               </p>
             </div>
-            <Button className="!w-full !bg-blue-500 !text-white !font-bold">
+            <Button className="!w-full !bg-blue-500 !text-white !font-bold hover:!bg-black  ">
               Đặt hàng
             </Button>
           </div>
         </div>
       </div>
+      {isOpenAddrFrm && <AddressForm/>}
     </div>
   );
 };

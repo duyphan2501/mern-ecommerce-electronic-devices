@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import AddToCartBtn from "./AddToCartBtn";
 import MyContext from "../Context/MyContext";
 import { useContext } from "react";
+import ViewMoreDialog from "./ViewMoreDialog";
 
 const ProductCard = ({
   image1,

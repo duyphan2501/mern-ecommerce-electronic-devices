@@ -102,9 +102,7 @@ const AddressForm = () => {
 
   return (
     <div
-      className={`fixed inset-0 flex justify-center items-center z-50 ${
-        isOpenAddrFrm ? "block" : "hidden"
-      }`}
+      className={`fixed inset-0 flex justify-center items-center z-50`}
     >
       <div className="absolute inset-0 bg-gray-700 opacity-30"></div>
       <div className="bg-white rounded-md p-5 z-50 border-b shadow-md">

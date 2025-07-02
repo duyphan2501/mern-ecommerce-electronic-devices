@@ -1,4 +1,4 @@
-import { FaFacebookMessenger, FaArrowUp } from "react-icons/fa";
+import { FaFacebookMessenger } from "react-icons/fa";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Header from "./components/Header";
 import TopStrip from "./components/TopStrip";
@@ -14,7 +14,6 @@ import { Toaster } from "react-hot-toast";
 import CartDrawer from "./components/CartDrawer";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
-import AddressForm from "./components/AddressForm";
 
 function App() {
   return (
@@ -43,7 +42,6 @@ function App() {
         </Routes>
         <CartDrawer />
         <ViewMoreDialog />
-        <AddressForm />
       </BrowserRouter>
       <Footer />
     </>
