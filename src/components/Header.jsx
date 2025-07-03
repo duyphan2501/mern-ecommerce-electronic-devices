@@ -23,7 +23,8 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 const Header = () => {
-  const { isLogin } = useContext(MyContext);
+  const  isLogin  = true;
+
   const [anchorEl, setAnchorEl] = useState(null);
   const openProfile = Boolean(anchorEl);
   const handleClick = (event) => {

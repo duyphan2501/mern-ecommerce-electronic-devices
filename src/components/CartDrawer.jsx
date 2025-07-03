@@ -107,7 +107,7 @@ const CartDrawer = () => {
               <Button
                 component={Link}
                 to={"/cart"}
-                className="!w-full !py-3 !bg-blue-500 !text-white !font-sans !font-bold hover:!bg-black"
+                className="!w-full !py-3 !bg-blue-500 !text-white !font-bold hover:!bg-black"
                 onClick={closeCart}
               >
                 Xem Giỏ Hàng
@@ -115,7 +115,7 @@ const CartDrawer = () => {
               <Button
                 component={Link}
                 to={"/checkout"}
-                className="!w-full !py-3 !bg-white !text-blue-500 !border-2 !border-blue-500 !font-sans !font-bold hover:!bg-black hover:!text-white hover:!border-black"
+                className="!w-full !py-3 !bg-white !text-blue-500 !border-2 !border-blue-500 !font-bold hover:!bg-black hover:!text-white hover:!border-black"
                 onClick={closeCart}
               >
                 CheckOut

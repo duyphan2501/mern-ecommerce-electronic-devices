@@ -126,7 +126,7 @@ const ChangePassword = () => {
             <div className="mt-4">
               <PasswordStrength password={password}/>
               <Button
-                className="!py-2 !bg-blue-500 !text-white !font-bold !font-sans !w-full !mt-4"
+                className="!py-2 !bg-blue-500 !text-white !font-bold !w-full !mt-4"
                 type="submit"
               >
                 Đổi mật khẩu
