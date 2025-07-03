@@ -14,6 +14,7 @@ import { Toaster } from "react-hot-toast";
 import CartDrawer from "./components/CartDrawer";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import MyAccount from "./pages/MyAccount";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/my-account" element={<MyAccount />} />
         </Routes>
         <CartDrawer />
         <ViewMoreDialog />

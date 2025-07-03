@@ -12,8 +12,12 @@
 body {
   background-color: rgba(85, 84, 84, 0.063);
   color: var(--text-color);
-  font-family: "Outfit", sans-serif;
+  font-family: "Outfit", sans-serif !important;
   overflow-x: hidden;
+}
+
+.MuiButton-text {
+  font-family: "Outfit", sans-serif !important;
 }
 
 .bg-secondary {
@@ -259,4 +263,4 @@ nav ul li:hover .submenu {
 .loginForm .MuiOutlinedInput-inpu {
   padding-top: 8px !important;
   padding-bottom: 8px !important;
-} 
+}

@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { Button, Checkbox } from "@mui/material";
 import CartPageItem from "../components/CartPageItem";
 import formatMoney from "../utils/MoneyFormat";
 import { Link } from "react-router-dom";
@@ -52,7 +52,7 @@ const products = [
 ];
 
 const totalCost = calculateTotalCost();
-
+const label = { inputProps: { "aria-label": "Checkbox demo" } };
 const Cart = () => {
   return (
     <div className=" py-10">
@@ -72,7 +72,10 @@ const Cart = () => {
               </p>
             </div>
             <div className="rounded-md bg-gray-300 p-2 flex font-bold items-center">
-              <div className="w-3/8">Sản phẩm</div>
+              <div className="w-3/8 flex items-center">
+                <Checkbox {...label} defaultChecked />
+                Sản phẩm
+              </div>
               <div className="flex flex-1 justify-between">
                 <div className="flex-1">Đơn giá</div>
                 <div className="flex-1">Số lượng</div>
@@ -110,7 +113,11 @@ const Cart = () => {
                   <div className="font-bold">Thành tiền: </div>
                   <div className="font-bold">{formatMoney(totalCost)}</div>
                 </div>
-                <Button component={Link} to={"/checkout"} className="!w-full !bg-blue-500 !text-white hover:!bg-black !font-bold !font-sans">
+                <Button
+                  component={Link}
+                  to={"/checkout"}
+                  className="!w-full !bg-blue-500 !text-white hover:!bg-black !font-bold !font-sans"
+                >
                   Checkout
                 </Button>
               </div>

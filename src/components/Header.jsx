@@ -10,6 +10,8 @@ import { useContext, useState } from "react";
 import CategoryDrawer from "./CategoryDrawer";
 import MyContext from "../Context/MyContext";
 import NavLinkHeader from "./NavLinkHeader";
+import { Menu, MenuItem } from "@mui/material";
+import { FaRegSmileWink } from "react-icons/fa";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -20,11 +22,20 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const isLogin = true;
-
 const Header = () => {
+  const { isLogin } = useContext(MyContext);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openProfile = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   const [open, setOpen] = useState(false);
-  const {openCart} = useContext(MyContext)
+  const { openCart } = useContext(MyContext);
+
   return (
     <header className="sticky top-0 z-50 !bg-white shadow-sm h-32">
       <div className="!py-2 border-b-[1px] border-[#e5e7eb]">
@@ -59,22 +70,84 @@ const Header = () => {
           </div>
           <div className="col3 w-[25%] flex items-center justify-end">
             <ul className="flex items-center justify-end lg:gap-5 w-full">
-              {isLogin? <li>
-                
-              </li>:
-              <li>
-                <Link className="text-gray-500 text-[15px] link" to={"/login"}>
-                  Đăng nhập
-                </Link>
-                <span className="text-gray-300 mx-2">|</span>
-                <Link
-                  className="text-gray-500 text-[15px] link"
-                  to={"/register"}
-                >
-                  Đăng ký
-                </Link>
-              </li>}
-              
+              {isLogin ? (
+                <li className="size-10 flex justify-end items-center flex-1">
+                  <Button
+                    className="!bg-gray-100 hover:!bg-gray-300 !items-center !normal-case !text-gray-500 !gap-1"
+                    aria-controls={openProfile ? "basic-menu" : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={openProfile ? "true" : undefined}
+                    onClick={handleClick}
+                  >
+                    <FaRegSmileWink size={25} />
+                    Tài khoản
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    id="account-menu"
+                    open={openProfile}
+                    onClose={handleClose}
+                    onClick={handleClose}
+                    slotProps={{
+                      paper: {
+                        elevation: 0,
+                        sx: {
+                          overflow: "visible",
+                          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                          mt: 1.5,
+                          "& .MuiAvatar-root": {
+                            width: 32,
+                            height: 32,
+                            ml: -0.5,
+                            mr: 1,
+                          },
+                          "&::before": {
+                            content: '""',
+                            display: "block",
+                            position: "absolute",
+                            top: 0,
+                            right: 14,
+                            width: 10,
+                            height: 10,
+                            bgcolor: "background.paper",
+                            transform: "translateY(-50%) rotate(45deg)",
+                            zIndex: 0,
+                          },
+                        },
+                      },
+                    }}
+                    transformOrigin={{ horizontal: "right", vertical: "top" }}
+                    anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                  >
+                    <MenuItem
+                      component={Link}
+                      to={"/my-account"}
+                      onClick={handleClose}
+                    >
+                      Profile
+                    </MenuItem>
+                    <MenuItem onClick={handleClose}>My account</MenuItem>
+                    <MenuItem onClick={handleClose}>Logout</MenuItem>
+                  </Menu>
+                </li>
+              ) : (
+                <li>
+                  <Link
+                    className="text-gray-500 text-[15px] link"
+                    to={"/login"}
+                  >
+                    Đăng nhập
+                  </Link>
+                  <span className="text-gray-300 mx-2">|</span>
+                  <Link
+                    className="text-gray-500 text-[15px] link"
+                    to={"/register"}
+                  >
+                    Đăng ký
+                  </Link>
+                </li>
+              )}
+
               <li>
                 <Link to={"/wishlist"}>
                   <Tooltip title="Đơn hàng" arrow>
@@ -103,7 +176,7 @@ const Header = () => {
         <div className="container">
           <div className="flex items-center gap-7">
             <div className="col1 w-[20%]">
-              <CategoryDrawer isOpenDrawer={open} setOpenDrawer={setOpen}/>
+              <CategoryDrawer isOpenDrawer={open} setOpenDrawer={setOpen} />
             </div>
             <div className="col2 xl:w-[50%]">
               <NavLinkHeader />

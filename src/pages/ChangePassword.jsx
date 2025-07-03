@@ -99,7 +99,6 @@ const ChangePassword = () => {
               name="confirmPassword"
               value={confirmPassword}
               autoComplete="confirm-password"
-
               onChange={(e) => setConfirmPassword(e.target.value)}
               endAdornment={
                 <InputAdornment position="end">
