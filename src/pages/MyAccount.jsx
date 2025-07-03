@@ -41,8 +41,8 @@ const MyAccount = () => {
   };
   return (
     <div>
-      <div className="container py-10 lg:px-20 flex gap-5">
-        <div className="w-1/4 bg-white rounded-md border border-gray-200 shadow h-fit">
+      <div className="container py-10 lg:px-20 md:flex gap-5">
+        <div className="md:w-1/4 bg-white rounded-md border border-gray-200 shadow h-fit">
           <div className="flex flex-col justify-center items-center gap-1 p-5">
             <div className="size-25 rounded-full border-5 border-blue-200 relative group flex items-center justify-center">
               <img
@@ -96,7 +96,7 @@ const MyAccount = () => {
             </ul>
           </div>
         </div>
-        <div className="w-3/4 ">
+        <div className="md:w-3/4 md:mt-0 mt-4">
             {activeTab === 0 && <Profile />}
             {activeTab === 1 && <Address />}
             {activeTab === 2 && <Order />}
