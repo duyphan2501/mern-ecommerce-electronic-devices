@@ -25,7 +25,7 @@ const addresses = [
 const Address = () => {
   return (
     <div className="bg-white rounded-md border border-gray-200 shadow p-5">
-      <AddressList title={"Sổ địa chỉ"} address={addresses}/>
+      <AddressList title={"Địa chỉ giao hàng"} address={addresses}/>
     </div>
   );
 };
