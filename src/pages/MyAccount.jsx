@@ -11,6 +11,7 @@ import Profile from "../components/MyAccount/Profile";
 import Address from "../components/MyAccount/Address";
 import MyContext from "../Context/MyContext";
 import { Link } from "react-router-dom";
+import Order from "../components/MyAccount/Order";
 const defaultAvatar = {
   src: "https://frontend.tikicdn.com/_desktop-next/static/img/account/avatar.png",
   class: "size-9 object-contain",
@@ -98,6 +99,7 @@ const MyAccount = () => {
         <div className="w-3/4 ">
             {activeTab === 0 && <Profile />}
             {activeTab === 1 && <Address />}
+            {activeTab === 2 && <Order />}
         </div>
       </div>
     </div>

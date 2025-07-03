@@ -17,7 +17,7 @@ const ProductZoom = ({ imageAddress }) => {
   return (
     <div>
       <div className="p-2">
-        <div className="flex gap-3 lg:border-r-2">
+        <div className="flex gap-3">
           <div className="">
             <Swiper className="" slidesPerView={4} direction={"vertical"}>
               {imageAddress.map((image, index) => {

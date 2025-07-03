@@ -59,7 +59,7 @@ const Header = () => {
                 name=""
                 id=""
                 className="ms-2 search-input w-full border-r-[1px] border-r-gray-300 text-gray-500"
-                placeholder="Mô-đun NXH350N100H4Q2F2P1G"
+                placeholder="Tìm kiếm sản phẩm"
               />
               <Button
                 variant="text"
