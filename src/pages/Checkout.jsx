@@ -1,9 +1,7 @@
 import { Button } from "@mui/material";
-import { FaPlus } from "react-icons/fa";
-import AddressCard from "../components/AddressCard";
 import CheckoutItem from "../components/CheckoutItem";
 import formatMoney from "../utils/MoneyFormat";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import MyContext from "../Context/MyContext";
 import AddressForm from "../components/AddressForm";
 import AddressList from "../components/AddressList";
@@ -80,13 +78,7 @@ const products = [
 const totalCost = calculateTotalCost();
 
 const Checkout = () => {
-  const [selectedId, setSelectedId] = useState(null);
-
-  const handleSelect = (id) => {
-    setSelectedId(id);
-  };
-
-  const {isOpenAddrFrm, openAddrFrm} = useContext(MyContext)
+  const {isOpenAddrFrm} = useContext(MyContext)
 
   return (
     <div className="py-10 flex justify-center ">

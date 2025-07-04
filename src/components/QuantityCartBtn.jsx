@@ -17,7 +17,7 @@ const QuantityCartBtn = ({quan}) => {
     }
 
   return (
-    <div className="flex gap-4 items-center">
+    <div className="flex gap-1 items-center">
         <div className="size-9 rounded-full font-black bg-gray-100 border border-gray-200 flex justify-center items-center cursor-pointer hover:bg-gray-300" onClick={() => setQuantity(quantity - 1)}><FaMinus /></div>
         <input className="size-9 text-center outline-0" value={quantity} onChange={(e) => handleChange(e)   }/>
         <div className="size-9 rounded-full font-black bg-gray-100 border border-gray-200 flex justify-center items-center cursor-pointer hover:bg-gray-300" onClick={() => setQuantity(quantity + 1)}><FaPlus /></div>

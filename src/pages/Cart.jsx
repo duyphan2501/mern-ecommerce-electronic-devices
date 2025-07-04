@@ -74,7 +74,7 @@ const Cart = () => {
             <div className="rounded-md bg-gray-300 p-2 flex font-bold items-center">
               <div className="w-3/8 flex items-center">
                 <Checkbox {...label} defaultChecked />
-                Sản phẩm
+                Tất cả ({products.length} Sản phẩm)
               </div>
               <div className="flex flex-1 justify-between">
                 <div className="flex-1">Đơn giá</div>

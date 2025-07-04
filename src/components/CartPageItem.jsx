@@ -12,7 +12,7 @@ const CartPageItem = ({ product }) => {
       <div className="rounded-md p-2 flex items-center font-bold border-b border-gray-200 select-none">
         <div className="w-3/8">
           <div className="flex gap-3">
-            <div className="self-start">
+            <div className="self-center">
               <Checkbox defaultChecked />
             </div>
             <Link to={"/san-pham/chi-tiet"}>
