@@ -9,7 +9,6 @@
   --highlight-color: #f75654;
 }
 
-
 body {
   background-color: rgba(85, 84, 84, 0.063);
   color: var(--text-color);
@@ -18,7 +17,7 @@ body {
 }
 
 .MuiBadge-dot {
-    background: var(--secondary-color) !important;
+  background: var(--secondary-color) !important;
 }
 
 .animate-spin {
@@ -26,6 +25,29 @@ body {
 }
 
 .navlink ul li button {
-    font-family: "Outfit", sans-serif !important;
+  font-family: "Outfit", sans-serif !important;
+}
 
+.swiper-button-prev,
+.swiper-button-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: all 0.1ms ease;
+  visibility: hidden !important;
+}
+.swiper:hover .swiper-button-prev,
+.swiper:hover .swiper-button-next {
+  visibility: visible !important;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  color: black !important;
 }
