@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900");
 @import "tailwindcss";
 
 :root {
@@ -8,6 +8,7 @@
   --text-color: #505050;
   --highlight-color: #f75654;
 }
+
 
 body {
   background-color: rgba(85, 84, 84, 0.063);
@@ -22,4 +23,9 @@ body {
 
 .animate-spin {
   animation-duration: 4s !important;
+}
+
+.navlink ul li button {
+    font-family: "Outfit", sans-serif !important;
+
 }

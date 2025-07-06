@@ -20,7 +20,7 @@ const Header = () => {
     setAnchorEl(null);
   };
   return (
-    <header className="pl-52 py-3 border-b-2 border-gray-200 ">
+    <header className="pl-62 py-5 bg-white border-b-2 border-gray-200 ">
       <div className="px-10 flex justify-between items-center">
         <IconButton>
           <RiMenu2Fill className="text-black" />
