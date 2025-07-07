@@ -21,10 +21,10 @@ const Header = () => {
     setAnchorEl(null);
   };
 
-  const {isOpenSidebar, handleClickSidebar} = useContext(MyContext)
+  const { handleClickSidebar} = useContext(MyContext)
 
   return (
-    <header className={` py-5 bg-white border-b-2 border-gray-200`}>
+    <header className={`sticky top-0 z-100 py-3 bg-white border-b-2 border-gray-200`}>
       <div className="pl-3 pr-5 flex justify-between items-center">
         <IconButton onClick={handleClickSidebar}>
           <RiMenu2Fill className="text-black" />
@@ -86,6 +86,7 @@ const Header = () => {
             }}
             transformOrigin={{ horizontal: "right", vertical: "top" }}
             anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            transitionDuration={10}
           >
             <MenuItem onClick={handleClose}>
               <Avatar /> Profile

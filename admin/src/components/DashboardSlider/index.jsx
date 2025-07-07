@@ -20,7 +20,7 @@ const DashboardCardSlider = () => {
           500: { slidesPerView: 1.5 },
           670: { slidesPerView: 2.5 },
           1024: { slidesPerView: 3 },
-          1280: { slidesPerView: 3.5 }
+          1280: { slidesPerView: 4 }
         }}
         navigation={true}
         modules={[Navigation]}
@@ -30,7 +30,7 @@ const DashboardCardSlider = () => {
             icon={<MdOutlineAttachMoney size={30} className="text-green-600" />}
             label="Total Revenue"
             price={123456789}
-            chartIcon={<BsBarChart size={50} className="text-green-600" />}
+            chartIcon={<BsBarChart size={40} className="text-green-600" />}
             gapLastmonth={32.3}
           />
         </SwiperSlide>
@@ -52,7 +52,7 @@ const DashboardCardSlider = () => {
             }
             label="Refunded"
             price={74321}
-            chartIcon={<BsBarChart size={50} className="text-orange-400" />}
+            chartIcon={<BsBarChart size={40} className="text-orange-400" />}
             gapLastmonth={-3.3}
           />
         </SwiperSlide>

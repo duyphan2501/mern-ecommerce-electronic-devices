@@ -101,17 +101,17 @@ const OrderTable = () => {
   return (
     <div className=" overflow-x-auto shadow rounded-md border border-gray-200 z-0">
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 whitespace-nowrap">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
           <tr>
-            <th className="pl-6 py-4 text-center"></th>
-            <th className="px-6 py-4">OrderId</th>
-            <th className="px-6 py-4">CreateAt</th>
-            <th className="px-6 py-4">Customer</th>
-            <th className="px-6 py-4">Address</th>
-            <th className="px-6 py-4">Phone</th>
-            <th className="px-6 py-4">Total</th>
-            <th className="px-6 py-4">Payment</th>
-            <th className="px-6 py-4">Status</th>
+            <th className="pl-4 py-4 text-center"></th>
+            <th className="px-4 py-4">OrderId</th>
+            <th className="px-4 py-4">CreateAt</th>
+            <th className="px-4 py-4">Customer</th>
+            <th className="px-4 py-4">Address</th>
+            <th className="px-4 py-4">Phone</th>
+            <th className="px-4 py-4">Total</th>
+            <th className="px-4 py-4">Payment</th>
+            <th className="px-4 py-4">Status</th>
           </tr>
         </thead>
         <tbody>

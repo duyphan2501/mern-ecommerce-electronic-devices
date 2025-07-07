@@ -28,14 +28,14 @@ const OrderItem = ({ order, openViewDetail, isViewDetail }) => {
           />
         </IconButton>
       </td>
-      <td className="px-6 py-4">{order.id}</td>
-      <td className="px-6 py-4">{formatDate(order.date)}</td>
-      <td className="px-6 py-4">{order.customer}</td>
-      <td className="px-6 py-4 !min-w-[280px] !text-wrap">{order.address}</td>
-      <td className="px-6 py-4">{order.phone}</td>
-      <td className="px-6 py-4">{formatMoney(order.total)}</td>
-      <td className="px-6 py-4">{order.payment}</td>
-      <td className="px-6 py-4">
+      <td className="px-4 py-4">{order.id}</td>
+      <td className="px-4 py-4">{formatDate(order.date)}</td>
+      <td className="px-4 py-4">{order.customer}</td>
+      <td className="px-4 py-4 !min-w-[230px] !text-wrap">{order.address}</td>
+      <td className="px-4 py-4">{order.phone}</td>
+      <td className="px-4 py-4">{formatMoney(order.total)}</td>
+      <td className="px-4 py-4">{order.payment}</td>
+      <td className="px-4 py-4">
         <FormControl fullWidth>
           <Select
             id="demo-simple-select"
