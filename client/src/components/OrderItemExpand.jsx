@@ -4,7 +4,7 @@ const OrderItemExpand = ({ products }) => {
     <tr>
       <td colSpan={8} className="pl-6">
         <div className="overflow-x-auto w-fit">
-          <table className="w-full border border-gray-300">
+          <table className="w-full border border-gray-200 rounded shadow-md">
             <thead className="bg-gray-100 text-left">
               <tr>
                 <th className="px-4 py-2">#</th>

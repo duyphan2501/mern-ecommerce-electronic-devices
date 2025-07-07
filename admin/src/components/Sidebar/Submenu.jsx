@@ -3,10 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { IoIosArrowForward } from "react-icons/io";
 import { RxDotFilled } from "react-icons/rx";
 import { useEffect, useState } from "react";
-const Submenu = ({ icon, label, link, navItems = [] }) => {
+const Submenu = ({ icon, label, navItems = [] }) => {
   const location = useLocation();
   const isActive = navItems.some(
-    (item) => link + item.link === location.pathname
+    (item) => item.link === location.pathname
   );
   const [isOpenSubmenu, setIsOpenSubmenu] = useState(false);
   useEffect(() => {
@@ -28,7 +28,7 @@ const Submenu = ({ icon, label, link, navItems = [] }) => {
           </div>
           <div className="">
             <IoIosArrowForward
-              className={`duration-200 ${
+              className={`duration-100 ease-in ${
                 isOpenSubmenu ? "rotate-90" : "rotate-0"
               }`}
             />
@@ -39,15 +39,15 @@ const Submenu = ({ icon, label, link, navItems = [] }) => {
         )}
       </div>
       {/* Hiển thị các mục con nếu có */}
-      <div className={`px-8 mt-1 duration-200 transition-all overflow-hidden ${isOpenSubmenu? "max-h-130":"max-h-0"}`}>
+      <div className={`px-8 mt-1 overflow-hidden ${isOpenSubmenu? "max-h-130 ":"max-h-0 "}`}>
           <ul className="space-y-1 ">
             {navItems.map((item, index) => {
-              const isSubActive = location.pathname === link + item.link;
+              const isSubActive = location.pathname === item.link;
               return (
                 <li key={index}>
                   <Button
                     component={Link}
-                    to={link + item.link}
+                    to={item.link}
                     className={`!w-full !justify-start !gap-2 !text-sm !capitalize !transition-none ${
                       isSubActive
                         ? "!text-blue-600 !bg-gray-100"

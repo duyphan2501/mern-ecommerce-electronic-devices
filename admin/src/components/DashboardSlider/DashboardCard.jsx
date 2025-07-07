@@ -25,7 +25,7 @@ const DashboardCard = ({
         };
   }
   return (
-    <div className="rounded-md border border-gray-200 p-5 shadow bg-white">
+    <div className="rounded-md border border-gray-200 p-5 shadow bg-white z-0">
       <div className="flex justify-between items-center pb-4 border-dashed border-b border-gray-300">
         <div className="flex items-center gap-2">
           {icon}

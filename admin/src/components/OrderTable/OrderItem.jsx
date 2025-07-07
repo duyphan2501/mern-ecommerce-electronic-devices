@@ -1,8 +1,6 @@
 import {
   FormControl,
   IconButton,
-  InputLabel,
-  Menu,
   MenuItem,
   Select,
 } from "@mui/material";

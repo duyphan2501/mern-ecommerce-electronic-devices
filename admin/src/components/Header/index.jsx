@@ -7,8 +7,9 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { IoSettingsSharp } from "react-icons/io5";
+import MyContext from "../../Context/MyContext";
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -19,10 +20,13 @@ const Header = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const {isOpenSidebar, handleClickSidebar} = useContext(MyContext)
+
   return (
-    <header className="pl-62 py-5 bg-white border-b-2 border-gray-200 ">
-      <div className="px-10 flex justify-between items-center">
-        <IconButton>
+    <header className={` py-5 bg-white border-b-2 border-gray-200`}>
+      <div className="pl-3 pr-5 flex justify-between items-center">
+        <IconButton onClick={handleClickSidebar}>
           <RiMenu2Fill className="text-black" />
         </IconButton>
         <div className="flex items-center gap-5">
