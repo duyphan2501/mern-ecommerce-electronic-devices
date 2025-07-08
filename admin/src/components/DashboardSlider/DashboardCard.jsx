@@ -42,7 +42,7 @@ const DashboardCard = ({
       </div>
       <div className="flex items-center gap-2 pt-2">
         <span className={`${getProp().color} flex items-center`}>
-          {getProp().icon} {gapLastmonth}%
+          {getProp().icon} {gapLastmonth<0?gapLastmonth:"+" + gapLastmonth}%
         </span>
         <p className="text-gray-500 font-light">{getProp().label}</p>
       </div>

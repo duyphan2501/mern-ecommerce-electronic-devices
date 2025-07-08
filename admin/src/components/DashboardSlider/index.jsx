@@ -15,7 +15,7 @@ const DashboardCardSlider = () => {
   return (
       <Swiper
         spaceBetween={20}
-        slidesPerView={3}
+        slidesPerView={1}
         breakpoints={{
           500: { slidesPerView: 1.5 },
           670: { slidesPerView: 2.5 },
