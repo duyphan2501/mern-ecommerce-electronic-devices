@@ -1,3 +1,4 @@
+import { Paper } from "@mui/material";
 import {
   MdKeyboardDoubleArrowUp,
   MdKeyboardDoubleArrowDown,
@@ -23,30 +24,33 @@ const DashboardCard = ({
           icon: <MdKeyboardDoubleArrowUp />,
           label: "Increased last month",
         };
-  }
+  };
   return (
-    <div className="rounded-md border border-gray-200 p-5 shadow bg-white z-0">
-      <div className="flex justify-between items-center pb-4 border-dashed border-b border-gray-300">
-        <div className="flex items-center gap-2">
-          {icon}
-          <div className="flex flex-col">
-            <p className=" font-light">{label}</p>
-            <p className="font-bold text-lg text-black">
-              {number != -1
-                ? number.toLocaleString()
-                : price.toLocaleString() + " VNĐ"}
-            </p>
+    <Paper sx={{width:"100%", my:"1px"}} elevation={2}>
+      <div className="p-5  z-0">
+        <div className="flex justify-between items-center pb-4 border-dashed border-b border-gray-300">
+          <div className="flex items-center gap-2">
+            {icon}
+            <div className="flex flex-col">
+              <p className=" font-light">{label}</p>
+              <p className="font-bold text-lg text-black">
+                {number != -1
+                  ? number.toLocaleString()
+                  : price.toLocaleString() + " VNĐ"}
+              </p>
+            </div>
           </div>
+          <div className="">{chartIcon}</div>
         </div>
-        <div className="">{chartIcon}</div>
+        <div className="flex items-center gap-2 pt-2">
+          <span className={`${getProp().color} flex items-center`}>
+            {getProp().icon}{" "}
+            {gapLastmonth < 0 ? gapLastmonth : "+" + gapLastmonth}%
+          </span>
+          <p className="text-gray-500 font-light">{getProp().label}</p>
+        </div>
       </div>
-      <div className="flex items-center gap-2 pt-2">
-        <span className={`${getProp().color} flex items-center`}>
-          {getProp().icon} {gapLastmonth<0?gapLastmonth:"+" + gapLastmonth}%
-        </span>
-        <p className="text-gray-500 font-light">{getProp().label}</p>
-      </div>
-    </div>
+    </Paper>
   );
 };
 

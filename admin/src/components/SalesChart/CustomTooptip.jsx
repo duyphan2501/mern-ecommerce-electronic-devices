@@ -29,17 +29,17 @@ const CustomTooltip = ({ active, payload, label }) => {
             <p
               key={index}
               style={{ color: item.color }}
-              className="px-2 flex items-center gap-2"
+              className="px-2 flex items-center gap-2 text-sm"
             >
               <div
-                className="size-2 rounded-full"
+                className="size-2"
                 style={{ backgroundColor: item.color }}
               ></div>
               {item.name}: {item.value.toLocaleString()}
             </p>
           ))}
 
-        <p className={`px-2 flex items-center gap-1 ${profitLabel.color}`}>
+        <p className={`px-2 flex items-center gap-1 text-sm ${profitLabel.color}`}>
           <profitLabel.Icon size={16} />
           {profitLabel.text}: {profit.toLocaleString()}
         </p>

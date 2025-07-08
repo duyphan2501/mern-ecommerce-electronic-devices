@@ -11,7 +11,7 @@ import NavItemSmall from "./NavItemSmall";
 const Sidebar = () => {
   const {isOpenSidebar} = useContext(MyContext)
   return (
-    <nav className={` h-screen sticky top-0 left-0 shadow bg-white border-r-2 border-gray-200 z-10`}>
+    <nav className={` h-screen sticky top-0 left-0 bg-white border-r-2 border-gray-200 z-10`}>
       <div className="logo p-3 mb-2">
         <img src="logo.jpg" alt="Logo" className="w-full h-14" />
       </div>

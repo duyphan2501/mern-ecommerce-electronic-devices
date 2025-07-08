@@ -40,7 +40,7 @@ export default class Example extends PureComponent {
     return (
       <>
         <div className="flex justify-between items-center mb-5">
-          <h2 className="font-bold text-2xl">Sales Report</h2>
+          <h2 className="font-bold text-xl">Sales Report</h2>
           <div className="">
             <MySelect selectItems={chartOptions} />
           </div>
@@ -50,9 +50,9 @@ export default class Example extends PureComponent {
             data={processedData}
             margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis tickFormatter={(value) => `${value.toLocaleString()} VNĐ`} />
+            <CartesianGrid strokeDasharray="10 10" vertical={false} stroke="#e0e0e0"/>
+            <XAxis dataKey="name" axisLine={false} tickLine={false}/>
+            <YAxis tickFormatter={(value) => `${value.toLocaleString()} VNĐ`} tickLine={false} axisLine={false}/>
            <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar
