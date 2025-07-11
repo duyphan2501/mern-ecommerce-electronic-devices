@@ -1,7 +1,7 @@
 
 const OrderItemExpand = ({ products }) => {
   return (
-    <tr>
+    <tr className="text-black">
       <td colSpan={9} className="pl-6 bg-white">
         <div className="overflow-x-auto w-fit border border-gray-200 rounded shadow-md">
           <table className="w-full ">

@@ -17,7 +17,7 @@ const OrderItem = ({ order, openViewDetail, isViewDetail }) => {
     setStatus(event.target.value);
   };
   return (
-    <tr className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+    <tr className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 text-black">
       <td className="pl-4 py-4">
         <IconButton className="!bg-gray-100 !border !border-gray-200" onClick={openViewDetail}>
           <IoIosArrowDown

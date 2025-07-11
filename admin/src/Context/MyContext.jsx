@@ -1,17 +1,17 @@
 import { createContext, useState } from "react";
 
-const MyContext = createContext()
+const MyContext = createContext();
 
-export const MyContextProvider = ({children}) => {
-    const [isOpenSidebar, setIsOpenSidebar] = useState(false)
-   const handleClickSidebar = () => {
-    setIsOpenSidebar(!isOpenSidebar)
-   }
+export const MyContextProvider = ({ children }) => {
+  const [isOpenSidebar, setIsOpenSidebar] = useState(false);
+  const handleClickSidebar = () => {
+    setIsOpenSidebar(!isOpenSidebar);
+  };
 
-    const values = {isOpenSidebar, handleClickSidebar}
-  return (
-    <MyContext.Provider value={values}>{children}</MyContext.Provider>
-  )
-}
+  const [isLogin, setIsLogin] = useState(true)
 
-export default MyContext
+  const values = { isOpenSidebar, handleClickSidebar, isLogin, setIsLogin };
+  return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
+};
+
+export default MyContext;
