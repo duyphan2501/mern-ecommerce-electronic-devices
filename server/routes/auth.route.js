@@ -1,16 +1,18 @@
 import express from 'express'
-import { login, logout, register, verifyEmail } from '../controller/auth.controller.js'
+import { forgotPassword, login, logout, register, verifyEmail, resetPassword } from '../controller/auth.controller.js'
 import checkAuth from '../middleware/auth.middleware.js'
-const router = express.Router()
+const authRouter = express.Router()
 
-router.post("/register", register)
-router.post("/login", login)
-router.put("/verify-email", verifyEmail)
-router.get("/logout", checkAuth, logout)
-router.get("/", checkAuth, (req, res) => {
+authRouter.post("/register", register)
+authRouter.post("/login", login)
+authRouter.put("/verify-email", verifyEmail)
+authRouter.get("/logout", checkAuth, logout)
+authRouter.post("/forgot-password", forgotPassword)
+authRouter.put("/reset-password/:token", resetPassword)
+authRouter.get("/", checkAuth, (req, res) => {
     res.send({
         message: "Welcome to home page"
     })
 })
 
-export default router
+export default authRouter

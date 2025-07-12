@@ -13,7 +13,7 @@ const generateAccessTokenAndSetCookie = (res, userId) => {
     maxAge: 15 * 60 * 1000,
   });
   return token
-};
+};  
 
 const generateRefreshTokenAndSetCookie = (res, userId) => {
   const token = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET_KEY, {
