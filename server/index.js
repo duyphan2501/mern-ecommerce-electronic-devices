@@ -1,20 +1,21 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/connectDB.js";
+import router from "./routes/auth.route.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
 
-app.get("/", (req, res) => {
-  res.json({
-    message: "is at home page",
-  });
-});
+app.use(cookieParser());
+app.use(express.json());
 
-const PORT = process.env.PORT || 8080;
+app.use("/api/auth", router);
+const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
   app.listen(PORT, () => {
-    console.log("server is listen to port " + PORT);
+    console.log("Server is running on Port", PORT);
   });
 });

@@ -16,7 +16,8 @@ const userSchema = new mongoose.Schema(
     },
     avatar: String,
     phone: Number,
-    refresh_token: String,
+    verificationToken: String,
+    verificationTokenExpireAt: Date,
     isVerified: {
       type: Boolean,
       default: false,
@@ -28,7 +29,7 @@ const userSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
-      default: ["active"],
+      default: "active",
     },
     addressId: {
       type: mongoose.Schema.ObjectId,
@@ -45,12 +46,14 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "user"],
       default: "user",
     },
+    refreshToken: String,
+    refreshTokenExpireAt: Date
   },
   {
     timestamps: true,
   }
 );
 
-const UserModel = mongoose.model("user", userSchema)
+const UserModel = mongoose.model("user", userSchema);
 
-export default UserModel
+export default UserModel;
