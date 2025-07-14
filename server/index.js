@@ -4,6 +4,7 @@ import connectDB from "./config/connectDB.js";
 import userRouter from "./routes/user.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import categoryRouter from "./routes/category.route.js";
 
 dotenv.config();
 const app = express();
@@ -12,6 +13,8 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/user", userRouter);
+app.use("/api/category", categoryRouter);
+
 const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {

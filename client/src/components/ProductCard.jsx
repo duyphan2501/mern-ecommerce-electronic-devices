@@ -49,7 +49,7 @@ const ProductCard = ({
         <Tooltip title="Xem thêm" placement="top" arrow>
           <IconButton
             variant="text"
-            className="!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-gray-200 !text-black !absolute right-0 hover:!bg-[#0d68f3] hover:!text-white top-[-30px] opacity-0 group-hover:top-1 group-hover:opacity-100 z-50"
+            className="!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-gray-200 !text-black !absolute right-0 hover:!bg-[#0d68f3] hover:!text-white top-[-30px] opacity-0 group-hover:top-1 group-hover:opacity-100 z-50 !transition-all !duration-100"
             onClick={openModal}
           >
             <HiOutlineArrowsExpand size={20} className="pointer-events-none" />

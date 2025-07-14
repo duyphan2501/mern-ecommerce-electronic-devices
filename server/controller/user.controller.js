@@ -11,6 +11,7 @@ import {
 import crypto from "crypto";
 import cloudinary from "../config/cloudinary.config.js";
 import fs from "fs";
+import extractPublicId from "../utils/extractPuclicId.js";
 
 const register = async (req, res) => {
   try {
@@ -293,12 +294,6 @@ const resetPassword = async (req, res) => {
 
 const avatarFolder = "avatars";
 
-function extractPublicId(url) {
-  const parts = url.split("/");
-  const filename = parts[parts.length - 1];
-  return `${avatarFolder}/${filename.split(".")[0]}`;
-}
-
 const uploadAvatarImage = async (req, res) => {
   try {
     const image = req.file;
@@ -319,7 +314,7 @@ const uploadAvatarImage = async (req, res) => {
       });
 
     if (user.avatar) {
-      const publicId = extractPublicId(user.avatar);
+      const publicId = extractPublicId(user.avatar, avatarFolder);
       await cloudinary.uploader.destroy(publicId)
     }
 
