@@ -1,6 +1,8 @@
 import cloudinary from "../config/cloudinary.config.js";
 import CategoryModel from "../model/category.model.js";
 import fs from "fs";
+import extractPublicId from "../utils/extractPuclicId.js";
+
 const categoryFolder = "categories";
 let uploadedImage = "";
 
@@ -58,6 +60,7 @@ const createCategory = async (req, res) => {
       parentId: req.body.parentId,
       image: uploadedImage,
     });
+    uploadedImage = "";
     if (!newCategory)
       return res.status(500).json({
         message: "Category is not created",
@@ -101,32 +104,28 @@ const getListOfCategories = async (req, res) => {
   }
 };
 
+async function deleteCategoryRecursively(id) {
+  const children = await CategoryModel.find({ parentId: id });
+  for (const child of children) {
+    await deleteCategoryRecursively(child._id);
+  }
+  await removeCategoryImageOnCloudinary(id);
+  await CategoryModel.findByIdAndDelete(id);
+}
+
 const deleteCategory = async (req, res) => {
   try {
     const id = req.params.id;
-    // delete children
-    const subCategories = await CategoryModel.find({ parentId: id });
-
-    subCategories.forEach(async (subCate) => {
-      const thirdSubCategory = await CategoryModel.find({
-        parentId: subCate._id,
-      });
-      thirdSubCategory.forEach(async (thirdCate) => {
-        await CategoryModel.findByIdAndDelete(thirdCate._id);
-      });
-      await CategoryModel.findByIdAndDelete(subCate._id);
-    });
-    // delete category
-    const deletedCategory = await CategoryModel.findByIdAndDelete(id);
-    if (!deletedCategory) {
-      return res.status(500).json({
-        message: "Deleted uncessfully",
+    const category = await CategoryModel.findById(id);
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found",
         success: false,
       });
     }
+    await deleteCategoryRecursively(id);
     return res.status(200).json({
-      message: "Deleted successfully",
-      deletedCategory,
+      message: "Deleted category and all subcategories successfully",
       success: true,
     });
   } catch (error) {
@@ -136,6 +135,7 @@ const deleteCategory = async (req, res) => {
     });
   }
 };
+
 
 const getCategoryById = async (req, res) => {
   try {
@@ -157,4 +157,59 @@ const getCategoryById = async (req, res) => {
   }
 };
 
-export { uploadImage, createCategory, getListOfCategories, deleteCategory, getCategoryById };
+const updateCategory = async (req, res) => {
+  try {
+    // delete old image in cloudinary
+    if (uploadedImage) await removeCategoryImageOnCloudinary(req.params.id);
+
+    // update new category
+    const updatedCategory = await CategoryModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        name: req.body.name,
+        parentId: req.body.parentId,
+        image: uploadedImage ? uploadedImage : req.body.image,
+      },
+      { new: true }
+    );
+    if (!updatedCategory) {
+      return res.status(500).json({
+        message: "Updated uncessfully",
+        success: false,
+      });
+    }
+
+    uploadedImage = "";
+    return res.status(200).json({
+      message: "Updated successfully",
+      updatedCategory,
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || error,
+      success: false,
+    });
+  }
+};
+
+async function removeCategoryImageOnCloudinary(id) {
+  const oldCategory = await CategoryModel.findById(id);
+  if (oldCategory?.image) {
+    const oldPublicId = extractPublicId(oldCategory.image, categoryFolder);
+    try {
+      await cloudinary.uploader.destroy(oldPublicId);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+export {
+  uploadImage,
+  createCategory,
+  getListOfCategories,
+  deleteCategory,
+  getCategoryById,
+  updateCategory,
+};
