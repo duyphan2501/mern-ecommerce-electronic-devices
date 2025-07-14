@@ -8,7 +8,9 @@ import {
   generateAccessTokenAndSetCookie,
   generateRefreshTokenAndSetCookie,
 } from "../utils/generateToken.js";
-import crypto from 'crypto'
+import crypto from "crypto";
+import cloudinary from "../config/cloudinary.config.js";
+import fs from "fs";
 
 const register = async (req, res) => {
   try {
@@ -289,4 +291,83 @@ const resetPassword = async (req, res) => {
   }
 };
 
-export { register, login, verifyEmail, logout, forgotPassword, resetPassword };
+const avatarFolder = "avatars";
+
+function extractPublicId(url) {
+  const parts = url.split("/");
+  const filename = parts[parts.length - 1];
+  return `${avatarFolder}/${filename.split(".")[0]}`;
+}
+
+const uploadAvatarImage = async (req, res) => {
+  try {
+    const image = req.file;
+    const userId = req.user.userId;
+    if (!image) {
+      return res.status(400).json({
+        message: "No image file uploaded",
+        success: false,
+      });
+    }
+    // remove old image avatar in cloudinary
+    const user = await UserModel.findById(userId);
+
+    if (!user)
+      return res.status(404).json({
+        message: "user not found",
+        success: false,
+      });
+
+    if (user.avatar) {
+      const publicId = extractPublicId(user.avatar);
+      await cloudinary.uploader.destroy(publicId)
+    }
+
+    // upload new image to cloudinary
+    const options = {
+      folder: avatarFolder,
+      use_filename: true,
+      unique_filename: false,
+      overwrite: true,
+    };
+
+    const result = await cloudinary.uploader.upload(image.path, options, () => {
+      // remove image in uploads folder
+      fs.unlink(`uploads/${image.filename}`, (err) => {
+        if (err) console.error("Error deleting file:", err);
+      });
+    });
+    // update in db if upload successfully
+    if (result) {
+      await UserModel.findByIdAndUpdate(userId, {
+        avatar: result.secure_url,
+      });
+      return res.status(200).json({
+        message: "Upload successful",
+        success: true,
+        url: result.secure_url,
+        public_id: result.public_id,
+      });
+    } else {
+      return res.status(500).json({
+        message: "Upload failed",
+        success: false,
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Internal server error",
+      success: false,
+    });
+  }
+};
+
+export {
+  register,
+  login,
+  verifyEmail,
+  logout,
+  forgotPassword,
+  resetPassword,
+  uploadAvatarImage,
+};
