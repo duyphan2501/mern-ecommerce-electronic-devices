@@ -1,22 +1,23 @@
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { verifyAccessToken } from "../helper/jwt_service.js";
 dotenv.config();
 
-const checkAuth = (req, res, next) => {
-  const token =
+const checkAuth = async (req, res, next) => {
+  const accessToken =
     req.cookies.accessToken || req.headers?.authorization?.split(" ")[1];
-  if (!token)
+  if (!accessToken)
     return res.status(401).json({
-      message: "unauthorized",
+      message: "AccessToken is missing",
       success: false,
     });
   try {
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
-    console.log('decodedToken', decodedToken)
+    const decodedToken = await verifyAccessToken(accessToken)
     req.user = decodedToken;
     next();
   } catch (err) {
-    return res.status(403).json({ message: "Token expired or invalid" });
+    return res.status(403).json({
+      message: err.message || err
+    });
   }
 };
 

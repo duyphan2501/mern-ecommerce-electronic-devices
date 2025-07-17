@@ -1,7 +1,7 @@
 import cloudinary from "../config/cloudinary.config.js";
 import CategoryModel from "../model/category.model.js";
 import fs from "fs";
-import extractPublicId from "../utils/extractPuclicId.js";
+import extractPublicId from "../helper/extractPuclicId.js";
 
 const categoryFolder = "categories";
 let uploadedImage = "";

@@ -7,11 +7,12 @@ import bcryptjs from "bcryptjs";
 import {
   generateAccessTokenAndSetCookie,
   generateRefreshTokenAndSetCookie,
-} from "../utils/generateToken.js";
+  verifyRefreshToken,
+} from "../helper/jwt_service.js";
 import crypto from "crypto";
 import cloudinary from "../config/cloudinary.config.js";
 import fs from "fs";
-import extractPublicId from "../utils/extractPuclicId.js";
+import extractPublicId from "../helper/extractPuclicId.js";
 
 const register = async (req, res) => {
   try {
@@ -100,8 +101,8 @@ const login = async (req, res) => {
       });
 
     // generate token and set cookie
-    const accessToken = generateAccessTokenAndSetCookie(res, user._id);
-    const refreshToken = generateRefreshTokenAndSetCookie(res, user._id);
+    await generateAccessTokenAndSetCookie(res, user._id);
+    const refreshToken = await generateRefreshTokenAndSetCookie(res, user._id);
 
     // save token in db
     user.refreshToken = refreshToken;
@@ -178,7 +179,6 @@ const verifyEmail = async (req, res) => {
 const logout = async (req, res) => {
   try {
     const userId = req.user.userId;
-
     // clear cookie
     const options = {
       httpOnly: true,
@@ -315,7 +315,7 @@ const uploadAvatarImage = async (req, res) => {
 
     if (user.avatar) {
       const publicId = extractPublicId(user.avatar, avatarFolder);
-      await cloudinary.uploader.destroy(publicId)
+      await cloudinary.uploader.destroy(publicId);
     }
 
     // upload new image to cloudinary
@@ -351,7 +351,56 @@ const uploadAvatarImage = async (req, res) => {
     }
   } catch (error) {
     return res.status(500).json({
-      message: error.message || "Internal server error",
+      message: error.message || error,
+      success: false,
+    });
+  }
+};
+
+const refreshToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken || req.headers?.authorization?.split(" ")[1];; 
+    if (!refreshToken)
+      return res
+        .status(401)
+        .json({ message: "No refresh token provided", success: false });
+
+    // Verify refresh token
+    const payload = await verifyRefreshToken(refreshToken)
+    const userId = payload.userId;
+
+    // Kiểm tra token còn hạn trong DB
+    const user = await UserModel.findOne({
+      _id: userId,
+      refreshToken,
+      refreshTokenExpireAt: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Refresh token is invalid or expired",
+        success: false,
+      });
+    }
+
+    // generate new token 
+    const accessToken = await generateAccessTokenAndSetCookie(res, user._id);
+    const newRefreshToken = await generateRefreshTokenAndSetCookie(res, user._id);
+
+    // save token in db
+    user.refreshToken = newRefreshToken;
+    const expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    user.refreshTokenExpireAt = expireDate;
+    await user.save();
+
+    return res.status(200).json({
+      accessToken,
+      refreshToken,
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || error,
       success: false,
     });
   }
@@ -365,4 +414,5 @@ export {
   forgotPassword,
   resetPassword,
   uploadAvatarImage,
+  refreshToken,
 };
