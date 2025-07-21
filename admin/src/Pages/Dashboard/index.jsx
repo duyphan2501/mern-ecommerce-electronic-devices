@@ -36,7 +36,9 @@ const Dashboard = () => {
         </div>
       </section>
       <section className="mt-5">
-        <StockTable />
+        <Paper sx={{ padding: "20px" }} elevation={2}>
+          <StockTable />
+        </Paper>
       </section>
       <section className="mt-5 ">
         <Paper elevation={2} sx={{ padding: "20px" }}>

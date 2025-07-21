@@ -52,4 +52,6 @@ body {
   color: black !important;
 }
 
-
+.MuiButton-text {
+  font-family: "Outfit", sans-serif !important;
+}

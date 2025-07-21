@@ -5,6 +5,8 @@ import Dashboard from "./Pages/Dashboard";
 import { useContext } from "react";
 import MyContext from "./Context/MyContext";
 import Login from "./Pages/Login";
+import ListProduct from "./Pages/Products/ListProduct";
+import CreateProduct from "./Pages/Products/CreateProduct";
 
 function App() {
   const { isOpenSidebar, isLogin } = useContext(MyContext);
@@ -30,6 +32,8 @@ function App() {
               <Header />
               <Routes>
                 <Route path="/" element={<Dashboard />}></Route>
+                <Route path="/products/list" element={<ListProduct />}></Route>
+                <Route path="/products/create" element={<CreateProduct />}></Route>
               </Routes>
             </main>
           </div>

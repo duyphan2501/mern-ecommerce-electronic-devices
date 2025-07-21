@@ -18,11 +18,11 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { visuallyHidden } from "@mui/utils";
 import { MdDelete, MdDeleteOutline } from "react-icons/md";
-import { IoFilter } from "react-icons/io5";
+import { IoFilter, IoSearch } from "react-icons/io5";
 import ProductItem from "./ProductItem";
 import StockProgress from "./StockProgress";
 import formatMoney from "../../utils/MoneyFormat";
-import { Rating } from "@mui/material";
+import { Button, Rating } from "@mui/material";
 import ProductStatus from "./ProductStatus";
 import { MdOutlineModeEdit } from "react-icons/md";
 import { IoEyeOutline } from "react-icons/io5";
@@ -179,6 +179,7 @@ function EnhancedTableHead(props) {
             align={headCell.numeric ? "right" : "left"}
             sortDirection={orderBy === headCell.id ? order : false}
             className="!uppercase !font-semibold"
+            sx={{ fontFamily: "Outfit, sans-serif" }}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
@@ -214,7 +215,7 @@ function EnhancedTableToolbar(props) {
     <Toolbar
       sx={[
         {
-          px: { sm: 2 },
+          px: { sm: 0 },
         },
         numSelected > 0 && {
           bgcolor: (theme) =>
@@ -227,7 +228,11 @@ function EnhancedTableToolbar(props) {
     >
       {numSelected > 0 ? (
         <Typography
-          sx={{ flex: "1 1 100%" }}
+          sx={{
+            flex: "1 1 100%",
+            paddingLeft: 2,
+            fontFamily: "Outfit, sans-serif",
+          }}
           color="inherit"
           variant="subtitle1"
           component="div"
@@ -246,17 +251,29 @@ function EnhancedTableToolbar(props) {
         </Typography>
       )}
       {numSelected > 0 ? (
-        <Tooltip title="Delete">
+        <Tooltip title="Delete" className="!mr-2">
           <IconButton>
             <MdDelete />
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <IoFilter />
-          </IconButton>
-        </Tooltip>
+        <div className="flex gap-2 min-w-[500px]">
+          <div className="border-[1px] border-gray-300 rounded-xl h-12 w-full flex items-center px-3 overflow-hidden ">
+            <IoSearch size={25} className="text-gray-400" />
+            <input
+              type="text"
+              name=""
+              id=""
+              className="ms-2 outline-0 search-input w-full text-gray-500"
+              placeholder="Search products"
+            />
+          </div>
+          <div className="flex items-center">
+              <Button className="!bg-white !border !border-gray-300 !rounded-xl !text-gray-500 hover:!bg-gray-200 !h-full gap-2 !normal-case ">
+                <IoFilter size={20}/> Filter
+              </Button>
+          </div>
+        </div>
       )}
     </Toolbar>
   );
@@ -266,7 +283,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
+export default function StockTable() {
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
@@ -331,125 +348,122 @@ export default function EnhancedTable() {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", mb: 2 }} className="!px-5 !pb-5 !pt-2">
-        <EnhancedTableToolbar numSelected={selected.length} />
-        <TableContainer>
-          <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size={dense ? "small" : "medium"}
-          >
-            <EnhancedTableHead
-              numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
-              rowCount={rows.length}
-            />
-            <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = selected.includes(row.id);
-                const labelId = `enhanced-table-checkbox-${index}`;
+      <EnhancedTableToolbar numSelected={selected.length} />
 
-                return (
-                  <TableRow
-                    hover
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        checked={isItemSelected}
-                        inputProps={{
-                          "aria-labelledby": labelId,
-                        }}
-                        onClick={(event) => handleClick(event, row.id)}
-                      />
-                    </TableCell>
-                    <TableCell component="th" id={labelId} scope="row">
-                      <ProductItem
-                        name={row.name}
-                        image={row.image}
-                        brand={row.brand}
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      <StockProgress
-                        stock={row.stock}
-                        minimum={row.minimum}
-                        expectedStock={row.expectedStock}
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      {formatMoney(row.price)}
-                    </TableCell>
-                    <TableCell align="right">
-                      <Box display="flex" justifyContent="flex-end">
-                        <Rating
-                          size="small"
-                          name="half-rating"
-                          defaultValue={row.rating}
-                          precision={0.5}
-                          readOnly
-                        />
-                      </Box>
-                    </TableCell>
+      <TableContainer>
+        <Table
+          sx={{ minWidth: 750 }}
+          aria-labelledby="tableTitle"
+          size={dense ? "small" : "medium"}
+        >
+          <EnhancedTableHead
+            numSelected={selected.length}
+            order={order}
+            orderBy={orderBy}
+            onSelectAllClick={handleSelectAllClick}
+            onRequestSort={handleRequestSort}
+            rowCount={rows.length}
+          />
+          <TableBody>
+            {visibleRows.map((row, index) => {
+              const isItemSelected = selected.includes(row.id);
+              const labelId = `enhanced-table-checkbox-${index}`;
 
-                    <TableCell align="right">
-                      <ProductStatus statusLabel={row.status} />
-                    </TableCell>
-                    <TableCell align="right">
-                      <div className="flex justify-end gap-2">
-                        <Tooltip title="Edit Product" disableInteractive>
-                          <IconButton className="!border !border-gray-200 !rounded-md">
-                            <MdOutlineModeEdit size={20} />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="View Product" disableInteractive>
-                          <IconButton className="!border !border-gray-200 !rounded-md">
-                            <IoEyeOutline size={20} />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Delete Product" disableInteractive>
-                          <IconButton className="!border !border-gray-200 !rounded-md">
-                            <MdDeleteOutline size={20} />
-                          </IconButton>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
+              return (
                 <TableRow
-                  style={{
-                    height: (dense ? 33 : 53) * emptyRows,
-                  }}
+                  hover
+                  role="checkbox"
+                  aria-checked={isItemSelected}
+                  tabIndex={-1}
+                  key={row.id}
+                  selected={isItemSelected}
+                  sx={{ cursor: "pointer" }}
                 >
-                  <TableCell colSpan={6} />
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      color="primary"
+                      checked={isItemSelected}
+                      inputProps={{
+                        "aria-labelledby": labelId,
+                      }}
+                      onClick={(event) => handleClick(event, row.id)}
+                    />
+                  </TableCell>
+                  <TableCell component="th" id={labelId} scope="row">
+                    <ProductItem
+                      name={row.name}
+                      image={row.image}
+                      brand={row.brand}
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <StockProgress
+                      stock={row.stock}
+                      minimum={row.minimum}
+                      expectedStock={row.expectedStock}
+                    />
+                  </TableCell>
+                  <TableCell align="right">{formatMoney(row.price)}</TableCell>
+                  <TableCell align="right">
+                    <Box display="flex" justifyContent="flex-end">
+                      <Rating
+                        size="small"
+                        name="half-rating"
+                        defaultValue={row.rating}
+                        precision={0.5}
+                        readOnly
+                      />
+                    </Box>
+                  </TableCell>
+
+                  <TableCell align="right">
+                    <ProductStatus statusLabel={row.status} />
+                  </TableCell>
+                  <TableCell align="right">
+                    <div className="flex justify-end gap-2">
+                      <Tooltip title="Edit Product" disableInteractive>
+                        <IconButton className="!border !border-gray-200 !rounded-md">
+                          <MdOutlineModeEdit size={20} />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="View Product" disableInteractive>
+                        <IconButton className="!border !border-gray-200 !rounded-md">
+                          <IoEyeOutline size={20} />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Delete Product" disableInteractive>
+                        <IconButton className="!border !border-gray-200 !rounded-md">
+                          <MdDeleteOutline size={20} />
+                        </IconButton>
+                      </Tooltip>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
+              );
+            })}
+            {emptyRows > 0 && (
+              <TableRow
+                style={{
+                  height: (dense ? 33 : 53) * emptyRows,
+                }}
+              >
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={rows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </Box>
   );
 }

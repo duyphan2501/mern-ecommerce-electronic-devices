@@ -13,7 +13,7 @@ const Sidebar = () => {
   return (
     <nav className={` h-screen sticky top-0 left-0 bg-white border-r-2 border-gray-200 z-10`}>
       <div className="logo p-3 mb-2">
-        <img src="logo.jpg" alt="Logo" className="w-full h-14" />
+        <img src="../public/logo.jpg" alt="Logo" className="w-full h-14" />
       </div>
       <div className="navlink">
         {isOpenSidebar?
@@ -36,10 +36,13 @@ const Sidebar = () => {
             />
           </li>
           <li>
-            <NavItem
+            <Submenu
               icon={<TbBrandProducthunt size={20} />}
               label="Products"
-              link="/products"
+              navItems={[
+                { label: "Create", link: "/products/create" },
+                { label: "List", link: "/products/list" },
+              ]}
             />
           </li>
           <li>
@@ -79,7 +82,10 @@ const Sidebar = () => {
             <NavItemSmall
               icon={<TbBrandProducthunt size={25} />}
               label="Products"
-              link="/products"
+              navItems={[
+                { label: "Create", link: "/products/create" },
+                { label: "List", link: "/products/list" },
+              ]}
             />
           </li>
           <li>
