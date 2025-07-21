@@ -108,6 +108,7 @@ const login = async (req, res) => {
     user.refreshToken = refreshToken;
     const expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     user.refreshTokenExpireAt = expireDate;
+    user.lastLogin = Date.now()
     await user.save();
 
     return res.status(200).json({
@@ -395,7 +396,7 @@ const refreshToken = async (req, res) => {
 
     return res.status(200).json({
       accessToken,
-      refreshToken,
+      refreshToken: newRefreshToken,
       success: true,
     });
   } catch (error) {

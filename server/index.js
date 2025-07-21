@@ -5,6 +5,7 @@ import userRouter from "./routes/user.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import categoryRouter from "./routes/category.route.js";
+import productRouter from "./routes/product.route.js";
 
 dotenv.config();
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use("/api/user", userRouter);
 app.use("/api/category", categoryRouter);
+app.use("/api/product", productRouter);
 
 const PORT = process.env.PORT || 5000;
 

@@ -1,24 +1,24 @@
-import dotenv from "dotenv";
-import { verifyAccessToken } from "../helper/jwt_service.js";
-dotenv.config();
+  import dotenv from "dotenv";
+  import { verifyAccessToken } from "../helper/jwt_service.js";
+  dotenv.config();
 
-const checkAuth = async (req, res, next) => {
-  const accessToken =
-    req.cookies.accessToken || req.headers?.authorization?.split(" ")[1];
-  if (!accessToken)
-    return res.status(401).json({
-      message: "AccessToken is missing",
-      success: false,
-    });
-  try {
-    const decodedToken = await verifyAccessToken(accessToken)
-    req.user = decodedToken;
-    next();
-  } catch (err) {
-    return res.status(403).json({
-      message: err.message || err
-    });
-  }
-};
+  const checkAuth = async (req, res, next) => {
+    const accessToken =
+      req.cookies.accessToken || req.headers?.authorization?.split(" ")[1];
+    if (!accessToken)
+      return res.status(401).json({
+        message: "AccessToken is missing",
+        success: false,
+      });
+    try {
+      const decodedToken = await verifyAccessToken(accessToken)
+      req.user = decodedToken;
+      next();
+    } catch (err) {
+      return res.status(403).json({
+        message: err.message || err
+      });
+    }
+  };
 
-export default checkAuth;
+  export default checkAuth;

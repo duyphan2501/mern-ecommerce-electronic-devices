@@ -7,7 +7,7 @@ const generateAccessTokenAndSetCookie = async (res, userId) => {
     jwt.sign(
       { userId },
       process.env.REFRESH_TOKEN_SECRET_KEY,
-      { expiresIn: "1m" },
+      { expiresIn: "15m" },
       (err, token) => {
         if (err) reject(err);
         else resolve(token);
