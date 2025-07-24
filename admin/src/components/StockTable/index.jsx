@@ -12,7 +12,6 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
@@ -269,7 +268,7 @@ function EnhancedTableToolbar(props) {
             />
           </div>
           <div className="flex items-center">
-              <Button className="!bg-white !border !border-gray-300 !rounded-xl !text-gray-500 hover:!bg-gray-200 !h-full gap-2 !normal-case ">
+              <Button className="!bg-white !border !border-gray-300 !rounded-xl !text-gray-500 hover:!bg-gray-200 !h-full gap-2 !normal-case !px-3">
                 <IoFilter size={20}/> Filter
               </Button>
           </div>

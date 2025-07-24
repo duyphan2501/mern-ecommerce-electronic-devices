@@ -1,0 +1,126 @@
+/* src/style.css */
+.btn {
+  padding: 6px 10px;
+  background-color: #f3f4f6;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn:hover {
+  background-color: #e5e7eb;
+}
+
+.btn-active {
+  padding: 6px 10px;
+  background-color: #2563eb;
+  color: white;
+  border-radius: 4px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tiptap ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+
+.tiptap ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror {
+  outline: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  padding: 12px;
+  line-height: 1.5;
+  background-color: #f3f4f6; 
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  caret-color: black; /* Màu con trỏ */
+}
+
+/* Đảm bảo con trỏ trong code block */
+.ProseMirror pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Khi đang focus: đổi border (tuỳ chọn) */
+.ProseMirror:focus {
+  outline: 2px solid #2563eb; /* Màu xanh khi focus */
+}
+
+
+/* Cỡ chữ cho từng mức heading */
+.ProseMirror h1 {
+  font-size: 2rem;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1.2rem;
+}
+
+.ProseMirror h4 {
+  font-size: 1.1rem;
+}
+
+.ProseMirror h5 {
+  font-size: 1rem;
+}
+
+.ProseMirror h6 {
+  font-size: 0.9rem;
+}
+
+.code-block {
+  background-color: #f9fafb;
+  color: #1f2937;
+  padding: 10px;
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  border-radius: 6px;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+}
+
+/* Cho phép căn lề */
+.tiptap p,
+.tiptap h1,
+.tiptap h2,
+.tiptap h3,
+.tiptap h4,
+.tiptap h5,
+.tiptap h6 {
+  text-align: start;
+}
+
+/* Hỗ trợ các trạng thái text-align */
+.tiptap p[style*="text-align:"],
+.tiptap h1[style*="text-align:"],
+.tiptap h2[style*="text-align:"],
+.tiptap h3[style*="text-align:"],
+.tiptap h4[style*="text-align:"],
+.tiptap h5[style*="text-align:"],
+.tiptap h6[style*="text-align:"] {
+  display: block;
+}
+
+
+/* Hỗ trợ các trạng thái text-align */
+.tiptap p[style*="text-align:"] {
+  display: block;
+}
+
