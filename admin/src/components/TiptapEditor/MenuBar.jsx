@@ -4,17 +4,12 @@ import {
   FaItalic,
   FaListUl,
   FaListOl,
-  FaCode,
-  FaLink,
   FaMinus,
-  FaHeading,
   FaUnderline,
-  FaAlignLeft,
-  FaAlignCenter,
-  FaAlignRight,
-  FaAlignJustify,
 } from "react-icons/fa";
 import HeadingSelect from "./HeadingSelect";
+import TextAlignBtn from "./TextAlignBtn";
+import ColorPickerBtn from "./ColorPickerBtn";
 
 const MenuBar = ({ editor }) => {
   const [activeFormats, setActiveFormats] = useState({});
@@ -28,10 +23,6 @@ const MenuBar = ({ editor }) => {
       underline: editor.isActive("underline"),
       bulletList: editor.isActive("bulletList"),
       orderedList: editor.isActive("orderedList"),
-      alignLeft: editor.isActive({ textAlign: "left" }),
-      alignCenter: editor.isActive({ textAlign: "center" }),
-      alignRight: editor.isActive({ textAlign: "right" }),
-      alignJustify: editor.isActive({ textAlign: "justify" }),
     });
   };
 
@@ -116,43 +107,11 @@ const MenuBar = ({ editor }) => {
       </button>
 
       {/* Alignment */}
-      <button
-        onClick={() => editor.chain().focus().setTextAlign("left").run()}
-        className={`p-2 rounded bg-gray-100 hover:bg-gray-200 ${
-          activeFormats.alignLeft ? "text-blue-500" : ""
-        }`}
-        title="Align Left"
-      >
-        <FaAlignLeft />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().setTextAlign("center").run()}
-        className={`p-2 rounded bg-gray-100 hover:bg-gray-200 ${
-          activeFormats.alignCenter ? "text-blue-500" : ""
-        }`}
-        title="Align Center"
-      >
-        <FaAlignCenter />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().setTextAlign("right").run()}
-        className={`p-2 rounded bg-gray-100 hover:bg-gray-200 ${
-          activeFormats.alignRight ? "text-blue-500" : ""
-        }`}
-        title="Align Right"
-      >
-        <FaAlignRight />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-        className={`p-2 rounded bg-gray-100 hover:bg-gray-200 ${
-          activeFormats.alignJustify ? "text-blue-500" : ""
-        }`}
-        title="Align Justify"
-      >
-        <FaAlignJustify />
-      </button>
+      <TextAlignBtn editor={editor} activeFormats={activeFormats} />
 
+      {/* Text Color Dropdown */}
+      <ColorPickerBtn editor={editor} />
+      
       {/* Heading Select */}
       <HeadingSelect
         selectItems={[

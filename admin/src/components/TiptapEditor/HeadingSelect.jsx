@@ -2,30 +2,44 @@ import { MenuItem, Select } from "@mui/material";
 import { useEffect, useState } from "react";
 
 const HeadingSelect = ({ selectItems, editor }) => {
+
   const getCurrentLevel = () => {
-    if (editor.isActive("heading", { level: 1 })) return 1;
-    if (editor.isActive("heading", { level: 2 })) return 2;
-    if (editor.isActive("heading", { level: 3 })) return 3;
-    if (editor.isActive("heading", { level: 4 })) return 4;
-    if (editor.isActive("heading", { level: 5 })) return 5;
-    if (editor.isActive("heading", { level: 6 })) return 6;
-    return 0; // Paragraph
+    if (!editor) return 0;
+    for (let i = 1; i <= 6; i++) {
+      if (editor.isActive("heading", { level: i })) return i;
+    }
+    return 0; 
   };
 
   const [value, setValue] = useState(getCurrentLevel());
-  
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const update = () => setValue(getCurrentLevel());
+
+    editor.on("selectionUpdate", update);
+    editor.on("transaction", update);
+
+    return () => {
+      editor.off("selectionUpdate", update);
+      editor.off("transaction", update);
+    };
+  }, [editor]);
+
+  const handleChange = (e) => {
+    const level = parseInt(e.target.value);
+    if (level === 0) {
+      editor.chain().focus().setParagraph().run();
+    } else {
+      editor.chain().focus().setHeading({ level }).run(); // dùng setHeading thay vì toggle
+    }
+  };
+
   return (
     <Select
       size="small"
-      onChange={(e) => {
-        const level = parseInt(e.target.value);
-        if (level === 0) {
-          editor.chain().focus().setParagraph().run();
-        } else {
-          editor.chain().focus().toggleHeading({ level }).run();
-        }
-        setValue(level);
-      }}
+      onChange={handleChange}
       className="!rounded !bg-gray-100"
       value={value}
       sx={{
@@ -39,6 +53,12 @@ const HeadingSelect = ({ selectItems, editor }) => {
         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
           border: "2px solid #3b82f6",
         },
+        ".MuiSelect-select": {
+          paddingTop: "4px",
+          paddingBottom: "4px",
+        },
+        minHeight: "unset",
+        height: "32px",
       }}
     >
       {selectItems.map((item) => (
