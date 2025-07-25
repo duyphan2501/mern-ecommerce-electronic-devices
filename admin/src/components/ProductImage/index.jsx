@@ -37,10 +37,10 @@ const ProductImage = () => {
     <div className="flex flex-col gap-3 ">
       <h3 className="text-xl font-bold">Product Image</h3>
       <p className="text-gray-500">
-        Choose a product photo or simply drag and drop up to 5 photos here.
+        Choose a product photo or simply drag and drop up here.
       </p>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-wrap">
         {imageSrcArray.map((imageSrc, index) => (
           <ImageItem
             key={index}
@@ -53,7 +53,8 @@ const ProductImage = () => {
         ))}
       </div>
       {indexImageView >= 0 && <ImageView imageSrc={imageSrcArray} />}
-    </div>
+      <p className="text-gray-500 text-sm">Image formats: .jpg, .jpeg, .png, preferred size: 1:1, file size is restricted to a maximum of 500kb.</p>
+    </div>  
   );
 };
 

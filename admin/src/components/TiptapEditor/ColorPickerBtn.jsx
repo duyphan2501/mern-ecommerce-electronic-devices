@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaPalette } from "react-icons/fa";
 
 const presetColors = [
@@ -16,6 +16,7 @@ const presetColors = [
 
 const ColorPickerBtn = ({ editor }) => {
   const [showPalette, setShowPalette] = useState(false);
+    const pickerRef = useRef(null);
 
   const applyColor = (color) => {
     editor.chain().focus().setColor(color).run();
@@ -23,16 +24,29 @@ const ColorPickerBtn = ({ editor }) => {
     setActiveColor(color);
   };
 
-  const [activeColor, setActiveColor] = useState(presetColors[0]);   
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+        setShowPalette(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const [activeColor, setActiveColor] = useState(presetColors[0]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={pickerRef}>
       <button
         onClick={() => setShowPalette((prev) => !prev)}
         className="p-2 rounded bg-gray-100 hover:bg-gray-200"
         title="Text Color"
       >
-        <FaPalette style={{color: activeColor}}/>
+        <FaPalette style={{ color: activeColor }} />
       </button>
 
       {showPalette && (

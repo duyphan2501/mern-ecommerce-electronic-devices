@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FaAlignLeft,
   FaAlignCenter,
@@ -39,8 +39,22 @@ const TextAlignBtn = ({ editor }) => {
     setOpen(!open);
   };
 
+  const alignRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (alignRef.current && !alignRef.current.contains(event.target)) {
+        setOpen(false);
+      } 
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="relative h-full">
+    <div className="relative h-full" ref={alignRef}>
       {alignments
         .filter((item) => item.id === activeId)
         .map((item) => (
