@@ -7,9 +7,11 @@ import MyContext from "./Context/MyContext";
 import Login from "./Pages/Login";
 import ListProduct from "./Pages/Products/ListProduct";
 import CreateProduct from "./Pages/Products/CreateProduct";
+import TypeProductQuesBox from "./components/TypeProductQuesBox";
 
 function App() {
-  const { isOpenSidebar, isLogin } = useContext(MyContext);
+  const { isOpenSidebar, isLogin, hasModels, isOpenQuesBox } =
+    useContext(MyContext);
   return (
     <>
       <BrowserRouter>
@@ -33,7 +35,10 @@ function App() {
               <Routes>
                 <Route path="/" element={<Dashboard />}></Route>
                 <Route path="/products/list" element={<ListProduct />}></Route>
-                <Route path="/products/create" element={<CreateProduct />}></Route>
+                <Route
+                  path="/products/create"
+                  element={<CreateProduct hasModels={hasModels} />}
+                ></Route>
               </Routes>
             </main>
           </div>

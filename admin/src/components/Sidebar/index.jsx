@@ -9,9 +9,9 @@ import MyContext from "../../Context/MyContext";
 import NavItemSmall from "./NavItemSmall";
 
 const Sidebar = () => {
-  const {isOpenSidebar, indexImageView} = useContext(MyContext)
+  const {isOpenSidebar, indexImageView, isOpenQuesBox} = useContext(MyContext)
   return (
-    <nav className={` h-screen sticky top-0 left-0 bg-white border-r-2 border-gray-200 ${indexImageView === -1 && "z-10"}`}>
+    <nav className={` h-screen sticky top-0 left-0 bg-white border-r-2 border-gray-200 ${indexImageView === -1 && !isOpenQuesBox && "z-10"}`}>
       <div className="logo p-3 mb-2">
         <img src="/logo.jpg" alt="Logo" className="w-full h-14" />
       </div>

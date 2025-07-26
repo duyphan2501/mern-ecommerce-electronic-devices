@@ -1,5 +1,5 @@
 
-const TextInput = ({placeholder}) => {
+const TextInput = ({placeholder=""}) => {
   return (
     <div>
       <input

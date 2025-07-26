@@ -10,8 +10,10 @@ export const MyContextProvider = ({ children }) => {
 
   const [isLogin, setIsLogin] = useState(true)
   const [indexImageView, setIndexImageView] = useState(-1);
+  const [hasModels, setHasModels] = useState(true);
+  const [isOpenQuesBox, setIsOpenQuesBox] = useState(false);
 
-  const values = { isOpenSidebar, handleClickSidebar, isLogin, setIsLogin, indexImageView, setIndexImageView  };
+  const values = { isOpenSidebar, handleClickSidebar, isLogin, setIsLogin, indexImageView, setIndexImageView, hasModels, setHasModels, isOpenQuesBox, setIsOpenQuesBox };
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
 };
 
