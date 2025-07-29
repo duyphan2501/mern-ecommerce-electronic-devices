@@ -6,9 +6,9 @@ import "./style.css";
 import TextAlign from "@tiptap/extension-text-align";
 import Heading from "@tiptap/extension-heading";
 import Color from "@tiptap/extension-color";
-import {TextStyle} from "@tiptap/extension-text-style";
+import { TextStyle } from "@tiptap/extension-text-style";
 
-const TiptapEditor = () => {
+const TiptapEditor = ({ handleChangeValue, content="" }) => {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -21,17 +21,22 @@ const TiptapEditor = () => {
         levels: [1, 2, 3, 4, 5, 6],
       }),
       TextAlign.configure({
-        types: ["heading", "paragraph"], // phải chỉ định rõ types áp dụng
+        types: ["heading", "paragraph"], 
       }),
       Color.configure({ types: ["textStyle"] }),
       TextStyle,
     ],
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      handleChangeValue(html);
+    },
+    content: content
   });
 
   return (
     <div>
       <MenuBar editor={editor} />
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} onChange={handleChangeValue} />
     </div>
   );
 };

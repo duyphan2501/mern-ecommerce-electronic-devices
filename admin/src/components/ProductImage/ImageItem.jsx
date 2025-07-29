@@ -10,7 +10,7 @@ const ImageItem = ({
   addImageHolder,
   deleteImage,
 }) => {
-  const { setIndexImageView } = useContext(MyContext);
+  const { setIndexImageView, notify } = useContext(MyContext);
   const [isDragging, setIsDragging] = useState(false);
 
   const processFile = (file) => {
@@ -24,7 +24,15 @@ const ImageItem = ({
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) processFile(file);
+    const maxSizeInBytes = 100 * 1024; // 500kb
+    if (file) {
+      if (file.size > maxSizeInBytes) {
+        notify("error", "Image size is restricted to a maximum of 500kb")
+        e.target.value = null; // reset input file
+        return;
+      }
+      processFile(file);
+    }
   };
 
   const handleDragOver = (e) => {
@@ -53,7 +61,6 @@ const ImageItem = ({
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-
           >
             <PiImagesThin size={50} />
             <p className="text-gray-500 text-[13px]">
@@ -67,6 +74,7 @@ const ImageItem = ({
             className="hidden"
             id="productImage"
             onChange={handleImageChange}
+            accept=".jpg,.jpeg,.png"
           />
         </div>
       ) : (

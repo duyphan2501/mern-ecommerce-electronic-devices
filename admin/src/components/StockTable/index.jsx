@@ -256,7 +256,7 @@ function EnhancedTableToolbar(props) {
           </IconButton>
         </Tooltip>
       ) : (
-        <div className="flex gap-2 min-w-[500px]">
+        <div className="flex gap-2 min-w-[500px] mb-2">
           <div className="border-[1px] border-gray-300 rounded-xl h-12 w-full flex items-center px-3 overflow-hidden ">
             <IoSearch size={25} className="text-gray-400" />
             <input

@@ -1,12 +1,20 @@
 import { MenuItem, Select } from "@mui/material";
 import { useState } from "react";
 
-const AttributeSelect = ({ selectItems }) => {
-  const [value, setValue] = useState(selectItems[0]?.id || "");
+const AttributeSelect = ({
+  selectItems,
+  onChange,
+  selectedItemId = "",
+}) => {
+
+  const selectedItem = selectedItemId && selectItems.find(id => id === selectedItemId)
+  const [value, setValue] = useState(selectedItem || "");
   const handleChange = (e) => {
     const selectedValue = e.target.value;
     setValue(selectedValue);
+    onChange(selectedValue);
   };
+
 
   return (
     <Select
@@ -21,7 +29,7 @@ const AttributeSelect = ({ selectItems }) => {
         },
         "&:hover .MuiOutlinedInput-notchedOutline": {
           border: "none",
-        },  
+        },
         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
           border: "2px solid #3b82f6",
         },

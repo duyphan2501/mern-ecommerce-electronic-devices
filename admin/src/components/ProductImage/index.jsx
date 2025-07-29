@@ -3,20 +3,29 @@ import ImageItem from "./ImageItem";
 import MyContext from "../../Context/MyContext";
 import ImageView from "./ImageView";
 
-const ProductImage = () => {
-  const [imageSrcArray, setImageSrcArray] = useState([null]);
+const ProductImage = ({ product, handleChangeValue }) => {
+  const [imageSrcArray, setImageSrcArray] = useState(
+    product?.images.length > 0 ? product?.images : [null]
+  );
+
+  const updateProductImage = (imagesArr) => {
+    setImageSrcArray(imagesArr);
+    const updatedImages = [...imagesArr];
+    updatedImages.splice(updatedImages.length - 1, 1);
+    handleChangeValue("images", updatedImages);
+  };
 
   const handleImageChange = (index, newImageSrc) => {
     const updatedImages = [...imageSrcArray];
     updatedImages[index] = newImageSrc;
-    setImageSrcArray(updatedImages);
+    updateProductImage(updatedImages);
     return updatedImages;
   };
 
   const deleteImageSrc = (index) => {
     const updatedImages = [...imageSrcArray];
     updatedImages.splice(index, 1);
-    setImageSrcArray(updatedImages);
+    updateProductImage(updatedImages);
     // If the last image is deleted, add a new empty holder
     if (updatedImages.length === 0 || updatedImages[updatedImages.length - 1]) {
       updatedImages.push(null);
@@ -27,8 +36,7 @@ const ProductImage = () => {
   const addImageHolder = (imageArr) => {
     const updatedImages = [...imageArr];
     updatedImages.push(null);
-    setImageSrcArray(updatedImages);
-    console.log("Add Image Sources:", updatedImages);
+    updateProductImage(updatedImages);
   };
 
   const indexImageView = useContext(MyContext).indexImageView;
@@ -53,8 +61,11 @@ const ProductImage = () => {
         ))}
       </div>
       {indexImageView >= 0 && <ImageView imageSrc={imageSrcArray} />}
-      <p className="text-gray-500 text-sm">Image formats: .jpg, .jpeg, .png, preferred size: 1:1, file size is restricted to a maximum of 500kb.</p>
-    </div>  
+      <p className="text-gray-500 text-sm">
+        Image formats: .jpg, .jpeg, .png, preferred size: 1:1, image size is
+        restricted to a maximum of 500kb.
+      </p>
+    </div>
   );
 };
 

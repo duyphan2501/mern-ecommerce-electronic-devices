@@ -8,13 +8,15 @@ import Login from "./Pages/Login";
 import ListProduct from "./Pages/Products/ListProduct";
 import CreateProduct from "./Pages/Products/CreateProduct";
 import TypeProductQuesBox from "./components/TypeProductQuesBox";
+import { Toaster } from "react-hot-toast";
 
 function App() {
-  const { isOpenSidebar, isLogin, hasModels, isOpenQuesBox } =
+  const { isOpenSidebar, isLogin, hasModels } =
     useContext(MyContext);
   return (
     <>
       <BrowserRouter>
+        <Toaster position="top-center" reverseOrder={false} />
         {!isLogin ? (
           <Login />
         ) : (

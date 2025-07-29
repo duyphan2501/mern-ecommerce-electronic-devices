@@ -1,4 +1,5 @@
 import { createContext, useState } from "react";
+import toast from "react-hot-toast";
 
 const MyContext = createContext();
 
@@ -8,12 +9,27 @@ export const MyContextProvider = ({ children }) => {
     setIsOpenSidebar(!isOpenSidebar);
   };
 
-  const [isLogin, setIsLogin] = useState(true)
+  const [isLogin, setIsLogin] = useState(true);
   const [indexImageView, setIndexImageView] = useState(-1);
   const [hasModels, setHasModels] = useState(true);
   const [isOpenQuesBox, setIsOpenQuesBox] = useState(false);
-
-  const values = { isOpenSidebar, handleClickSidebar, isLogin, setIsLogin, indexImageView, setIndexImageView, hasModels, setHasModels, isOpenQuesBox, setIsOpenQuesBox };
+  const notify = (status, message) => {
+    if (status === "success") toast.success(message);
+    else if (status === "error") toast.error(message);
+  };
+  const values = {
+    isOpenSidebar,
+    handleClickSidebar,
+    isLogin,
+    setIsLogin,
+    indexImageView,
+    setIndexImageView,
+    hasModels,
+    setHasModels,
+    isOpenQuesBox,
+    setIsOpenQuesBox,
+    notify,
+  };
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
 };
 

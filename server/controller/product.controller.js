@@ -1,6 +1,5 @@
 import ProductModel from "../model/product.model.js";
 import ModelsModel from "../model/productModel.model.js";
-import extractPublicId from "../helper/extractPuclicId.js";
 import uploadFiles from "../helper/upload.js";
 
 let uploadedImages = [];
@@ -84,6 +83,7 @@ const createProduct = async (req, res) => {
     if (!name || !brandId || !description || !categoryId || !models) {
       return res.status(400).json({ message: "All fields are required" });
     }
+    
     const newProduct = await ProductModel.create({
       name,
       brandId,

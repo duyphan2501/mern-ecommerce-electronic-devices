@@ -3,7 +3,7 @@ import PriceInput from "../Pricing/PriceInput";
 import AttributeSelect from "./AttributeSelect";
 import { useState } from "react";
 
-const Attribute = () => {
+const Attribute = ({ product, handleChangeValue }) => {
   const categories = [
     { id: 1, name: "Color" },
     { id: 2, name: "Size" },
@@ -29,7 +29,14 @@ const Attribute = () => {
     { id: 3, name: "Archived" },
   ];
 
-  const [isFreeShipping, setIsFreeShipping] = useState(false);
+  const handleChangeSwitch = () => {
+    setIsFreeShipping(!isFreeShipping);
+    if (isFreeShipping) handleChangeValue("shippingCost", 0);
+  };
+
+  const [isFreeShipping, setIsFreeShipping] = useState(
+    product?.shippingCost === 0 ? true : false
+  );
 
   return (
     <div>
@@ -38,19 +45,31 @@ const Attribute = () => {
         <div className="">
           <p className="font-semibold">Category</p>
           <div className="mt-1">
-            <AttributeSelect selectItems={categories} />
+            <AttributeSelect
+              selectItems={categories}
+              onChange={(val) => handleChangeValue("categoryId", val)}
+              selectedItem={product?.categoryId}
+            />
           </div>
         </div>
         <div className="">
           <p className="font-semibold">Brand</p>
           <div className="mt-1">
-            <AttributeSelect selectItems={brands} />
+            <AttributeSelect
+              selectItems={brands}
+              onChange={(val) => handleChangeValue("brandId", val)}
+              selectedItem={product?.brandId}
+            />
           </div>
         </div>
         <div className="">
           <p className="font-semibold">Status</p>
           <div className="mt-1">
-            <AttributeSelect selectItems={status} />
+            <AttributeSelect
+              selectItems={status}
+              onChange={(val) => handleChangeValue("status", val)}
+              selectedItem={product?.status}
+            />
           </div>
         </div>
         <div className="">
@@ -59,8 +78,8 @@ const Attribute = () => {
             <FormControlLabel
               control={
                 <Switch
-                  defaultChecked={isFreeShipping}
-                  onChange={() => setIsFreeShipping(!isFreeShipping)}
+                  checked={isFreeShipping}
+                  onChange={handleChangeSwitch}
                 />
               }
               label="Free Ship"
@@ -68,7 +87,12 @@ const Attribute = () => {
           </div>
 
           <div className="mt-1">
-            <PriceInput label={"VNĐ"} disable={isFreeShipping} />
+            <PriceInput
+              label={"VNĐ"}
+              disable={isFreeShipping}
+              productValue={product?.shippingCost}
+              setProductValue={(val) => handleChangeValue("shippingCost", val)}
+            />
           </div>
         </div>
       </div>

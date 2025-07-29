@@ -19,6 +19,17 @@ const productSchema = new mongoose.Schema({
     ref: "categories",
     required: true,
   },
+  status: {
+    type: String,
+    enum: ["draft", "active", "archived"],
+    default: "draft",
+  },
+  shippingCost: { type: Number, required: true },
+  images: {type: [String], required: true},
+  pageTitle: String,
+  metaKeywords: String,
+  metaDescription: String,
+  productUrl: String,
 });
 
 const ProductModel = mongoose.model("products", productSchema);

@@ -7,15 +7,60 @@ import StockTracking from "../../components/StockTracking";
 import SEO_Information from "../../components/SEO_Information";
 import CreateFooter from "../../components/CreateFooter";
 import ProductModels from "../../components/ProductModels";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import MyContext from "../../Context/MyContext";
 import TypeProductQuesBox from "../../components/TypeProductQuesBox";
 
+const defaultModel = {
+  modelName: "",
+  salePrice: 0,
+  costPrice: 0,
+  discount: 0,
+  tax: 0,
+  stockQuantity: 0,
+  unit: "",
+  expectedQuantity: 0,
+  minimumQuantity: 0,
+  documents: [],
+  specifications: "",
+};
+
 const CreateProduct = ({ hasModels }) => {
   const { isOpenQuesBox, setIsOpenQuesBox } = useContext(MyContext);
+
   useEffect(() => {
     setIsOpenQuesBox(true);
   }, []);
+
+  // Gộp các state liên quan thành 1 object
+  const [product, setProduct] = useState({
+    productName: "",
+    description: "",
+    models: [defaultModel],
+    images: [],
+    categoryId: "",
+    brandId: "",
+    shippingCost: 0,
+    pageTitle: "",
+    metaKeywords: "",
+    metaDescription: "",
+    productUrl: "",
+    status: "",
+  });
+
+  const handleChangeModel = (field, index, value) => {
+    setProduct((prev) => {
+      const updatedModels = [...prev.models];
+      updatedModels[index] = { ...updatedModels[index], [field]: value };
+      return { ...prev, models: updatedModels };
+    });
+  };
+
+  const handleChangeProduct = (field, value) => {
+    setProduct((prev) => ({ ...prev, [field]: value }));
+  };
+
+  console.log(product);
 
   return (
     <>
@@ -29,15 +74,20 @@ const CreateProduct = ({ hasModels }) => {
                 elevation={2}
                 className="!rounded-xl"
               >
-                <BasicInfo />
+                <BasicInfo
+                  product={product}
+                  handleChangeModel={handleChangeModel}
+                  handleChangeProduct={handleChangeProduct}
+                />
               </Paper>
+
               {hasModels ? (
                 <Paper
                   sx={{ padding: "20px" }}
                   elevation={2}
                   className="!rounded-xl mt-5"
                 >
-                  <ProductModels />
+                  <ProductModels product={product} setProduct={setProduct} handleChangeValue={handleChangeModel} defaultModel={defaultModel} />
                 </Paper>
               ) : (
                 <>
@@ -49,52 +99,56 @@ const CreateProduct = ({ hasModels }) => {
                     <h3 className="font-bold text-xl mb-5">
                       Pricing Information
                     </h3>
-                    <Pricing />
+                    <Pricing product={product} handleChangeValue={handleChangeModel}/>
                   </Paper>
+
                   <Paper
                     sx={{ padding: "20px" }}
                     elevation={2}
                     className="!rounded-xl mt-5"
                   >
                     <h3 className="font-bold text-xl mb-5">Stock Tracking</h3>
-
-                    <StockTracking />
+                    <StockTracking product={product} handleChangeValue={handleChangeModel} />
                   </Paper>
                 </>
               )}
             </div>
+
             <div className="lg:w-[430px] xl:w-[523px] h-fit mt-5 lg:mt-0">
               <Paper
                 sx={{ padding: "20px" }}
                 elevation={2}
                 className="!rounded-xl"
               >
-                <ProductImage />
+                <ProductImage product={product} handleChangeValue={handleChangeProduct}/>
               </Paper>
+
               <Paper
                 sx={{ padding: "20px" }}
                 elevation={2}
                 className="!rounded-xl mt-5"
               >
-                <Attribute />
+                <Attribute product={product} handleChangeValue={handleChangeProduct} />
               </Paper>
+
               <Paper
                 sx={{ padding: "20px" }}
                 elevation={2}
                 className="!rounded-xl mt-5"
               >
-                <SEO_Information />
+                <SEO_Information product={product} handleChange={handleChangeProduct} />
               </Paper>
             </div>
           </div>
-          <div className="py-10">
-            <CreateFooter />
-          </div>
 
+          <div className="py-10">
+            <CreateFooter product={product} />
+          </div>
         </div>
       )}
+
       {isOpenQuesBox && <TypeProductQuesBox />}
-    </> 
+    </>
   );
 };
 

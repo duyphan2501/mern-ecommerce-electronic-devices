@@ -1,29 +1,41 @@
 import TextInput from "../BasicInfoProduct/TextInput";
 
-const SEO_Information = () => {
+const SEO_Information = ({ product, handleChange }) => {
   return (
-    <div className="">
+    <div>
       <h3 className="font-bold text-xl">SEO Information</h3>
-      <div className="flex flex-col md:gap-5 mt-5">
-        <div className="md:flex items-center gap-5">
-          <div className="flex-1">
-            <p className="font-semibold mb-1">Page Title</p>
-            <TextInput placeholder={"Page Title"} />
-          </div>
-          <div className="flex-1 mt-5 md:mt-0">
-            <p className="font-semibold mb-1">Meta Keywords</p>
-            <TextInput placeholder={"Meta Keywords"} />
-          </div>
+      <div className="flex flex-col gap-5 mt-5">
+        <div className="">
+          <p className="font-semibold mb-1">Page Title</p>
+          <TextInput
+            placeholder="Page Title"
+            value={product?.pageTitle || ""}
+            onChange={(val) => handleChange("pageTitle", val)}
+          />
         </div>
-        <div className="md:flex items-center gap-5">
-          <div className="flex-1 mt-5 md:mt-0">
-            <p className="font-semibold mb-1">Meta Description</p>
-            <TextInput placeholder={"Meta Description"} />
-          </div>
-          <div className="flex-1 mt-5 md:mt-0">
-            <p className="font-semibold mb-1">Product URL</p>
-            <TextInput placeholder={"Product URL"} />
-          </div>
+        <div className="">
+          <p className="font-semibold mb-1">Meta Keywords</p>
+          <TextInput
+            placeholder="Meta Keywords"
+            value={product?.metaKeywords || ""}
+            onChange={(val) => handleChange("metaKeywords", val)}
+          />
+        </div>
+        <div className="">
+          <p className="font-semibold mb-1">Meta Description</p>
+          <TextInput
+            placeholder="Meta Description"
+            value={product?.metaDescription || ""}
+            onChange={(val) => handleChange("metaDescription", val)}
+          />
+        </div>
+        <div className="">
+          <p className="font-semibold mb-1">Product URL</p>
+          <TextInput
+            placeholder="Product URL"
+            value={product?.productUrl || ""}
+            onChange={(val) => handleChange("productUrl", val)}
+          />
         </div>
       </div>
     </div>

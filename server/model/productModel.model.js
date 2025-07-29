@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
 
 const modelSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  price: { type: Number, required: true },
+  name: String,
   discount: { type: Number, required: true },
+  tax: { type: Number, required: true },
   inStock: { type: Number, required: true },
-  technicalInfo: { type: String, required: true },
-  technicalDocument: [{ type: String}],
-  rating: { type: Number, default: 0 },
+  expectedQuantity: { type: Number, required: true },
+  minimumQuantity: { type: Number, required: true },
+  salePrice: { type: Number, required: true },
+  costPrice: { type: Number, required: true },
+  specifications: { type: String, required: true },
+  documents: [{ type: String}],
   productId: {
     type: mongoose.Types.ObjectId,
     ref: "products",
