@@ -5,28 +5,28 @@ import { useState } from "react";
 
 const Attribute = ({ product, handleChangeValue }) => {
   const categories = [
-    { id: 1, name: "Color" },
-    { id: 2, name: "Size" },
-    { id: 3, name: "Material" },
-    { id: 4, name: "Brand" },
-    { id: 5, name: "Style" },
-    { id: 6, name: "Pattern" },
-    { id: 7, name: "Fit" },
-    { id: 8, name: "Occasion" },
-    { id: 9, name: "Season" },
+    { id: "660ef98c8b0f2e23d8ccfe71", name: "Color" },
+    { id: "660ef98c8b0f2e23d8ccfe72", name: "Size" },
+    { id: "660ef98c8b0f2e23d8ccfe73", name: "Material" },
+    { id: "660ef98c8b0f2e23d8ccfe74", name: "Brand" },
+    { id: "660ef98c8b0f2e23d8ccfe75", name: "Style" },
+    { id: "660ef98c8b0f2e23d8ccfe76", name: "Pattern" },
+    { id: "660ef98c8b0f2e23d8ccfe77", name: "Fit" },
+    { id: "660ef98c8b0f2e23d8ccfe78", name: "Occasion" },
+    { id: "660ef98c8b0f2e23d8ccfe79", name: "Season" },
   ];
 
   const brands = [
-    { id: 1, name: "Nike" },
-    { id: 2, name: "Adidas" },
-    { id: 3, name: "Puma" },
-    { id: 4, name: "Reebok" },
+    { id: "660ef98c8b0f2e23d8ccfe71", name: "Nike" },
+    { id: "660ef98c8b0f2e23d8ccfe72", name: "Adidas" },
+    { id: "660ef98c8b0f2e23d8ccfe73", name: "Puma" },
+    { id: "660ef98c8b0f2e23d8ccfe74", name: "Reebok" },
   ];
 
   const status = [
-    { id: 1, name: "Draft" },
-    { id: 2, name: "Active" },
-    { id: 3, name: "Archived" },
+    { id: "draft", name: "Draft" },
+    { id: "active", name: "Active" },
+    { id: "archived", name: "Archived" },
   ];
 
   const handleChangeSwitch = () => {
@@ -48,7 +48,7 @@ const Attribute = ({ product, handleChangeValue }) => {
             <AttributeSelect
               selectItems={categories}
               onChange={(val) => handleChangeValue("categoryId", val)}
-              selectedItem={product?.categoryId}
+              selectedItemId={product?.categoryId}
             />
           </div>
         </div>
@@ -58,7 +58,7 @@ const Attribute = ({ product, handleChangeValue }) => {
             <AttributeSelect
               selectItems={brands}
               onChange={(val) => handleChangeValue("brandId", val)}
-              selectedItem={product?.brandId}
+              selectedItemId={product?.brandId}
             />
           </div>
         </div>
@@ -68,7 +68,7 @@ const Attribute = ({ product, handleChangeValue }) => {
             <AttributeSelect
               selectItems={status}
               onChange={(val) => handleChangeValue("status", val)}
-              selectedItem={product?.status}
+              selectedItemId={product?.status}
             />
           </div>
         </div>

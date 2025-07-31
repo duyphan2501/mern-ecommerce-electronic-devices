@@ -7,14 +7,13 @@ const AttributeSelect = ({
   selectedItemId = "",
 }) => {
 
-  const selectedItem = selectedItemId && selectItems.find(id => id === selectedItemId)
-  const [value, setValue] = useState(selectedItem || "");
+  const selectedItem = selectedItemId && selectItems.find(item => item.id === selectedItemId)
+  const [value, setValue] = useState(selectedItem?.id || "");
   const handleChange = (e) => {
     const selectedValue = e.target.value;
     setValue(selectedValue);
     onChange(selectedValue);
   };
-
 
   return (
     <Select

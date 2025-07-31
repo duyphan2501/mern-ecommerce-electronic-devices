@@ -36,9 +36,8 @@ const BasicInfo = ({ product, handleChangeModel, handleChangeProduct }) => {
               <p className="font-semibold mb-1">Technical Documents</p>
               <DocumentUpload
                 field={"documents"}
-                index={0}
                 handleChangeValue={handleChangeModel}
-                productDocuments={product.models[0].documents}
+                productDocuments={product?.models?.[0].documents}
               />
             </div>
           </>

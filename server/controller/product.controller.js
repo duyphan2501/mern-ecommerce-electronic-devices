@@ -1,20 +1,20 @@
 import ProductModel from "../model/product.model.js";
 import ModelsModel from "../model/productModel.model.js";
 import uploadFiles from "../helper/upload.js";
+import mongoose from "mongoose";
 
-let uploadedImages = [];
 const productFolder = "products";
-let uploadedDocuments = [];
 const documentFolder = "documents";
 
 const uploadDocument = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "No files uploaded." });
+      return res
+        .status(400)
+        .json({ message: "No files uploaded.", success: false });
     }
 
     const files = req.files;
-
     const options = {
       folder: documentFolder,
       use_filename: true,
@@ -24,11 +24,10 @@ const uploadDocument = async (req, res) => {
     };
 
     // upload new documents to cloudinary
-    uploadedDocuments.length = 0; // Clear previous documents
-    uploadedDocuments = await uploadFiles(files, options);
+    const uploadedDocuments = await uploadFiles(files, options);
 
     return res.status(200).json({
-      message: "Upload successful",
+      message: "Upload documents successful",
       uploadedDocuments,
       success: true,
     });
@@ -43,7 +42,9 @@ const uploadDocument = async (req, res) => {
 const uploadImages = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "No files uploaded." });
+      return res
+        .status(400)
+        .json({ message: "No files uploaded.", success: false });
     }
     const images = req.files;
     // upload new images to cloudinary
@@ -54,11 +55,10 @@ const uploadImages = async (req, res) => {
       overwrite: true,
     };
 
-    uploadedImages.length = 0; // Clear previous images
-    uploadedImages = await uploadFiles(images, options);
+    const uploadedImages = await uploadFiles(images, options);
 
     return res.status(200).json({
-      message: "Upload successful",
+      message: "Upload images successful",
       uploadedImages,
       success: true,
     });
@@ -69,43 +69,107 @@ const uploadImages = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const products = await ProductModel.find().populate("models");
-    res.status(200).json(products);
+    const products = await ProductModel.find();
+
+    // Lấy models ứng với mỗi sản phẩm
+    const models = await Promise.all(
+      products.map((product) => ModelsModel.findOne({ productId: product._id }))
+    );
+
+    res.status(200).json({ products, models, success: true });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 const createProduct = async (req, res) => {
   try {
-    const { name, brandId, description, categoryId, models } = req.body;
-
-    if (!name || !brandId || !description || !categoryId || !models) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-    
-    const newProduct = await ProductModel.create({
-      name,
-      brandId,
+    const {
+      productName,
       description,
+      models,
+      images,
       categoryId,
-      images: uploadedImages,
+      brandId,
+      shippingCost,
+      pageTitle,
+      metaKeywords,
+      metaDescription,
+      productUrl,
+      status,
+    } = req.body;
+
+    // Kiểm tra required fields
+    if (
+      !productName ||
+      !brandId ||
+      !description ||
+      !categoryId ||
+      !models ||
+      models.length < 1 ||
+      shippingCost === undefined ||
+      !pageTitle ||
+      !metaKeywords ||
+      !metaDescription ||
+      !productUrl ||
+      !status
+    ) {
+      return res.status(400).json({ message: "All fields are required", success: false });
+    }
+
+    // convert string to ObjectId
+    const parsedCategoryId = mongoose.Types.ObjectId.isValid(categoryId)
+      ? new mongoose.Types.ObjectId(categoryId)
+      : null;
+
+    const parsedBrandId = mongoose.Types.ObjectId.isValid(brandId)
+      ? new mongoose.Types.ObjectId(brandId)
+      : null;
+
+    if (!parsedCategoryId || !parsedBrandId) {
+      return res.status(400).json({
+        message: "Invalid categoryId or brandId",
+        success: false,
+      });
+    }
+
+    const validStatuses = ["draft", "active", "archived"]; 
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status value", success: false });
+    }
+
+    const newProduct = await ProductModel.create({
+      productName,
+      description,
+      categoryId: parsedCategoryId,
+      brandId: parsedBrandId,
+      shippingCost,
+      pageTitle,
+      metaKeywords,
+      metaDescription,
+      productUrl,
+      images,
+      status,
     });
 
-    if (!newProduct) {
-      return res.status(500).json({ message: "Product creation failed" });
-    }
-    uploadedImages = []; // Clear uploaded images after creating product
+    if (!newProduct)
+      return res.status(500).json({
+        message: "New product is not created",
+        success: false,
+      });
 
     const createdModels = await ModelsModel.insertMany(
-      models.map((model) => {
-        return {
-          ...model,
-          documents: uploadedDocuments,
-          productId: newProduct._id,
-        };
-      })
+      models.map((model) => ({
+        ...model,
+        productId: newProduct._id,
+      }))
     );
+
+    if (!createdModels || createdModels.length < 1)
+      return res.status(500).json({
+        message: "Models is not created",
+        success: false,
+      });
 
     return res.status(201).json({
       message: "Product and models created successfully",
@@ -114,8 +178,21 @@ const createProduct = async (req, res) => {
       success: true,
     });
   } catch (error) {
+    console.error("Create product error:", error);
     res.status(500).json({ message: error.message || error, success: false });
   }
 };
+
+// const deleteProduct = async (req, res) => {
+//   try {
+//     const productId = req.params.id
+
+//     const deletedModels = ModelsModel.findAndDeleteById()
+
+//   } catch (error) {
+//     res.status(500).json({ message: error.message || error, success: false });
+    
+//   }
+// }
 
 export { getAllProducts, uploadImages, createProduct, uploadDocument };

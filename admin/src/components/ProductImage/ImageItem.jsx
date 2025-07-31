@@ -6,7 +6,10 @@ import MyContext from "../../Context/MyContext";
 const ImageItem = ({
   index,
   imageSrc,
-  handleChange,
+  imageSrcArray,
+  product,
+  onChangeImageFile,
+  onChangeImageBase64,
   addImageHolder,
   deleteImage,
 }) => {
@@ -14,20 +17,29 @@ const ImageItem = ({
   const [isDragging, setIsDragging] = useState(false);
 
   const processFile = (file) => {
+    // Cập nhật File trong product.images
+    const updatedFiles = [...product.images];
+    updatedFiles[index] = file;
+    onChangeImageFile("images", updatedFiles);
+
+    // Cập nhật preview
     const reader = new FileReader();
     reader.onloadend = () => {
-      const newArr = handleChange(index, reader.result);
-      addImageHolder(newArr);
+      const previewBase64 = reader.result;
+      const updatedPreviews = [...imageSrcArray];
+      updatedPreviews[index] = previewBase64;
+      onChangeImageBase64(updatedPreviews);
+      addImageHolder(updatedPreviews);
     };
     reader.readAsDataURL(file);
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = ( e) => {
     const file = e.target.files[0];
     const maxSizeInBytes = 100 * 1024; // 500kb
     if (file) {
       if (file.size > maxSizeInBytes) {
-        notify("error", "Image size is restricted to a maximum of 500kb")
+        notify("error", "Image size is restricted to a maximum of 500kb");
         e.target.value = null; // reset input file
         return;
       }

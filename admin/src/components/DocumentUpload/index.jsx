@@ -4,13 +4,14 @@ import { RiDeleteBinLine } from "react-icons/ri";
 
 const DocumentUpload = ({
   field,
-  modelIndex,
+  modelIndex = 0,
   handleChangeValue,
   productDocuments,
 }) => {
   const [documents, setDocuments] = useState(productDocuments || []);
   const [dragActive, setDragActive] = useState(false);
   const inputId = `doc-upload-${modelIndex}`;
+
   useEffect(() => {
     setDocuments(productDocuments || []);
   }, [productDocuments]);

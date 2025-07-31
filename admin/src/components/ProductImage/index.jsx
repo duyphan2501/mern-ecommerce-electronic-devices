@@ -8,35 +8,33 @@ const ProductImage = ({ product, handleChangeValue }) => {
     product?.images.length > 0 ? product?.images : [null]
   );
 
-  const updateProductImage = (imagesArr) => {
-    setImageSrcArray(imagesArr);
-    const updatedImages = [...imagesArr];
-    updatedImages.splice(updatedImages.length - 1, 1);
-    handleChangeValue("images", updatedImages);
-  };
+  // const updateProductImage = (imagesArr) => {
+  //   setImageSrcArray(imagesArr);
+  //   const updatedImages = [...imagesArr];
+  //   updatedImages.splice(updatedImages.length - 1, 1);
+  //   handleChangeValue("images", updatedImages);
+  // };
 
-  const handleImageChange = (index, newImageSrc) => {
-    const updatedImages = [...imageSrcArray];
-    updatedImages[index] = newImageSrc;
-    updateProductImage(updatedImages);
-    return updatedImages;
-  };
+  // const handleImageChange = (index, newImageSrc) => {
+  //   const updatedImages = [...imageSrcArray];
+  //   updatedImages[index] = newImageSrc;
+  //   updateProductImage(updatedImages);
+  //   return updatedImages;
+  // };
 
   const deleteImageSrc = (index) => {
-    const updatedImages = [...imageSrcArray];
-    updatedImages.splice(index, 1);
-    updateProductImage(updatedImages);
-    // If the last image is deleted, add a new empty holder
-    if (updatedImages.length === 0 || updatedImages[updatedImages.length - 1]) {
-      updatedImages.push(null);
-    }
-    console.log("Delete Image Sources:", updatedImages);
+    const updatedImageSrcs = [...imageSrcArray];
+    const updatedImageFile = [...product.images]
+    updatedImageSrcs.splice(index, 1);
+    updatedImageFile.splice(index, 1);
+    setImageSrcArray(updatedImageSrcs);
+    handleChangeValue("images", updatedImageFile)
   };
 
   const addImageHolder = (imageArr) => {
     const updatedImages = [...imageArr];
     updatedImages.push(null);
-    updateProductImage(updatedImages);
+    setImageSrcArray(updatedImages);
   };
 
   const indexImageView = useContext(MyContext).indexImageView;
@@ -54,9 +52,12 @@ const ProductImage = ({ product, handleChangeValue }) => {
             key={index}
             index={index}
             imageSrc={imageSrc}
-            handleChange={handleImageChange}
+            onChangeImageFile={handleChangeValue}
+            onChangeImageBase64={setImageSrcArray}
             addImageHolder={addImageHolder}
             deleteImage={deleteImageSrc}
+            imageSrcArray={imageSrcArray}
+            product={product}
           />
         ))}
       </div>

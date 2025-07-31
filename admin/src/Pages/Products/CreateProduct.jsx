@@ -10,23 +10,26 @@ import ProductModels from "../../components/ProductModels";
 import { useContext, useEffect, useState } from "react";
 import MyContext from "../../Context/MyContext";
 import TypeProductQuesBox from "../../components/TypeProductQuesBox";
+import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 const defaultModel = {
-  modelName: "",
-  salePrice: 0,
-  costPrice: 0,
-  discount: 0,
-  tax: 0,
-  stockQuantity: 0,
-  unit: "",
-  expectedQuantity: 0,
-  minimumQuantity: 0,
+  modelName: "3kw 1pha",
+  salePrice: 12323,
+  costPrice: 123123,
+  discount: 10,
+  tax: 10,
+  stockQuantity: 100,
+  unit: "cái",
+  expectedQuantity: 120,
+  minimumQuantity: 20,
   documents: [],
-  specifications: "",
+  specifications: "sasdfasdcasd",
 };
 
 const CreateProduct = ({ hasModels }) => {
-  const { isOpenQuesBox, setIsOpenQuesBox } = useContext(MyContext);
+  const { isOpenQuesBox, setIsOpenQuesBox, notify } = useContext(MyContext);
 
   useEffect(() => {
     setIsOpenQuesBox(true);
@@ -34,18 +37,18 @@ const CreateProduct = ({ hasModels }) => {
 
   // Gộp các state liên quan thành 1 object
   const [product, setProduct] = useState({
-    productName: "",
-    description: "",
+    productName: "Inverter Deye",
+    description: "lorem adcscsc",
     models: [defaultModel],
     images: [],
-    categoryId: "",
-    brandId: "",
+    categoryId: "660ef98c8b0f2e23d8ccfe71",
+    brandId: "660ef98c8b0f2e23d8ccfe72",
     shippingCost: 0,
-    pageTitle: "",
-    metaKeywords: "",
-    metaDescription: "",
-    productUrl: "",
-    status: "",
+    pageTitle: "Inverter Deye",
+    metaKeywords: "Inverter Deye",
+    metaDescription: "Inverter Deye",
+    productUrl: "/Inverter-Deye",
+    status: "draft",
   });
 
   const handleChangeModel = (field, index, value) => {
@@ -60,7 +63,94 @@ const CreateProduct = ({ hasModels }) => {
     setProduct((prev) => ({ ...prev, [field]: value }));
   };
 
-  console.log(product);
+  const login = async () => {
+    const res = await axios.post(
+      "http://localhost:3000/api/user/login",
+      {
+        email: "duyneon09@gmail.com",
+        password: "123456",
+      },
+      {
+        withCredentials: true,
+      }
+    );
+    console.log(res.data);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // Upload hình ảnh
+      const imageFormData = new FormData();
+      product.images.forEach((img) => {
+        imageFormData.append("productImages", img);
+      });
+      for (let [key, value] of imageFormData.entries()) {
+        console.log(key, value);
+      }
+
+      const imageRes = await axios.post(
+        `${API_BASE_URL}/api/product/upload-images`,
+        imageFormData,
+        {
+          withCredentials: true, // Gửi cookie kèm theo
+        }
+      );
+      let uploadedImages = [];
+      if (imageRes) {
+        uploadedImages = imageRes.data?.uploadedImages;
+        notify("success", imageRes.data?.message);
+      } else notify("error", imageRes.data?.message);
+
+      // Upload tài liệu
+      const newModels = [...product.models];
+
+      for (let i = 0; i < newModels.length; i++) {
+        const docFormData = new FormData();
+        newModels[i].documents.forEach((doc) => {
+          docFormData.append("documents", doc);
+        });
+        for (let [key, value] of docFormData.entries()) {
+          console.log(key, value);
+        }
+        const docRes = await axios.post(
+          `${API_BASE_URL}/api/product/upload-documents`,
+          docFormData,
+          {
+            withCredentials: true, // Gửi cookie kèm theo
+          }
+        );
+        if (docRes) {
+          newModels[i].documents = docRes.data?.uploadedDocuments;
+          notify("success", docRes.data?.message);
+        } else notify("error", docRes.data?.message);
+      }
+
+      const payload = {
+        ...product,
+        images: uploadedImages,
+        models: newModels,
+      };
+      const res = await axios.post(
+        `${API_BASE_URL}/api/product/create`,
+        payload,
+        {
+          withCredentials: true,
+        }
+      );
+
+      // 4. Xử lý kết quả
+      if (res.data?.success) {
+        notify("success", res.data.message || "Tạo sản phẩm thành công!");
+      } else {
+        notify("error", res.data.message || "Tạo sản phẩm thất bại!");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || error.message || "Đã có lỗi xảy ra.";
+      notify("error", errorMessage);
+      console.error("Chi tiết lỗi:", error);
+    }
+  };
 
   return (
     <>
@@ -87,7 +177,12 @@ const CreateProduct = ({ hasModels }) => {
                   elevation={2}
                   className="!rounded-xl mt-5"
                 >
-                  <ProductModels product={product} setProduct={setProduct} handleChangeValue={handleChangeModel} defaultModel={defaultModel} />
+                  <ProductModels
+                    product={product}
+                    setProduct={setProduct}
+                    handleChangeValue={handleChangeModel}
+                    defaultModel={defaultModel}
+                  />
                 </Paper>
               ) : (
                 <>
@@ -99,7 +194,10 @@ const CreateProduct = ({ hasModels }) => {
                     <h3 className="font-bold text-xl mb-5">
                       Pricing Information
                     </h3>
-                    <Pricing product={product} handleChangeValue={handleChangeModel}/>
+                    <Pricing
+                      product={product}
+                      handleChangeValue={handleChangeModel}
+                    />
                   </Paper>
 
                   <Paper
@@ -108,7 +206,10 @@ const CreateProduct = ({ hasModels }) => {
                     className="!rounded-xl mt-5"
                   >
                     <h3 className="font-bold text-xl mb-5">Stock Tracking</h3>
-                    <StockTracking product={product} handleChangeValue={handleChangeModel} />
+                    <StockTracking
+                      product={product}
+                      handleChangeValue={handleChangeModel}
+                    />
                   </Paper>
                 </>
               )}
@@ -120,7 +221,10 @@ const CreateProduct = ({ hasModels }) => {
                 elevation={2}
                 className="!rounded-xl"
               >
-                <ProductImage product={product} handleChangeValue={handleChangeProduct}/>
+                <ProductImage
+                  product={product}
+                  handleChangeValue={handleChangeProduct}
+                />
               </Paper>
 
               <Paper
@@ -128,7 +232,10 @@ const CreateProduct = ({ hasModels }) => {
                 elevation={2}
                 className="!rounded-xl mt-5"
               >
-                <Attribute product={product} handleChangeValue={handleChangeProduct} />
+                <Attribute
+                  product={product}
+                  handleChangeValue={handleChangeProduct}
+                />
               </Paper>
 
               <Paper
@@ -136,13 +243,15 @@ const CreateProduct = ({ hasModels }) => {
                 elevation={2}
                 className="!rounded-xl mt-5"
               >
-                <SEO_Information product={product} handleChange={handleChangeProduct} />
+                <SEO_Information
+                  product={product}
+                  handleChange={handleChangeProduct}
+                />
               </Paper>
             </div>
           </div>
-
           <div className="py-10">
-            <CreateFooter product={product} />
+            <CreateFooter product={product} onSubmit={handleSubmit} />
           </div>
         </div>
       )}

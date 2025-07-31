@@ -3,26 +3,25 @@ import fs from "fs";
 
 async function uploadFiles(files, options) {
   try {
-    let uploadedFiles = [];
+    const uploadPromises = files.map(async (file) => {
+      return cloudinary.uploader.upload(file.path, options)
+        .then(result => {
+          // Xóa file sau khi upload thành công
+          fs.unlink(file.path, (err) => {
+            if (err) console.error("Error deleting file:", err);
+          });
 
-    for (const file of files) {
-      const result = await cloudinary.uploader.upload(file.path, options);
+          return result.secure_url;
+        });
+    });
 
-      if (result) {
-        uploadedFiles.push(result.secure_url);
-      } else {
-        throw new Error("Upload failed");
-      }
-
-      fs.unlink(file.path, (err) => {
-        if (err) console.error("Error deleting file:", err);
-      });
-    }
-
+    const uploadedFiles = await Promise.all(uploadPromises);
     return uploadedFiles;
+
   } catch (error) {
     throw error;
   }
 }
+
 
 export default uploadFiles;
