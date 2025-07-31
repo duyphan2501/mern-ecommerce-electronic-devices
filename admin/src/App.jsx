@@ -7,7 +7,6 @@ import MyContext from "./Context/MyContext";
 import Login from "./Pages/Login";
 import ListProduct from "./Pages/Products/ListProduct";
 import CreateProduct from "./Pages/Products/CreateProduct";
-import TypeProductQuesBox from "./components/TypeProductQuesBox";
 import { Toaster } from "react-hot-toast";
 
 function App() {

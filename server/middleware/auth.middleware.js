@@ -16,7 +16,8 @@
       next();
     } catch (err) {
       return res.status(403).json({
-        message: err.message || err
+        message: err.message || err,
+        success: false,
       });
     }
   };

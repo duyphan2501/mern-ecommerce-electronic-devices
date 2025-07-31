@@ -9,7 +9,7 @@ export const MyContextProvider = ({ children }) => {
     setIsOpenSidebar(!isOpenSidebar);
   };
 
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const [indexImageView, setIndexImageView] = useState(-1);
   const [hasModels, setHasModels] = useState(true);
   const [isOpenQuesBox, setIsOpenQuesBox] = useState(false);

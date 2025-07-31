@@ -108,7 +108,7 @@ const login = async (req, res) => {
     user.refreshToken = refreshToken;
     const expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     user.refreshTokenExpireAt = expireDate;
-    user.lastLogin = Date.now()
+    user.lastLogin = Date.now();
     await user.save();
 
     return res.status(200).json({
@@ -360,23 +360,23 @@ const uploadAvatarImage = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken || req.headers?.authorization?.split(" ")[1];; 
+    const refreshToken =
+      req.cookies.refreshToken || req.headers?.authorization?.split(" ")[1];
     if (!refreshToken)
       return res
         .status(401)
         .json({ message: "No refresh token provided", success: false });
 
     // Verify refresh token
-    const payload = await verifyRefreshToken(refreshToken)
+    const payload = await verifyRefreshToken(refreshToken);
     const userId = payload.userId;
 
     // Kiểm tra token còn hạn trong DB
     const user = await UserModel.findOne({
       _id: userId,
-      refreshToken,
-      refreshTokenExpireAt: { $gt: Date.now() },
+      refreshToken, 
+      refreshTokenExpireAt: { $gt: new Date() },
     });
-
     if (!user) {
       return res.status(401).json({
         message: "Refresh token is invalid or expired",
@@ -384,9 +384,12 @@ const refreshToken = async (req, res) => {
       });
     }
 
-    // generate new token 
+    // generate new token
     const accessToken = await generateAccessTokenAndSetCookie(res, user._id);
-    const newRefreshToken = await generateRefreshTokenAndSetCookie(res, user._id);
+    const newRefreshToken = await generateRefreshTokenAndSetCookie(
+      res,
+      user._id
+    );
 
     // save token in db
     user.refreshToken = newRefreshToken;
@@ -399,6 +402,17 @@ const refreshToken = async (req, res) => {
       refreshToken: newRefreshToken,
       success: true,
     });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || error,
+      success: false,
+    });
+  }
+};
+
+const checkAuth = async (req, res) => {
+  try {
+    const checkAccessTokenn = await checkAuth();
   } catch (error) {
     return res.status(500).json({
       message: error.message || error,

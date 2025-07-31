@@ -31,10 +31,10 @@ const CustomTooltip = ({ active, payload, label }) => {
               style={{ color: item.color }}
               className="px-2 flex items-center gap-2 text-sm"
             >
-              <div
+              <span
                 className="size-2"
                 style={{ backgroundColor: item.color }}
-              ></div>
+              ></span>
               {item.name}: {item.value.toLocaleString()}
             </p>
           ))}

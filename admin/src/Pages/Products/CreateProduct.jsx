@@ -10,9 +10,7 @@ import ProductModels from "../../components/ProductModels";
 import { useContext, useEffect, useState } from "react";
 import MyContext from "../../Context/MyContext";
 import TypeProductQuesBox from "../../components/TypeProductQuesBox";
-import axios from "axios";
-
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+import { createProduct } from "../../controller/product";
 
 const defaultModel = {
   modelName: "3kw 1pha",
@@ -63,93 +61,8 @@ const CreateProduct = ({ hasModels }) => {
     setProduct((prev) => ({ ...prev, [field]: value }));
   };
 
-  const login = async () => {
-    const res = await axios.post(
-      "http://localhost:3000/api/user/login",
-      {
-        email: "duyneon09@gmail.com",
-        password: "123456",
-      },
-      {
-        withCredentials: true,
-      }
-    );
-    console.log(res.data);
-  };
-
   const handleSubmit = async () => {
-    try {
-      // Upload hình ảnh
-      const imageFormData = new FormData();
-      product.images.forEach((img) => {
-        imageFormData.append("productImages", img);
-      });
-      for (let [key, value] of imageFormData.entries()) {
-        console.log(key, value);
-      }
-
-      const imageRes = await axios.post(
-        `${API_BASE_URL}/api/product/upload-images`,
-        imageFormData,
-        {
-          withCredentials: true, // Gửi cookie kèm theo
-        }
-      );
-      let uploadedImages = [];
-      if (imageRes) {
-        uploadedImages = imageRes.data?.uploadedImages;
-        notify("success", imageRes.data?.message);
-      } else notify("error", imageRes.data?.message);
-
-      // Upload tài liệu
-      const newModels = [...product.models];
-
-      for (let i = 0; i < newModels.length; i++) {
-        const docFormData = new FormData();
-        newModels[i].documents.forEach((doc) => {
-          docFormData.append("documents", doc);
-        });
-        for (let [key, value] of docFormData.entries()) {
-          console.log(key, value);
-        }
-        const docRes = await axios.post(
-          `${API_BASE_URL}/api/product/upload-documents`,
-          docFormData,
-          {
-            withCredentials: true, // Gửi cookie kèm theo
-          }
-        );
-        if (docRes) {
-          newModels[i].documents = docRes.data?.uploadedDocuments;
-          notify("success", docRes.data?.message);
-        } else notify("error", docRes.data?.message);
-      }
-
-      const payload = {
-        ...product,
-        images: uploadedImages,
-        models: newModels,
-      };
-      const res = await axios.post(
-        `${API_BASE_URL}/api/product/create`,
-        payload,
-        {
-          withCredentials: true,
-        }
-      );
-
-      // 4. Xử lý kết quả
-      if (res.data?.success) {
-        notify("success", res.data.message || "Tạo sản phẩm thành công!");
-      } else {
-        notify("error", res.data.message || "Tạo sản phẩm thất bại!");
-      }
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || error.message || "Đã có lỗi xảy ra.";
-      notify("error", errorMessage);
-      console.error("Chi tiết lỗi:", error);
-    }
+    await createProduct(product)
   };
 
   return (

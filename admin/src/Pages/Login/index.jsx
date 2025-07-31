@@ -9,14 +9,18 @@ import {
   OutlinedInput,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { Link } from "react-router-dom";
+import { checkAuth, login } from "../../controller/login";
+import MyContext from "../../Context/MyContext";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const {setIsLogin, notify} = useContext(MyContext)
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleMouseDownPassword = (event) => {
@@ -26,6 +30,19 @@ const Login = () => {
   const handleMouseUpPassword = (event) => {
     event.preventDefault();
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await login(email, password, setIsLogin, notify);
+  };
+
+  useEffect(() => {
+    const handleCheckAuth = async () => {
+      await checkAuth(setIsLogin, notify);
+    };
+    handleCheckAuth()
+  }, []);
+
   return (
     <div className="">
       <div className="fixed inset-0 w-screen h-screen opacity-5 z-0">
@@ -38,24 +55,34 @@ const Login = () => {
       <div className="flex  justify-center items-center h-screen">
         <div className="flex flex-col justify-center items-center gap-4 z-10 p-5 h-full shadow">
           <div className="h-[40px]">
-            <img src="logo.jpg" alt="" className="h-full object-cover" />
+            <img src="./logo.jpg" alt="" className="h-full object-cover" />
           </div>
-          <div className="font-bold text-4xl text-center text-black">
-            <p className="">Welcome Back!</p>
+          <div className="font-bold text-4xl text-center text-black mb-5">
+            <p className="">Welcome Back, Admin!</p>
             <p>Sign in with your credentials.</p>
           </div>
+          <form onSubmit={handleSubmit} className="flex flex-col">
+            <FormControl sx={{ width: "40ch" }} className="!mb-5">
+              <TextField
+                label="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </FormControl>
 
-          <FormControl sx={{ width: "40ch" }}>
-            <TextField label="Email"></TextField>
-          </FormControl>
-          <div className="">
             <FormControl sx={{ width: "40ch" }} variant="outlined">
               <InputLabel htmlFor="outlined-adornment-password">
-                Password
+                Password *
               </InputLabel>
               <OutlinedInput
                 id="outlined-adornment-password"
                 type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
                 endAdornment={
                   <InputAdornment position="end">
                     <IconButton
@@ -77,7 +104,7 @@ const Login = () => {
               />
             </FormControl>
 
-            <div className="flex justify-between items-center mt-3">
+            <div className="flex justify-between items-center mt-3 w-full">
               <FormControlLabel
                 control={<Checkbox defaultChecked />}
                 label="Remember me"
@@ -86,18 +113,16 @@ const Login = () => {
                 <p className="link hover:underline">Forgot Password?</p>
               </Link>
             </div>
-          <Button
-            className="!py-2 !bg-blue-500 !text-white !text-lg !font-bold !w-full !mt-3"
-            sx={{ fontFamily: "Outfit" }}
-          >
-            Sign In
-          </Button>
-          </div>
 
-          <div className="flex items-center gap-1 justify-center mt-3">
-            <p className=" text-gray-400">Don't have an account??</p>
-            <span className="link hover:underline">Sign Up</span>
-          </div>
+            <Button
+              className="!py-2 !bg-blue-500 !text-white !text-lg !font-bold !w-full !mt-3"
+              sx={{ fontFamily: "Outfit" }}
+              type="submit"
+            >
+              Sign In
+            </Button>
+          </form>
+
           <div className="flex items-center gap-2">
             <div className="h-[0.5px] bg-gray-400 w-20"></div>
             <p>Or, Continue with Google</p>
