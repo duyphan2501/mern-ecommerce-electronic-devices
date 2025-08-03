@@ -1,36 +1,38 @@
-import { client, sender } from "./email.config.js";
+import { resend, sender } from "./email.config.js";
 import { verificationEmail, resetPassword } from "./email.templates.js";
 
 const sendVerificationEmail = async (email, verificationToken) => {
   try {
-    const recipient = [{ email }];
-    const response = await client.send({
+    const htmlContent = verificationEmail.replace("{verificationToken}", verificationToken);
+
+    const data = await resend.emails.send({
       from: sender,
-      to: recipient,
+      to: email,
       subject: "Verify your email",
-      html: verificationEmail.replace("{verificationToken}", verificationToken),
-      category: "Email Verification"
-    });
-    console.log(response)
+      html: htmlContent,
+    }); 
+
+    console.log("Verification email sent:", data);
   } catch (error) {
-    console.log(error);
-  } 
+    console.error("Error sending verification email:", error);
+  }
 };
 
-const sendForgotPasswordEMail = async(email, resetUrl) => {
+const sendForgotPasswordEmail = async (email, resetUrl) => {
   try {
-    const recipient = [{email}]
-    const response = await client.send({
-      from: sender,
-      to: recipient,
-      subject: "Reset password",
-      html: resetPassword.replace("{resetUrl}", resetUrl),
-      category: "Reset Password"
-    })  
-    console.log(response)
-  } catch (error) {
-    console.log(error)
-  }
-}
+    const htmlContent = resetPassword.replace("{resetUrl}", resetUrl);
 
-export { sendVerificationEmail, sendForgotPasswordEMail };
+    const data = await resend.emails.send({
+      from: sender,
+      to: email,
+      subject: "Reset your password",
+      html: htmlContent,
+    });
+
+    console.log("Reset password email sent:", data?.id);
+  } catch (error) {
+    console.error("Error sending reset password email:", error);
+  }
+};
+
+export { sendVerificationEmail, sendForgotPasswordEmail };

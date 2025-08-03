@@ -1,5 +1,5 @@
 import express from 'express'
-import { forgotPassword, login, logout, register, verifyEmail, resetPassword, uploadAvatarImage, refreshToken } from '../controller/user.controller.js'
+import { forgotPassword, login, logout, register, verifyEmail, resetPassword, uploadAvatarImage, refreshToken, sendVerificationEmailAgain } from '../controller/user.controller.js'
 import checkAuth from '../middleware/auth.middleware.js'
 import {uploadImg} from '../middleware/cloudinary.middleware.js'
 import multer from 'multer'
@@ -14,6 +14,7 @@ userRouter.post("/forgot-password", forgotPassword)
 userRouter.post("/avatar/upload", checkAuth, uploadImg.single('avatar'), uploadAvatarImage)
 userRouter.put("/reset-password/:token", resetPassword)
 userRouter.put("/refresh-token", refreshToken)
+userRouter.put("/send-verification-email", sendVerificationEmailAgain)
 userRouter.get("/check-auth", checkAuth, (req, res) => {
     res.status(200).json({
         message: "Check auth successfully",

@@ -1,5 +1,5 @@
 import {
-  sendForgotPasswordEMail,
+  sendForgotPasswordEmail,
   sendVerificationEmail,
 } from "../mailtrap/emails.js";
 import UserModel from "../model/user.model.js";
@@ -13,6 +13,45 @@ import crypto from "crypto";
 import cloudinary from "../config/cloudinary.config.js";
 import fs from "fs";
 import extractPublicId from "../helper/extractPuclicId.js";
+
+const sendVerificationEmailAgain = async (req, res) => {
+  try {
+    const {email} = req.body
+
+    if (!email) {
+      res.status(400).json({
+        message: "Email is missing",
+        success: false,
+      })
+    }
+
+    const user = await UserModel.findOne({email})
+    
+    if (!user)
+      res.status(404).json({
+    message: "User does not exist", success:false})
+
+    const verificationToken = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+    await sendVerificationEmail(email, verificationToken);
+
+    user.verificationToken = verificationToken
+    user.verificationTokenExpireAt = Date.now() + 1000 * 60 * 60 * 24;
+    await user.save()
+
+    res.status(200).json({
+      message: "Sent OTP successfully",
+      success: true,
+    })
+  } catch (error) {
+     return res.status(500).json({
+      message: error.message || error,
+      success: false,
+    });
+  }
+}
 
 const register = async (req, res) => {
   try {
@@ -44,7 +83,7 @@ const register = async (req, res) => {
     await sendVerificationEmail(email, verificationToken);
 
     // create new object to db
-    const verificationTokenExpireAt = Date.now() + 1000 * 60 * 60 * 24; //ms
+    const verificationTokenExpireAt = Date.now() + 1000 * 60 * 60 * 24;
     const newUser = await UserModel.create({
       name,
       email,
@@ -86,17 +125,22 @@ const login = async (req, res) => {
         success: false,
       });
 
-    if (!user.isVerified)
-      return res.status(401).json({
-        message: "User is not verified",
-        success: false,
-      });
-
     // compare password
     const isCorrectPassword = await bcryptjs.compare(password, user.password);
     if (!isCorrectPassword)
       return res.status(401).json({
         message: "Password is not correct",
+        success: false,
+      });
+
+    if (!user.isVerified)
+      return res.status(401).json({
+        user: {
+          ...user._doc,
+          password: undefined,
+          refreshToken: undefined,
+        },
+        message: "User is not verified",
         success: false,
       });
 
@@ -114,9 +158,10 @@ const login = async (req, res) => {
     return res.status(200).json({
       user: {
         ...user._doc,
-        message: "Login successfully",
         password: undefined,
+        refreshToken: undefined,
       },
+      message: "Login successfully",
       success: true,
     });
   } catch (error) {
@@ -131,7 +176,7 @@ const verifyEmail = async (req, res) => {
   try {
     const { email, code } = req.body;
     if (!code || !email)
-      return res.status(500).json({
+      return res.status(400).json({
         message: "Please provide verification token and email",
         success: false,
       });
@@ -139,11 +184,11 @@ const verifyEmail = async (req, res) => {
     // find user
     const user = await UserModel.findOne({
       email: email,
-      verificationToken: code,
+      isVerified: false,
     });
     if (!user)
       return res.status(404).json({
-        message: "User does not exist or wrong OTP",
+        message: "User does not exist",
         success: false,
       });
 
@@ -151,7 +196,7 @@ const verifyEmail = async (req, res) => {
     const isCorretToken = user.verificationToken === code;
     if (!isCorretToken)
       return res.status(401).json({
-        message: "token is not correct",
+        message: "OTP code is not correct",
         success: false,
       });
 
@@ -164,9 +209,10 @@ const verifyEmail = async (req, res) => {
     return res.status(200).json({
       user: {
         ...user._doc,
-        message: "verify account succesfully",
         password: undefined,
+        refreshToken: undefined,
       },
+      message: "Verify account succesfully",
       success: true,
     });
   } catch (error) {
@@ -235,7 +281,7 @@ const forgotPassword = async (req, res) => {
     // send email reset password
     const resetPasswordUrl =
       process.env.FRONTEND_URL + "/reset-password/" + resetPasswordToken;
-    await sendForgotPasswordEMail(email, resetPasswordUrl);
+    await sendForgotPasswordEmail(email, resetPasswordUrl);
 
     return res.status(200).json({
       message: "Reset email is sent to " + email,
@@ -374,7 +420,7 @@ const refreshToken = async (req, res) => {
     // Kiểm tra token còn hạn trong DB
     const user = await UserModel.findOne({
       _id: userId,
-      refreshToken, 
+      refreshToken,
       refreshTokenExpireAt: { $gt: new Date() },
     });
     if (!user) {
@@ -430,4 +476,5 @@ export {
   resetPassword,
   uploadAvatarImage,
   refreshToken,
+  sendVerificationEmailAgain,
 };

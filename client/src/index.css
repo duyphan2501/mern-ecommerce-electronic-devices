@@ -272,3 +272,11 @@ nav ul li:hover .submenu {
   padding-top: 8px !important;
   padding-bottom: 8px !important;
 }
+
+.MuiButton-text {
+  font-family: "Outfit", sans-serif !important;
+}
+
+.MuiFormControlLabel-label {
+  font-family: "Outfit", sans-serif !important;
+}

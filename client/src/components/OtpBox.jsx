@@ -7,6 +7,7 @@ const OtpBox = ({ length, onChangeOtp, onSubmit }) => {
   useEffect(() => {
     inputsOtp.current = inputsOtp.current.slice(0, length);
   }, [length]);
+
   useEffect(() => {
     if (otp.every((digit) => digit !== "")) {
       onSubmit(); // Gọi khi đã điền đủ OTP
@@ -16,15 +17,20 @@ const OtpBox = ({ length, onChangeOtp, onSubmit }) => {
   const handleChange = (e, index) => {
     // handle input
     const value = e.target.value;
-    if (isNaN(value)) {
-      inputsOtp.current[index].value = "";
-      return;
-    }
     // asign value to new otp[]
     const newOtp = [...otp];
-
     // handle copy
     let currentInputIndex = index;
+
+    if (isNaN(value) || value==="") {
+      inputsOtp.current[index].value = "";
+      newOtp[index] = "";
+      // update otp
+      setOtp(newOtp); 
+      onChangeOtp(newOtp.join(""));
+      return;
+    }
+
     for (
       let i = 0;
       i < value.length && currentInputIndex < length;
@@ -41,7 +47,7 @@ const OtpBox = ({ length, onChangeOtp, onSubmit }) => {
 
     // update otp
     setOtp(newOtp);
-    onChangeOtp(otp.join(""));
+    onChangeOtp(newOtp.join(""));
   };
 
   const handleKeyDown = (e, index) => {

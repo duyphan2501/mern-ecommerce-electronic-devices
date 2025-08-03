@@ -1,5 +1,4 @@
 import { createContext, useState } from "react";
-import toast from "react-hot-toast";
 
 const MyContext = createContext();
 
@@ -16,16 +15,7 @@ export const MyContextProvider = ({ children }) => {
   const openAddrFrm = () => setIsOpenAddrFrm(true)
   const closeAddrFrm = () => setIsOpenAddrFrm(false)
 
-  const [isLogin, setIsLogin] = useState(false)
-  
-  const notify = (status, message) => {
-    if (status === "success")
-      toast.success(message)
-    else if(status === "error")
-      toast.error(message)
-  }
-
-  const values = {isOpenModal, openModal, closeModal, notify, isOpenCart, openCart, closeCart, isOpenAddrFrm, openAddrFrm, closeAddrFrm, isLogin, setIsLogin }
+  const values = {isOpenModal, openModal, closeModal, isOpenCart, openCart, closeCart, isOpenAddrFrm, openAddrFrm, closeAddrFrm }
   return (
     <MyContext.Provider value={values}>
       {children}

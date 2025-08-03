@@ -8,13 +8,14 @@ import ProductPage from "./pages/ProductPage";
 import ProductDetail from "./pages/ProductDetail";
 import ViewMoreDialog from "./components/ViewMoreDialog";
 import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
 import ChangePassword from "./pages/ChangePassword";
 import { Toaster } from "react-hot-toast";
 import CartDrawer from "./components/CartDrawer";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import MyAccount from "./pages/MyAccount";
+import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
 
 function App() {
   return (
@@ -35,8 +36,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/san-pham" element={<ProductPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/san-pham/chi-tiet" element={<ProductDetail />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
