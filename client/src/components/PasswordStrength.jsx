@@ -1,6 +1,6 @@
 import { FaCheck, FaX } from "react-icons/fa6";
 
-const PasswordStrength = ({ password }) => {
+const PasswordStrength = ({ password, setPasswordScore }) => {
   const colors = [
     "bg-red-500",
     "bg-red-400",
@@ -17,9 +17,10 @@ const PasswordStrength = ({ password }) => {
     { label: "Chứa kí tự đặc biệt", pass: /[^A-Za-z0-9]/.test(password) },
   ];
 
-  const score = criteria.filter((c) => c.pass).length;
-
-  const getColor = () => colors[score - 1] || "bg-gray-500";
+  const passwordScore = criteria.filter((c) => c.pass).length;
+  setPasswordScore(passwordScore)
+  
+  const getColor = () => colors[passwordScore - 1] || "bg-gray-500";
 
   return (
     <div>
@@ -28,7 +29,7 @@ const PasswordStrength = ({ password }) => {
           <div
             key={index}
             className={`rounded h-1 flex-1 transition-all duration-300 ${
-              score > index ? getColor() : "bg-gray-300"
+              passwordScore > index ? getColor() : "bg-gray-300"
             }`}
           ></div>
         ))}

@@ -57,7 +57,7 @@ const VerifyEmail = () => {
             <OtpBox length={6} onChangeOtp={setOtp} onSubmit={handleVerify} />
           </div>
           <Button
-            className="!w-full !bg-blue-500 !text-white !font-sans !font-bold"
+            className="!w-full !bg-blue-500 !text-white !font-sans !font-bold !h-10"
             onClick={handleVerify}
           >
             {isLoading ? (

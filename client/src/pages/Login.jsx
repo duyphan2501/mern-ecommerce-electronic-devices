@@ -18,7 +18,7 @@ import { FiLoader } from "react-icons/fi";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, forgotPassword } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
 
   const navigator = useNavigate();
@@ -38,6 +38,7 @@ const Login = () => {
     try {
       await login(email, password);
       toast.success(useAuthStore.getState().message);
+      console.log(useAuthStore.getState().user);
       navigator("/");
     } catch (error) {
       // Nếu tài khoản chưa xác thực thì chuyển sang trang xác thực
@@ -50,6 +51,16 @@ const Login = () => {
       console.log(error);
     }
   };
+
+  const handleForgotPassword = async () => {
+   try {
+      await forgotPassword(email);
+      toast.success(useAuthStore.getState().message);
+    } catch (error) {
+      toast.error(useAuthStore.getState().message);
+      console.log(error);
+    }
+  }
 
   useEffect(() => {}, []);
 
@@ -100,13 +111,11 @@ const Login = () => {
               }
               label="Mật Khẩu"
             />
-            <Link>
-              <p className="my-3 font-semibold font-sans link hover:underline">
-                Quên mật khẩu?
-              </p>
-            </Link>
+            <p className="my-3 font-semibold font-sans link hover:underline" onClick={handleForgotPassword}>
+              Quên mật khẩu?
+            </p>
             <Button
-              className={`!py-2 !bg-blue-500 !text-white !font-bold`}
+              className={`!h-10 !bg-blue-500 !text-white !font-bold`}
               type="submit"
             >
               {isLoading ? (

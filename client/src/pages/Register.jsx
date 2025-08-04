@@ -14,11 +14,13 @@ import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
 import { FiLoader } from "react-icons/fi";
+import PasswordStrength from "../components/PasswordStrength";
 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userName, setUserName] = useState("");
+  const [passwordScore, setPasswordScore] = useState(0);
 
   const { register, isLoading } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +40,10 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      if (passwordScore < 5) {
+        toast.error("Password is not strong enough");
+        return;
+      }
       await register(email, password, userName);
       console.log(useAuthStore.getState().user);
       toast.success(useAuthStore.getState().message);
@@ -60,7 +66,7 @@ const Register = () => {
           <FormControl sx={{ m: 1, width: "40ch" }}>
             <TextField
               id="outlined-basic"
-              label="Họ Tên"
+              label="Họ và Tên"
               variant="outlined"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
@@ -105,16 +111,22 @@ const Register = () => {
               }
               label="Password"
             />
+            <div className="mt-3">
+              <PasswordStrength
+                password={password}
+                setPasswordScore={setPasswordScore}
+              />
+            </div>
           </FormControl>
 
           <FormControl sx={{ m: 1, width: "40ch" }} variant="outlined">
             <Button
-              className={`!py-2 !bg-blue-500 !text-white !font-bold mb-5`}
+              className={`!h-10 !bg-blue-500 !text-white !font-bold mb-5`}
               type="submit"
             >
               {isLoading ? <FiLoader className="animate-spin" /> : "Đăng Ký"}
             </Button>
-             <div className="flex items-center gap-1 justify-center my-3">
+            <div className="flex items-center gap-1 justify-center my-3">
               <p className=" text-gray-400">Đã có tài khoản?</p>
               <Link to={"/login"} className="link hover:underline">
                 Đăng nhập

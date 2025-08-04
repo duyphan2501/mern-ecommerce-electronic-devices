@@ -39,7 +39,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/san-pham/chi-tiet" element={<ProductDetail />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/reset-password/:token" element={<ChangePassword />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/my-account" element={<MyAccount />} />
