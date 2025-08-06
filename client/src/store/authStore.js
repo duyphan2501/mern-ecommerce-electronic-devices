@@ -11,7 +11,7 @@ const initialState = {
   isVerified: false,
   message: null,
   isLoading: false,
-  isCheckingAuth: true,
+  accessToken: null,
 };
 
 const useAuthStore = create((set) => ({
@@ -77,7 +77,7 @@ const useAuthStore = create((set) => ({
       );
       set({
         message: res.data?.message || "Sent successfully",
-      })
+      });
     } catch (error) {
       set({
         message: error.response?.data?.message || "Sent Verify Email failed",
@@ -100,6 +100,7 @@ const useAuthStore = create((set) => ({
         isAuthenticated: true,
         message: res?.data?.message || "Login successfully",
         isVerified: true, // reset về true nếu login thành công
+        accessToken: res.data.accessToken,
       });
     } catch (error) {
       let message = "Login failed";
@@ -149,7 +150,7 @@ const useAuthStore = create((set) => ({
         `${API_URL}/api/user/reset-password/${token}`,
         {
           password: newPassword,
-          confirmPassword
+          confirmPassword,
         }
       );
       set({ user: res.data.user, isLoading: false, message: res.data.message });
@@ -167,10 +168,28 @@ const useAuthStore = create((set) => ({
     try {
       await axios.get(`${API_URL}/api/user/logout`);
       set({
+        ...initialState,
+      });
+    } catch (error) {
+      set({
+        error: error.response.data.message || "Logout failed",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  refreshToken: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await axios.put(`${API_URL}/api/user/refresh-token`);
+      set({
         isLoading: false,
         isAuthenticated: true,
         isVerified: true,
+        accessToken: res.data.accessToken,
       });
+      return { accessToken: res.data.accessToken };
     } catch (error) {
       set({
         error: error.response.data.message || "Logout failed",

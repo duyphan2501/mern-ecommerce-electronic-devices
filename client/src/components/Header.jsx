@@ -12,6 +12,8 @@ import MyContext from "../Context/MyContext";
 import NavLinkHeader from "./NavLinkHeader";
 import { Menu, MenuItem } from "@mui/material";
 import { FaRegSmileWink } from "react-icons/fa";
+import useAuthStore from "../store/authStore";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -23,9 +25,9 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 const Header = () => {
-  const  isLogin  = false;
-
   const [anchorEl, setAnchorEl] = useState(null);
+  const [open, setOpen] = useState(false);
+
   const openProfile = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -34,8 +36,9 @@ const Header = () => {
     setAnchorEl(null);
   };
 
-  const [open, setOpen] = useState(false);
   const { openCart } = useContext(MyContext);
+  const { user } = useAuthStore();
+  const axiosPrivate = useAxiosPrivate()
 
   return (
     <header className="sticky top-0 z-50 !bg-white shadow-sm h-32">
@@ -71,7 +74,7 @@ const Header = () => {
           </div>
           <div className="col3 w-[25%] flex items-center justify-end">
             <ul className="flex items-center justify-end lg:gap-5 w-full">
-              {isLogin ? (
+              {user ? (
                 <li className="size-10 flex justify-end items-center flex-1">
                   <Button
                     className="!bg-gray-100 hover:!bg-gray-300 !items-center !normal-case !text-gray-500 !gap-1"
@@ -150,7 +153,7 @@ const Header = () => {
               )}
 
               <li>
-                <Link to={"/wishlist"}>
+                {/* <Link to={"/wishlist"}> */}
                   <Tooltip title="Đơn hàng" arrow>
                     <IconButton aria-label="wishlist">
                       <StyledBadge badgeContent={4} color="secondary">
@@ -158,7 +161,7 @@ const Header = () => {
                       </StyledBadge>
                     </IconButton>
                   </Tooltip>
-                </Link>
+                {/* </Link> */}
               </li>
               <li>
                 <Tooltip title="Giỏ hàng" arrow>

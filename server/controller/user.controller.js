@@ -140,7 +140,7 @@ const login = async (req, res) => {
       });
 
     // generate token and set cookie
-    await generateAccessTokenAndSetCookie(res, user._id);
+    const accessToken = await generateAccessTokenAndSetCookie(res, user._id);
     const refreshToken = await generateRefreshTokenAndSetCookie(res, user._id);
 
     // save token in db
@@ -153,6 +153,7 @@ const login = async (req, res) => {
     return res.status(200).json({
       user: sanitizeUser(user),
       message: "Login successfully",
+      accessToken,
       success: true,
     });
   } catch (error) {
@@ -271,7 +272,10 @@ const forgotPassword = async (req, res) => {
 
     // generate reset password token to to identify user need to be reset password
     const resetPasswordToken = crypto.randomBytes(20).toString("hex");
-    const hashedToken = crypto.createHash("sha256").update(resetPasswordToken).digest("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetPasswordToken)
+      .digest("hex");
     const tokenExpire = Date.now() + 1000 * 60 * 15;
     // save in db
     user.resetPasswordToken = hashedToken;
@@ -303,7 +307,10 @@ const resetPassword = async (req, res) => {
         message: "Reset token is missing",
         success: false,
       });
-    const hashedToken = crypto.createHash("sha256").update(resetPasswordToken).digest("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetPasswordToken)
+      .digest("hex");
 
     const { password, confirmPassword } = req.body;
     if (!password || !confirmPassword)
@@ -423,8 +430,7 @@ const uploadAvatarImage = async (req, res) => {
 
 const refreshToken = async (req, res) => {
   try {
-    const refreshToken =
-      req.cookies.refreshToken || req.headers?.authorization?.split(" ")[1];
+    const refreshToken = req.cookies.refreshToken;
     if (!refreshToken)
       return res
         .status(401)
@@ -440,8 +446,9 @@ const refreshToken = async (req, res) => {
       refreshToken,
       refreshTokenExpireAt: { $gt: new Date() },
     });
+
     if (!user) {
-      return res.status(401).json({
+      return res.status(403).json({
         message: "Refresh token is invalid or expired",
         success: false,
       });
@@ -465,17 +472,6 @@ const refreshToken = async (req, res) => {
       refreshToken: newRefreshToken,
       success: true,
     });
-  } catch (error) {
-    return res.status(500).json({
-      message: error.message || error,
-      success: false,
-    });
-  }
-};
-
-const checkAuth = async (req, res) => {
-  try {
-    const checkAccessTokenn = await checkAuth();
   } catch (error) {
     return res.status(500).json({
       message: error.message || error,
