@@ -1,10 +1,12 @@
 import { create } from "zustand";
 
 const useUserStore = create((set) => ({
+  message: null,
+  isLoading: false,
   updateAvatar: async (axiosPrivate, formData) => {
     set({ isLoading: true, message: null });
     try {
-      const res = await axiosPrivate("/api/user/avatar/upload", formData);
+      const res = await axiosPrivate.post("/api/user/avatar/upload", formData);
       set({
         message: res.data.message,
         isLoading: false,
@@ -19,4 +21,4 @@ const useUserStore = create((set) => ({
   },
 }));
 
-export default useUserStore
+export default useUserStore;

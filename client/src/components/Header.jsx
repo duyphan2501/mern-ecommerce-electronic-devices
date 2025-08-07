@@ -3,7 +3,7 @@ import { MdOutlineRocketLaunch } from "react-icons/md";
 import Badge from "@mui/material/Badge";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { useContext, useState } from "react";
@@ -14,7 +14,6 @@ import { Menu, MenuItem } from "@mui/material";
 import { FaRegSmileWink } from "react-icons/fa";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
-import useUserStore from "../store/userStore";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -28,6 +27,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
+  const navigator = useNavigate()
 
   const openProfile = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -44,6 +44,7 @@ const Header = () => {
     try {
       await logout();
       toast.success(useAuthStore.getState().message);
+      navigator("/")
     } catch (error) {
       toast.error(useAuthStore.getState().message);
       console.log(error);

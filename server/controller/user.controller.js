@@ -369,6 +369,7 @@ const uploadAvatarImage = async (req, res) => {
   try {
     const image = req.file;
     const userId = req.user.userId;
+    
     if (!image) {
       return res.status(400).json({
         message: "No image file uploaded",
@@ -380,7 +381,7 @@ const uploadAvatarImage = async (req, res) => {
 
     if (!user)
       return res.status(404).json({
-        message: "user not found",
+        message: "User not found",
         success: false,
       });
 

@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import useAuthStore from "../store/authStore";
 import axiosPrivate from "../API/axiosInstance.js";
+import MyContext from "../Context/MyContext.jsx";
 
 const useAxiosPrivate = () => {
   const { refreshToken } = useAuthStore();
-
+  const { persist } = useContext(MyContext);
   useEffect(() => {
     const requestInterceptor = axiosPrivate.interceptors.request.use(
       (config) => {
@@ -22,8 +23,9 @@ const useAxiosPrivate = () => {
       async (error) => {
         const prevRequest = error?.config;
         if (
-          (error.response?.status === 401 && !prevRequest._retry) ||
-          (error.response?.status === 403 && !prevRequest._retry)
+          (error.response?.status === 401 || error.response?.status === 403) &&
+          !prevRequest._retry &&
+          persist
         ) {
           prevRequest._retry = true;
           try {

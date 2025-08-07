@@ -32,7 +32,7 @@ const Profile = () => {
     <div>
       {/* Thông tin tài khoản */}
       <div className="bg-white rounded-md border border-gray-200 shadow p-5">
-        <div className="flex justify-between items-center pb-3 mb-3 border-b border-gray-200">
+        <div className="flex justify-between items-center pb-3 mb-5 border-b border-gray-200">
           <h4 className="text-lg font-bold">Thông tin tài khoản</h4>
           <Button
             className="!font-semibold !font-sans"
@@ -58,7 +58,7 @@ const Profile = () => {
         }`}
       >
         <div className="bg-white rounded-md border border-gray-200 shadow p-5">
-          <div className="pb-3 mb-3 border-b border-gray-200">
+          <div className="pb-3 mb-5 border-b border-gray-200">
             <h4 className="text-lg font-bold">Đổi mật khẩu</h4>
           </div>
           <div className="grid grid-cols-2 gap-5">

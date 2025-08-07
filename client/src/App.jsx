@@ -16,23 +16,11 @@ import Checkout from "./pages/Checkout";
 import MyAccount from "./pages/MyAccount";
 import Register from "./pages/Register";
 import VerifyEmail from "./pages/VerifyEmail";
-import { useEffect } from "react";
-import useAuthStore from "./store/authStore";
+import PersistentLogin from "./components/PersistentLogin";
 
 function App() {
-  useEffect(() => {
-    const refresh = async () => {
-      const { user, refreshToken } = useAuthStore.getState();
-      if (!user) {
-        try {
-          await refreshToken();
-        } catch (error) {
-          console.log(error);
-        }
-      }
-    };
-    refresh();
-  }, []);
+
+  
 
   return (
     <>
@@ -44,21 +32,22 @@ function App() {
           </div>
         </div>
       </div>
-
       <BrowserRouter>
         <TopStrip />
         <Header />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/san-pham" element={<ProductPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/san-pham/chi-tiet" element={<ProductDetail />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/reset-password/:token" element={<ChangePassword />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/my-account" element={<MyAccount />} />
+          <Route element={<PersistentLogin />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/san-pham" element={<ProductPage />} />
+            <Route path="/san-pham/chi-tiet" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/my-account" element={<MyAccount />} />
+          </Route>
         </Routes>
         <CartDrawer />
         <ViewMoreDialog />

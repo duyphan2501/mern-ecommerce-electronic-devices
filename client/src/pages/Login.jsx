@@ -1,25 +1,29 @@
 import {
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   IconButton,
   InputAdornment,
   InputLabel,
   OutlinedInput,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
 import { FiLoader } from "react-icons/fi";
+import MyContext from "../Context/MyContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, isLoading, forgotPassword } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
+  const {persist, setPersist} = useContext(MyContext)
 
   const navigator = useNavigate();
 
@@ -53,16 +57,22 @@ const Login = () => {
   };
 
   const handleForgotPassword = async () => {
-   try {
+    try {
       await forgotPassword(email);
       toast.success(useAuthStore.getState().message);
     } catch (error) {
       toast.error(useAuthStore.getState().message);
       console.log(error);
     }
+  };
+
+  const handleTogglePersist = () => {
+    setPersist(prev => !prev)
   }
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    localStorage.setItem('persist', persist)
+  }, [persist])
 
   return (
     <div className="flex justify-center items-center py-15 ">
@@ -111,9 +121,20 @@ const Login = () => {
               }
               label="Mật Khẩu"
             />
-            <p className="my-3 font-semibold font-sans link hover:underline" onClick={handleForgotPassword}>
-              Quên mật khẩu?
-            </p>
+            <div className="flex justify-between items-center my-3 w-full">
+              <FormControlLabel
+                control={<Checkbox checked={persist} />}
+                label="Remember me"
+                onChange={handleTogglePersist}
+              />
+              <p
+                className=" font-semibold font-sans link text-sm hover:underline"
+                onClick={handleForgotPassword}
+              >
+                Quên mật khẩu?
+              </p>
+            </div>
+
             <Button
               className={`!h-10 !bg-blue-500 !text-white !font-bold`}
               type="submit"
