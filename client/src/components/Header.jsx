@@ -13,7 +13,8 @@ import NavLinkHeader from "./NavLinkHeader";
 import { Menu, MenuItem } from "@mui/material";
 import { FaRegSmileWink } from "react-icons/fa";
 import useAuthStore from "../store/authStore";
-import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import toast from "react-hot-toast";
+import useUserStore from "../store/userStore";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -37,8 +38,17 @@ const Header = () => {
   };
 
   const { openCart } = useContext(MyContext);
-  const { user } = useAuthStore();
-  const axiosPrivate = useAxiosPrivate()
+  const { user, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success(useAuthStore.getState().message);
+    } catch (error) {
+      toast.error(useAuthStore.getState().message);
+      console.log(error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 !bg-white shadow-sm h-32">
@@ -131,7 +141,7 @@ const Header = () => {
                       Profile
                     </MenuItem>
                     <MenuItem onClick={handleClose}>My account</MenuItem>
-                    <MenuItem onClick={handleClose}>Logout</MenuItem>
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
                   </Menu>
                 </li>
               ) : (
@@ -154,13 +164,13 @@ const Header = () => {
 
               <li>
                 {/* <Link to={"/wishlist"}> */}
-                  <Tooltip title="Đơn hàng" arrow>
-                    <IconButton aria-label="wishlist">
-                      <StyledBadge badgeContent={4} color="secondary">
-                        <IoBagCheckOutline className="text-[#0d68f3]" />
-                      </StyledBadge>
-                    </IconButton>
-                  </Tooltip>
+                <Tooltip title="Đơn hàng" arrow>
+                  <IconButton aria-label="wishlist">
+                    <StyledBadge badgeContent={4} color="secondary">
+                      <IoBagCheckOutline className="text-[#0d68f3]" />
+                    </StyledBadge>
+                  </IconButton>
+                </Tooltip>
                 {/* </Link> */}
               </li>
               <li>

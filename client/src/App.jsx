@@ -16,8 +16,24 @@ import Checkout from "./pages/Checkout";
 import MyAccount from "./pages/MyAccount";
 import Register from "./pages/Register";
 import VerifyEmail from "./pages/VerifyEmail";
+import { useEffect } from "react";
+import useAuthStore from "./store/authStore";
 
 function App() {
+  useEffect(() => {
+    const refresh = async () => {
+      const { user, refreshToken } = useAuthStore.getState();
+      if (!user) {
+        try {
+          await refreshToken();
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    };
+    refresh();
+  }, []);
+
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />

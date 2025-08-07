@@ -14,6 +14,7 @@ const initialState = {
   accessToken: null,
 };
 
+
 const useAuthStore = create((set) => ({
   ...initialState,
   reset: () => {
@@ -166,13 +167,14 @@ const useAuthStore = create((set) => ({
   logout: async () => {
     set({ isLoading: true, error: null });
     try {
-      await axios.get(`${API_URL}/api/user/logout`);
+      const res = await axios.get(`${API_URL}/api/user/logout`);
       set({
         ...initialState,
+        message: res.data.message || "Logout successfully",
       });
     } catch (error) {
       set({
-        error: error.response.data.message || "Logout failed",
+        message: error.response.data.message || "Logout failed",
         isLoading: false,
       });
       throw error;
@@ -187,17 +189,21 @@ const useAuthStore = create((set) => ({
         isLoading: false,
         isAuthenticated: true,
         isVerified: true,
+        user: res.data.user,
         accessToken: res.data.accessToken,
       });
       return { accessToken: res.data.accessToken };
     } catch (error) {
       set({
-        error: error.response.data.message || "Logout failed",
+        message:
+          error.response.data.message ||
+          "Token is expired, you have login again!",
         isLoading: false,
       });
       throw error;
     }
   },
+  
 }));
 
 export default useAuthStore;

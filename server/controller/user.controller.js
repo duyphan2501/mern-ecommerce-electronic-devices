@@ -470,6 +470,7 @@ const refreshToken = async (req, res) => {
     return res.status(200).json({
       accessToken,
       refreshToken: newRefreshToken,
+      user: sanitizeUser(user),
       success: true,
     });
   } catch (error) {

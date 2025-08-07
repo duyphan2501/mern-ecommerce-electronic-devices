@@ -12,6 +12,8 @@ import Address from "../components/MyAccount/Address";
 import MyContext from "../Context/MyContext";
 import { Link } from "react-router-dom";
 import Order from "../components/MyAccount/Order";
+import useAuthStore from "../store/authStore";
+import toast from "react-hot-toast";
 const defaultAvatar = {
   src: "https://frontend.tikicdn.com/_desktop-next/static/img/account/avatar.png",
   class: "size-9 object-contain",
@@ -34,10 +36,22 @@ const tabs = [
 ];
 
 const MyAccount = () => {
-  const {setIsLogin} = useContext(MyContext)
+  const { setIsLogin } = useContext(MyContext);
   const [activeTab, setActiveTab] = useState(0);
   const handleActiveTab = (index) => {
     setActiveTab(index);
+  };
+
+  const { logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success(useAuthStore.getState().message);
+    } catch (error) {
+      toast.error(useAuthStore.getState().message);
+      console.log(error);
+    }
   };
   return (
     <div>
@@ -74,7 +88,8 @@ const MyAccount = () => {
                 <li key={index}>
                   <Button
                     className={`!rounded-none !items-center !w-full !py-2 !gap-2 !pl-4 !justify-start !normal-case !text-gray-700 ${
-                      activeTab === index && "!shadow-[inset_4px_0_0_#dc2626] !bg-gray-200"
+                      activeTab === index &&
+                      "!shadow-[inset_4px_0_0_#dc2626] !bg-gray-200"
                     }`}
                     onClick={() => handleActiveTab(index)}
                   >
@@ -83,23 +98,26 @@ const MyAccount = () => {
                   </Button>
                 </li>
               ))}
-                <li>
-                  <Button
-                    className={`!rounded-none !items-center !w-full !py-2 !gap-2 !pl-4 !justify-start !normal-case !text-gray-700`}
-                    onClick={() => setIsLogin(false)}
-                    component={Link} to={"/"}
-                  >
-                    <span className="w-7"><MdOutlineLogout size={25} /></span>
-                    Đăng xuất
-                  </Button>
-                </li>
+              <li>
+                <Button
+                  className={`!rounded-none !items-center !w-full !py-2 !gap-2 !pl-4 !justify-start !normal-case !text-gray-700`}
+                  onClick={handleLogout}
+                  component={Link}
+                  to={"/"}
+                >
+                  <span className="w-7">
+                    <MdOutlineLogout size={25} />
+                  </span>
+                  Đăng xuất
+                </Button>
+              </li>
             </ul>
           </div>
         </div>
         <div className="md:w-3/4 md:mt-0 mt-4">
-            {activeTab === 0 && <Profile />}
-            {activeTab === 1 && <Address />}
-            {activeTab === 2 && <Order />}
+          {activeTab === 0 && <Profile />}
+          {activeTab === 1 && <Address />}
+          {activeTab === 2 && <Order />}
         </div>
       </div>
     </div>
