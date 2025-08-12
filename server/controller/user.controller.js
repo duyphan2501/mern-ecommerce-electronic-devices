@@ -95,7 +95,7 @@ const register = async (req, res) => {
       verificationTokenExpireAt,
     });
 
-    return res.status(200).json({
+    return res.status(201).json({
       success: true,
       user: sanitizeUser(newUser),
     });
@@ -369,7 +369,7 @@ const uploadAvatarImage = async (req, res) => {
   try {
     const image = req.file;
     const userId = req.user.userId;
-    
+
     if (!image) {
       return res.status(400).json({
         message: "No image file uploaded",
@@ -482,6 +482,128 @@ const refreshToken = async (req, res) => {
   }
 };
 
+const updateUserDetails = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    if (!userId) {
+      res.status(401).json({
+        message: "You have to login",
+        success: false,
+      });
+    }
+
+    const { name, email, phone } = req.body;
+
+    if (!name || !email || !phone)
+      return res.status(400).json({
+        message: "Please fill in all information",
+        success: false,
+      });
+
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      res.status(404).json({
+        message: "User does not exist",
+        success: false,
+      });
+    }
+
+    var verificationToken;
+
+    if (email !== user.email) {
+      // generate verified account token
+      verificationToken = Math.floor(
+        100000 + Math.random() * 900000
+      ).toString();
+
+      //send verified email
+      await sendVerificationEmail(email, verificationToken);
+
+      // create new object to db
+      const verificationTokenExpireAt = Date.now() + 1000 * 60 * 60 * 24;
+      user.verificationToken = verificationToken;
+      user.verificationTokenExpireAt = verificationTokenExpireAt;
+    }
+
+    if (name !== user.name) user.name = name;
+    if (phone !== user.phone) user.phone = phone;
+
+    await user.save();
+    return res.status(200).json({
+      user: sanitizeUser(user),
+      message: "Update user detail successfully",
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || error,
+      success: false,
+    });
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    if (!userId)
+      return res.status(401).json({
+        message: "You have to login",
+        success: false,
+      });
+
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmPassword)
+      return res.status(400).json({
+        message: "Please enter all password",
+        success: false,
+      });
+
+    if (newPassword !== confirmPassword)
+      return res.status(400).json({
+        message: "New password and confirm password do not match",
+        success: false,
+      });
+
+    const user = await UserModel.findById(userId);
+
+    if (!user)
+      return res.status(404).json({
+        message: "User does not exist",
+        success: false,
+      });
+
+    const isCorrectPassword = await bcryptjs.compare(
+      currentPassword,
+      user.password
+    );
+
+    if (!isCorrectPassword)
+      res.status(403).json({
+        message: "Current password is not correct",
+        success: false,
+      });
+
+    const salt = await bcryptjs.genSalt();
+    const hashedNewPassword = await bcryptjs.hash(newPassword, salt);
+
+    user.password = hashedNewPassword;
+    await user.save();
+
+    return res.status(200).json({
+      message: "Changed password successfully",
+      success: false,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || error,
+      success: false,
+    });
+  }
+};
+
 export {
   register,
   login,
@@ -492,4 +614,6 @@ export {
   uploadAvatarImage,
   refreshToken,
   sendVerificationEmailAgain,
+  updateUserDetails,
+  changePassword,
 };

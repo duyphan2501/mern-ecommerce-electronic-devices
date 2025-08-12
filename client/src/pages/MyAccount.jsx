@@ -88,7 +88,7 @@ const MyAccount = () => {
         <div className="md:w-1/4 bg-white rounded-md border border-gray-200 shadow h-fit">
           <div className="flex flex-col justify-center items-center gap-1 p-5">
             <div className="size-25 rounded-full border-5 border-blue-200 relative group flex items-center justify-center">
-              {isLoading ? (
+              {isLoading.avatar ? (
                 <AiOutlineLoading3Quarters size={40} className="animate-spin" />
               ) : (
                 <img

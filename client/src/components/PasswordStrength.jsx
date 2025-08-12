@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { FaCheck, FaX } from "react-icons/fa6";
 
 const PasswordStrength = ({ password, setPasswordScore }) => {
@@ -18,14 +19,17 @@ const PasswordStrength = ({ password, setPasswordScore }) => {
   ];
 
   const passwordScore = criteria.filter((c) => c.pass).length;
-  setPasswordScore(passwordScore)
-  
+
+  useEffect(() => {
+    setPasswordScore(passwordScore);
+  }, [passwordScore, setPasswordScore]);
+
   const getColor = () => colors[passwordScore - 1] || "bg-gray-500";
 
   return (
     <div>
       <div className="flex gap-1 mb-2">
-        {Array.from({length:4}).map((_, index) => (
+        {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
             className={`rounded h-1 flex-1 transition-all duration-300 ${
