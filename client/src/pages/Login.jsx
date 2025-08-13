@@ -39,6 +39,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
     try {
       await login(email, password);
       toast.success(useAuthStore.getState().message);
@@ -57,6 +58,7 @@ const Login = () => {
   };
 
   const handleForgotPassword = async () => {
+    if (isLoading) return;
     try {
       await forgotPassword(email);
       toast.success(useAuthStore.getState().message);

@@ -2,14 +2,17 @@ import { IconButton } from "@mui/material";
 import { RiMenu2Fill } from "react-icons/ri";
 import Badge from "@mui/material/Badge";
 import { BiLogOut, BiSolidBellRing } from "react-icons/bi";
-import Avatar from '@mui/material/Avatar';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Divider from '@mui/material/Divider';
+import Avatar from "@mui/material/Avatar";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Divider from "@mui/material/Divider";
 import { useContext, useState } from "react";
 import { IoSettingsSharp } from "react-icons/io5";
 import MyContext from "../../Context/MyContext";
+import useAuthStore from "../../store/authStore";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -20,11 +23,22 @@ const Header = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  const { handleClickSidebar} = useContext(MyContext)
-
+  const { user, logout } = useAuthStore();
+  const navigator = useNavigate();
+  const { handleClickSidebar } = useContext(MyContext);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigator("/login");
+      toast.success(useAuthStore.getState().message);
+    } catch (error) {
+      toast.error(useAuthStore.getState().message);
+    }
+  };
   return (
-    <header className={`sticky top-0 z-100 py-3 bg-white border-b-2 border-gray-200`}>
+    <header
+      className={`sticky top-0 z-100 py-3 bg-white border-b-2 border-gray-200`}
+    >
       <div className="pl-3 pr-5 flex justify-between items-center">
         <IconButton onClick={handleClickSidebar}>
           <RiMenu2Fill className="text-black" />
@@ -36,20 +50,25 @@ const Header = () => {
             </Badge>
           </div>
           <div className="size-10 rounded shadow flex justify-center items-center hover:text-blue-500 cursor-pointer active:translate-y-[1px]">
-              <IoSettingsSharp size={20} className="animate-spin"/>
+            <IoSettingsSharp size={20} className="animate-spin" />
           </div>
           {/*  */}
-            <div className="size-10 flex justify-center items-center cursor-pointer active:translate-y-[1px]"
-              onClick={handleClick}
-              size="small"
-              aria-controls={open ? "account-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={open ? "true" : undefined}
-            >
-              <Avatar sx={{ width: 40, height: 40 }}>
-                <img src="https://isomorphic-furyroad.vercel.app/avatar.webp" alt="" className="size-full object-cover" />
-              </Avatar>
-            </div>
+          <div
+            className="size-10 flex justify-center items-center cursor-pointer active:translate-y-[1px]"
+            onClick={handleClick}
+            size="small"
+            aria-controls={open ? "account-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+          >
+            <Avatar sx={{ width: 40, height: 40 }}>
+              <img
+                src="https://isomorphic-furyroad.vercel.app/avatar.webp"
+                alt=""
+                className="size-full object-cover"
+              />
+            </Avatar>
+          </div>
           <Menu
             anchorEl={anchorEl}
             id="account-menu"
@@ -88,16 +107,14 @@ const Header = () => {
             anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
             transitionDuration={10}
           >
-            <MenuItem onClick={handleClose}>
-              <Avatar /> Profile
-            </MenuItem>
+            <MenuItem onClick={handleClose}>{user?.email}</MenuItem>
             <MenuItem onClick={handleClose}>
               <Avatar /> My account
             </MenuItem>
             <Divider />
-            <MenuItem onClick={handleClose}>
+            <MenuItem onClick={handleLogout}>
               <ListItemIcon>
-                <BiLogOut/>
+                <BiLogOut />
               </ListItemIcon>
               Logout
             </MenuItem>

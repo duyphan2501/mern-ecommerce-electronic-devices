@@ -83,6 +83,8 @@ const getAllProducts = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const {
       productName,
@@ -99,7 +101,7 @@ const createProduct = async (req, res) => {
       status,
     } = req.body;
 
-    // Kiểm tra required fields
+    // Validate required fields
     if (
       !productName ||
       !brandId ||
@@ -117,59 +119,59 @@ const createProduct = async (req, res) => {
       return res.status(400).json({ message: "All fields are required", success: false });
     }
 
-    // convert string to ObjectId
+    // Parse ObjectId
     const parsedCategoryId = mongoose.Types.ObjectId.isValid(categoryId)
       ? new mongoose.Types.ObjectId(categoryId)
       : null;
-
     const parsedBrandId = mongoose.Types.ObjectId.isValid(brandId)
       ? new mongoose.Types.ObjectId(brandId)
       : null;
 
     if (!parsedCategoryId || !parsedBrandId) {
-      return res.status(400).json({
-        message: "Invalid categoryId or brandId",
-        success: false,
-      });
+      return res.status(400).json({ message: "Invalid categoryId or brandId", success: false });
     }
 
-    const validStatuses = ["draft", "active", "archived"]; 
+    // Validate status
+    const validStatuses = ["draft", "active", "archived"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status value", success: false });
     }
 
-    const newProduct = await ProductModel.create({
-      productName,
-      description,
-      categoryId: parsedCategoryId,
-      brandId: parsedBrandId,
-      shippingCost,
-      pageTitle,
-      metaKeywords,
-      metaDescription,
-      productUrl,
-      images,
-      status,
-    });
-
-    if (!newProduct)
-      return res.status(500).json({
-        message: "New product is not created",
-        success: false,
-      });
-
-    const createdModels = await ModelsModel.insertMany(
-      models.map((model) => ({
-        ...model,
-        productId: newProduct._id,
-      }))
+    // Create product first (empty modelsId)
+    const [newProduct] = await ProductModel.create(
+      [{
+        productName,
+        description,
+        categoryId: parsedCategoryId,
+        brandId: parsedBrandId,
+        shippingCost,
+        pageTitle,
+        metaKeywords,
+        metaDescription,
+        productUrl,
+        images,
+        status,
+        modelsId: [],
+      }],
+      { session }
     );
 
-    if (!createdModels || createdModels.length < 1)
-      return res.status(500).json({
-        message: "Models is not created",
-        success: false,
-      });
+    // Create models linked to productId
+    const createdModels = await ModelsModel.insertMany(
+      models.map(model => ({
+        ...model,
+        productId: newProduct._id,
+      })),
+      { session }
+    );
+
+    // Update product.modelsId
+    newProduct.modelsId = createdModels.map(m => m._id);
+    await newProduct.save({ session });
+
+    // Commit transaction
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(201).json({
       message: "Product and models created successfully",
@@ -178,10 +180,13 @@ const createProduct = async (req, res) => {
       success: true,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("Create product error:", error);
     res.status(500).json({ message: error.message || error, success: false });
   }
 };
+
 
 // const deleteProduct = async (req, res) => {
 //   try {

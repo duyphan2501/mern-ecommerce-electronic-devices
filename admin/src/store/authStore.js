@@ -8,40 +8,16 @@ axios.defaults.withCredentials = true;
 const initialState = {
   user: null,
   isAuthenticated: false,
-  isVerified: false,
   message: null,
+  isVerified,
   isLoading: false,
   accessToken: null,
 };
 
-
 const useAuthStore = create((set) => ({
   ...initialState,
   reset: () => {
-    set({ message: null });
-  },
-
-  register: async (email, password, name) => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await axios.post(`${API_URL}/api/user/register`, {
-        email,
-        password,
-        name,
-      });
-      set({
-        user: res.data.user,
-        isLoading: false,
-        isAuthenticated: true,
-        message: res.data.message || "Sign up successfully",
-      });
-    } catch (error) {
-      set({
-        message: error.response?.data?.message || "Sign up failed",
-        isLoading: false,
-      });
-      throw error;
-    }
+    set({ message: null, isLoading: false });
   },
 
   verifyEmail: async (email, code) => {

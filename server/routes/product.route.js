@@ -7,7 +7,7 @@ const productRouter = express.Router()
 
 productRouter.post("/upload-images", checkAuth, uploadImg.array('productImages', 10), uploadImages);
 productRouter.post("/upload-documents", checkAuth, uploadDoc.array('documents', 10), uploadDocument);
-productRouter.post("/create", checkAuth, createProduct);
+productRouter.post("/create", createProduct);
 productRouter.get("/list", checkAuth, getAllProducts);
     
 export default productRouter;

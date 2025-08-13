@@ -55,6 +55,7 @@ const Profile = () => {
   const handleMouseDown = (event) => event.preventDefault();
 
   const handleUpdateUser = async () => {
+    if (isLoading.details) return;
     try {
       await updateUserDetails(axiosPrivate, userDetails);
       toast.success(useUserStore.getState().message);
@@ -69,6 +70,11 @@ const Profile = () => {
   };
 
   const handleChangePassword = async () => {
+    if (isLoading.changePwd) return;
+    if (passwordScore < 5) {
+      toast.error("Password is not strong enough");
+      return;
+    }
     try {
       const passDatatoSend = {
         currentPassword: passData.current,
@@ -228,8 +234,15 @@ const Profile = () => {
             />
           </div>
 
-          <Button className="!py-2 !bg-blue-500 !text-white !font-semibold !w-full !mt-5" onClick={handleChangePassword}>
-           {isLoading.changePwd? <AiOutlineLoading3Quarters className="animate-spin" size={18}/> : "Đổi mật khẩu"}
+          <Button
+            className="!py-2 !bg-blue-500 !text-white !font-semibold !w-full !mt-5"
+            onClick={handleChangePassword}
+          >
+            {isLoading.changePwd ? (
+              <AiOutlineLoading3Quarters className="animate-spin" size={18} />
+            ) : (
+              "Đổi mật khẩu"
+            )}
           </Button>
         </div>
       </div>

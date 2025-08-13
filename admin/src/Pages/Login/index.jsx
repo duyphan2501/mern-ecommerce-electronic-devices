@@ -9,19 +9,22 @@ import {
   OutlinedInput,
   TextField,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import {  useContext, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { Link } from "react-router-dom";
-import { checkAuth, login } from "../../controller/login";
+import { Link, useNavigate } from "react-router-dom";
+import useAuthStore from "../../store/authStore";
+import toast from "react-hot-toast"
 import MyContext from "../../Context/MyContext";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const {setIsLogin, notify} = useContext(MyContext)
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const {login, isLoading} = useAuthStore()
+  const {fiLoader, persist, setPersist} = useContext(MyContext)
+  const navigator = useNavigate()
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
@@ -31,17 +34,24 @@ const Login = () => {
     event.preventDefault();
   };
 
+  const handleTogglePersist = ()=> {
+    const updatedPersist = !persist
+    setPersist(updatedPersist)
+    localStorage.setItem("persist", updatedPersist)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(email, password, setIsLogin, notify);
+    if (isLoading) return
+    try {
+      await login(email, password)
+      toast.success(useAuthStore.getState().message)
+      navigator("/")
+    } catch (error) {
+      console.log(error)
+      toast.error(useAuthStore.getState().message)
+    }
   };
-
-  useEffect(() => {
-    const handleCheckAuth = async () => {
-      await checkAuth(setIsLogin, notify);
-    };
-    handleCheckAuth()
-  }, []);
 
   return (
     <div className="">
@@ -106,7 +116,7 @@ const Login = () => {
 
             <div className="flex justify-between items-center mt-3 w-full">
               <FormControlLabel
-                control={<Checkbox defaultChecked />}
+                control={<Checkbox checked={persist} onChange={handleTogglePersist}/>}
                 label="Remember me"
               />
               <Link to={"/forgot-password"}>
@@ -119,7 +129,7 @@ const Login = () => {
               sx={{ fontFamily: "Outfit" }}
               type="submit"
             >
-              Sign In
+              {isLoading ? fiLoader : "Sign In"}
             </Button>
           </form>
 

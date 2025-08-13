@@ -39,6 +39,8 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
+
     try {
       if (passwordScore < 5) {
         toast.error("Password is not strong enough");

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const productSchema = new mongoose.Schema({
   productName: {
     type: String,
@@ -26,11 +25,17 @@ const productSchema = new mongoose.Schema({
     default: "draft",
   },
   shippingCost: { type: Number, required: true },
-  images: {type: [String], required: true},
+  images: { type: [String], required: true },
   pageTitle: String,
   metaKeywords: String,
   metaDescription: String,
   productUrl: String,
+  modelsId: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "models",
+    },
+  ],
 });
 
 const ProductModel = mongoose.model("products", productSchema);

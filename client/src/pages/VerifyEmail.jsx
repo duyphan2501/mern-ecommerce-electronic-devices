@@ -15,6 +15,8 @@ const VerifyEmail = () => {
   const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const handleVerify = async () => {
+    if (isLoading) return;
+
     try {
       await verifyEmail(user?.email, otp);
       toast.success(useAuthStore.getState().message);
