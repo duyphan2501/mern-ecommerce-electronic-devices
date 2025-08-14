@@ -1,6 +1,41 @@
+import { useEffect, useState } from "react";
 import LazyComponentWrapper from "../components/LazyComponentWrapper";
+import useCategoryStore from "../store/categoryStore";
+import useProductStore from "../store/productStore";
 
 const Home = () => {
+  const [categories, setCategories] = useState();
+  const [products, setProducts] = useState();
+  const [selectedCategory, setSelectedCategory] = useState()
+  const { getAllCategories } = useCategoryStore();
+  const {getProductByCategoryId} = useProductStore()
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const fetchedCategories = await getAllCategories();
+        setCategories(fetchedCategories);
+        setSelectedCategory(fetchedCategories[0]._id)
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchCategories()
+  }, []);
+  
+  useEffect(() => {
+    if (!selectedCategory) return;
+    const getProducts = async () => {
+      try {
+        const fetchedProducts = await getProductByCategoryId(selectedCategory);
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getProducts();
+  }, [selectedCategory]);
+
   return (
     <div>
       <section className="py-5 mb-4">
@@ -32,12 +67,15 @@ const Home = () => {
               <div className="md:w-2/3 px-4">
                 <LazyComponentWrapper
                   importFunc={() => import("../components/ProductTabbar")}
+                  categories={categories}
+                  setSelectedCategory={setSelectedCategory}
                 />
               </div>
             </div>
             <div className="pb-5">
               <LazyComponentWrapper
                 importFunc={() => import("../components/ProductSlider")}
+                products={products}
               />
             </div>
           </div>

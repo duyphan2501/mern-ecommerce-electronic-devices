@@ -28,7 +28,7 @@ const ProductListShape = ({
   const {openModal} = useContext(MyContext)
 
   return (
-    <div className="p-4 rounded-md shadow-md bg-gray-100 flex items-center gap-10 relative border border-gray-200">
+    <div className="p-4 rounded-md shadow bg-gray-100 flex items-center gap-10 relative border border-gray-200">
       {isNew && (
         <span className="px-2 rounded-md bg-secondary text-white absolute top-3 right-4">
           New!
@@ -66,7 +66,7 @@ const ProductListShape = ({
 
       <div className="flex flex-col justify-between flex-1 gap-2">
         <h4 className="text-2xl text-black font-semibold font-sans">{name}</h4>
-        <p className="w-[95%]">{description}</p>
+        <p className="w-[95%] line-clamp-6">{description}</p>
         <div className="">
           <Stack spacing={1}>
             <Rating

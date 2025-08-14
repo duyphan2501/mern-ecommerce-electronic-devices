@@ -2,7 +2,7 @@ import { Suspense, useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
 
-const LazyComponentWrapper = ({ importFunc, fallback = null }) => {
+const LazyComponentWrapper = ({ importFunc, fallback = null, ...props }) => {
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -13,7 +13,7 @@ const LazyComponentWrapper = ({ importFunc, fallback = null }) => {
   useEffect(() => {
     if (inView && !LazyComponent) {
       importFunc().then((mod) => {
-        setLazyComponent(() => mod.default); 
+        setLazyComponent(() => mod.default);
       });
     }
   }, [inView, LazyComponent, importFunc]);
@@ -27,7 +27,7 @@ const LazyComponentWrapper = ({ importFunc, fallback = null }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <LazyComponent />
+            <LazyComponent {...props} /> 
           </motion.div>
         </Suspense>
       ) : (

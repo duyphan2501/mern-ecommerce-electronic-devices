@@ -35,7 +35,7 @@ const ProductDetailInfo = ({ product }) => {
       </div>
       <div className="py-5">
         {activeTab === 0 ? (
-          <p className="">{product.description}{product.description}{product.description}{product.description}</p>
+          <p className="">{product.description}</p>
         ) : (
           <div className="shadow rounded px-5 py-2">
             <div className="">

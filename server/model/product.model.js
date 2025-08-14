@@ -36,6 +36,7 @@ const productSchema = new mongoose.Schema({
       ref: "models",
     },
   ],
+  create_at: {type: Date, default: Date.now()}
 });
 
 const ProductModel = mongoose.model("products", productSchema);

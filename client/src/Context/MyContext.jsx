@@ -16,8 +16,10 @@ export const MyContextProvider = ({ children }) => {
   const closeAddrFrm = () => setIsOpenAddrFrm(false)
 
   const [persist, setPersist] = useState(JSON.parse(localStorage.getItem('persist')) || false)
+  const [selectedProduct, setSelectedProduct] = useState({})
 
-  const values = {isOpenModal, openModal, closeModal, isOpenCart, openCart, closeCart, isOpenAddrFrm, openAddrFrm, closeAddrFrm, persist, setPersist }
+  const values = {isOpenModal, openModal, closeModal, isOpenCart, openCart, closeCart, isOpenAddrFrm, openAddrFrm, closeAddrFrm, persist, setPersist, selectedProduct, setSelectedProduct }
+  
   return (
     <MyContext.Provider value={values}>
       {children}

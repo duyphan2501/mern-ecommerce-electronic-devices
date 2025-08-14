@@ -4,23 +4,14 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import ProductCard from "./ProductCard";
 import ProductListShape from "./ProductListShape";
 import { CgMenuGridR } from "react-icons/cg";
-
-const product = {
-  image1:
-    "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-  image2:
-    "https://powertech.vn/thumbs/540x540x2/upload/product/thiet-ke-chua-co-ten-3496.png",
-  name: "Inverter Dye Hydrid 3kw",
-  price: 1000000,
-  discount: 20,
-  isNew: true,
-  rating: 4.5,
-};
+import useProductStore from "../store/productStore";
 
 const ProductGridView = () => {
   const [openSort, setOpenSort] = useState(false);
+  const [products, setProducts] = useState([]);
   const [view, setView] = useState(0); // 0 for grid, 1 for list
   const sortRef = useRef(null);
+  const { getAllProducts } = useProductStore();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -33,6 +24,19 @@ const ProductGridView = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, []);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const fetchedProduct = await getAllProducts();
+        setProducts(fetchedProduct);
+        console.log(fetchedProduct);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchProducts();
   }, []);
 
   const handleOpenSort = () => {
@@ -111,17 +115,11 @@ const ProductGridView = () => {
       <div className="my-4">
         {view === 0 ? (
           <div className="grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-3">
-            {Array.from({ length: 10 }).map((_,id) => {
+            {products && products.map((product) => {
               return (
-                <div className="" key={id}>
+                <div className="" key={product._id}>
                   <ProductCard
-                    image1={product.image1}
-                    image2={product.image2}
-                    name={product.name}
-                    rating={product.rating}
-                    isNew={product.isNew}
-                    discount={product.discount}
-                    price={product.price}
+                    product={product}
                   />
                 </div>
               );
@@ -129,20 +127,20 @@ const ProductGridView = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {Array.from({ length: 10 }).map((_,id) => {
+            {products.map((product) => {
+              const isNew =
+                (Date.now() - product.create_at) / (1000 * 60 * 60 * 24) < 7;
               return (
-                <div className="" key={id}>
+                <div className="" key={product._id}>
                   <ProductListShape
-                    image1={product.image1}
-                    image2={product.image2}
-                    name={product.name}
-                    rating={product.rating}
-                    isNew={product.isNew}
-                    discount={product.discount}
-                    price={product.price}
-                    description={
-                      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
-                    }
+                    image1={product.images[0]}
+                    image2={product.images[1]}
+                    name={product.productName}
+                    rating={product.rating || 5}
+                    isNew={isNew}
+                    discount={product.modelsId[0]?.discount}
+                    price={product.modelsId[0]?.salePrice}
+                    description={product.description}
                   />
                 </div>
               );

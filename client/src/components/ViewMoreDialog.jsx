@@ -8,23 +8,8 @@ import ProductDetailContent from "./ProductDetailContent";
 import { IoClose } from "react-icons/io5";
 import { useContext } from "react";
 
-const product = {
-  imageAddress: [
-    "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-    "https://powertech.vn/thumbs/540x540x2/upload/product/thiet-ke-chua-co-ten-3496.png",
-  ],
-  name: "Inverter Dye Hydrid 3kw",
-  price: 1000000,
-  discount: 20,
-  isNew: true,
-  rating: 4.5,
-  description:
-    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-  brand: "Deye",
-};
-
 export default function ViewMoreDialog() {
-  const { isOpenModal, closeModal } = useContext(MyContext);
+  const { isOpenModal, closeModal, selectedProduct } = useContext(MyContext);
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -35,7 +20,6 @@ export default function ViewMoreDialog() {
         open={isOpenModal}
         onClose={closeModal}
         aria-labelledby="responsive-dialog-title"
-        transitionDuration={0}
       >
         <DialogContent className="">
           <div className="flex justify-end items-center">
@@ -48,10 +32,10 @@ export default function ViewMoreDialog() {
           </div>
           <section className="lg:flex gap-5 pb-5">
             <div className="">
-              <ProductZoom imageAddress={product.imageAddress} />
+              <ProductZoom imageAddress={selectedProduct.images} />
             </div>
             <section>
-              <ProductDetailContent product={product} />
+              <ProductDetailContent product={selectedProduct} />
             </section>
           </section>
         </DialogContent>

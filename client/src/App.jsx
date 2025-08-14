@@ -43,7 +43,7 @@ function App() {
           <Route element={<PersistentLogin />}>
             <Route path="/" element={<Home />} />
             <Route path="/san-pham" element={<ProductPage />} />
-            <Route path="/san-pham/chi-tiet" element={<ProductDetail />} />
+            <Route path="/san-pham/chi-tiet/:slug" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/my-account" element={<MyAccount />} />

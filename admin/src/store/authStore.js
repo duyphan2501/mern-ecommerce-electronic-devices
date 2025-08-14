@@ -9,7 +9,7 @@ const initialState = {
   user: null,
   isAuthenticated: false,
   message: null,
-  isVerified,
+  isVerified: false,
   isLoading: false,
   accessToken: null,
 };

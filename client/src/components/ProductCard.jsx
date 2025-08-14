@@ -7,40 +7,38 @@ import { Link } from "react-router-dom";
 import AddToCartBtn from "./AddToCartBtn";
 import MyContext from "../Context/MyContext";
 import { useContext } from "react";
+import formatMoney from "../utils/MoneyFormat";
 
 const ProductCard = ({
-  image1,
-  image2,
-  name,
-  price,
-  discount,
-  isNew,
-  rating,
+  product,
 }) => {
-  const discountPrice = price - price * (discount / 100);
-  const formattedPrice = new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(price);
-  const formattedDiscountPrice = new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(discountPrice);
+  const discount = product.modelsId[0]?.discount;
+  const price = product.modelsId[0]?.salePrice;
+  const isNew = (Date.now - product.create_at) / (1000 * 60 * 60 * 24) < 7
 
-  const { openModal } = useContext(MyContext);
+  const discountPrice = price - price * (discount / 100);
+  const formattedPrice = formatMoney(price) 
+  const formattedDiscountPrice = formatMoney(discountPrice)
+
+  const { openModal, setSelectedProduct } = useContext(MyContext);
+
+  const handleViewMore = () => {
+    setSelectedProduct(product)
+    openModal()
+  }
 
   return (
-    <div className="productCard border-1 border-gray-200 rounded-md p-2 flex flex-col h-full ">
+    <div className="productCard border-1 border-gray-200 rounded-md p-2 flex flex-col h-full shadow">
       <div className="relative group h-[200px] overflow-hidden">
-        <Link to={`/san-pham/chi-tiet`}>
+        <Link to={`/san-pham/chi-tiet/${product.productUrl}`}>
           <img
-            src={image1}
+            src={product.images[0]}
             alt=""
             className="w-full object-contain h-full rounded-md"
           />
-          {image2 !== "" && (
+          {product.images[1] && (
             <img
-              src={image2}
+              src={product.images[1]}
               alt=""
               className="w-full object-contain h-full rounded-md absolute top-0 left-0 opacity-0 group-hover:opacity-100 transition duration-500 ease-in-out cursor-pointer group-hover:scale-105"
             />
@@ -50,7 +48,7 @@ const ProductCard = ({
           <IconButton
             variant="text"
             className="!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-gray-200 !text-black !absolute right-0 hover:!bg-[#0d68f3] hover:!text-white top-[-30px] opacity-0 group-hover:top-1 group-hover:opacity-100 z-50 !transition-all !duration-100"
-            onClick={openModal}
+            onClick={handleViewMore}
           >
             <HiOutlineArrowsExpand size={20} className="pointer-events-none" />
           </IconButton>
@@ -63,13 +61,13 @@ const ProductCard = ({
       </div>
       <div className="flex flex-col justify-between flex-1">
         <div className="">
-          <h4 className="line-clamp-2">{name}</h4>
+          <h4 className="line-clamp-2">{product.productName}</h4>
           <div className="">
             <Stack spacing={1}>
               <Rating
                 size="small"
                 name="half-rating"
-                defaultValue={rating}
+                defaultValue={product?.modelsId[0]?.rating || 5}
                 precision={0.5}
                 readOnly
               />

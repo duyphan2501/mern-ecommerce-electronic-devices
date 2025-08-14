@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import React from 'react';
+import PropTypes from "prop-types";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Box from "@mui/material/Box";
+import React from "react";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -29,29 +29,31 @@ CustomTabPanel.propTypes = {
 function a11yProps(index) {
   return {
     id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
   };
 }
 
-export default function ProductTabbar() {
+export default function ProductTabbar({ categories, setSelectedCategory }) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    setSelectedCategory(categories[newValue]._id)
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: "100%" }}>
       <Box>
-        <Tabs value={value} onChange={handleChange} variant="scrollable"
-        scrollButtons="auto" aria-label="basic tabs example">
-          <Tab label="inverter" {...a11yProps(0)} />
-          <Tab label="batteries" {...a11yProps(1)} />
-          <Tab label="adapter" {...a11yProps(2)} />
-          <Tab label="dây cáp" {...a11yProps(3)} />
-          <Tab label="phụ kiện" {...a11yProps(4)} />
-          <Tab label="đèn mặt trời" {...a11yProps(5)} />
-          <Tab label="đồng hồ đo điện" {...a11yProps(6)} />
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          aria-label="basic tabs example"
+        >
+          {categories && categories.map((cate, index) => (
+            <Tab label={cate.name} {...a11yProps(index)} key={cate._id} />
+          ))}
         </Tabs>
       </Box>
     </Box>

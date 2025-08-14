@@ -69,14 +69,8 @@ const uploadImages = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const products = await ProductModel.find();
-
-    // Lấy models ứng với mỗi sản phẩm
-    const models = await Promise.all(
-      products.map((product) => ModelsModel.findOne({ productId: product._id }))
-    );
-
-    res.status(200).json({ products, models, success: true });
+    const products = await ProductModel.find().populate("modelsId");
+    res.status(200).json({ products, success: true });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -116,7 +110,9 @@ const createProduct = async (req, res) => {
       !productUrl ||
       !status
     ) {
-      return res.status(400).json({ message: "All fields are required", success: false });
+      return res
+        .status(400)
+        .json({ message: "All fields are required", success: false });
     }
 
     // Parse ObjectId
@@ -128,37 +124,43 @@ const createProduct = async (req, res) => {
       : null;
 
     if (!parsedCategoryId || !parsedBrandId) {
-      return res.status(400).json({ message: "Invalid categoryId or brandId", success: false });
+      return res
+        .status(400)
+        .json({ message: "Invalid categoryId or brandId", success: false });
     }
 
     // Validate status
     const validStatuses = ["draft", "active", "archived"];
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status value", success: false });
+      return res
+        .status(400)
+        .json({ message: "Invalid status value", success: false });
     }
 
     // Create product first (empty modelsId)
     const [newProduct] = await ProductModel.create(
-      [{
-        productName,
-        description,
-        categoryId: parsedCategoryId,
-        brandId: parsedBrandId,
-        shippingCost,
-        pageTitle,
-        metaKeywords,
-        metaDescription,
-        productUrl,
-        images,
-        status,
-        modelsId: [],
-      }],
+      [
+        {
+          productName,
+          description,
+          categoryId: parsedCategoryId,
+          brandId: parsedBrandId,
+          shippingCost,
+          pageTitle,
+          metaKeywords,
+          metaDescription,
+          productUrl,
+          images,
+          status,
+          modelsId: [],
+        },
+      ],
       { session }
     );
 
     // Create models linked to productId
     const createdModels = await ModelsModel.insertMany(
-      models.map(model => ({
+      models.map((model) => ({
         ...model,
         productId: newProduct._id,
       })),
@@ -166,7 +168,7 @@ const createProduct = async (req, res) => {
     );
 
     // Update product.modelsId
-    newProduct.modelsId = createdModels.map(m => m._id);
+    newProduct.modelsId = createdModels.map((m) => m._id);
     await newProduct.save({ session });
 
     // Commit transaction
@@ -187,7 +189,6 @@ const createProduct = async (req, res) => {
   }
 };
 
-
 // const deleteProduct = async (req, res) => {
 //   try {
 //     const productId = req.params.id
@@ -196,8 +197,72 @@ const createProduct = async (req, res) => {
 
 //   } catch (error) {
 //     res.status(500).json({ message: error.message || error, success: false });
-    
+
 //   }
 // }
 
-export { getAllProducts, uploadImages, createProduct, uploadDocument };
+const getProductBySlug = async (req, res) => {
+  try {
+    const productUrl = req.params.slug;
+
+    if (!productUrl)
+      return res.status(400).json({
+        message: "Product url is missing!",
+        success: false,
+      });
+
+    const foundProduct = await ProductModel.findOne({ productUrl }).populate(
+      "modelsId"
+    );
+
+    if (!foundProduct)
+      return res.status(404).json({
+        message: "Product does not exist!",
+        success: false,
+      });
+
+    return res.status(200).json({
+      product: foundProduct,
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message || error, success: false });
+  }
+};
+
+const getProductByCategoryId = async (req, res) => {
+  try {
+    const categoryId = req.params.categoryId;
+    if (!categoryId)
+      return res.status(400).json({
+        message: "Category id is missing",
+        success: false,
+      });
+
+    const foundProducts = await ProductModel.find({ categoryId }).populate(
+      "modelsId"
+    );
+
+    if (!foundProducts)
+      return res.status(404).json({
+        message: "There is no any products with this category",
+        success: false,
+      });
+
+    return res.status(200).json({
+      products: foundProducts,
+      success: true,
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message || error, success: false });
+  }
+};
+
+export {
+  getAllProducts,
+  uploadImages,
+  createProduct,
+  uploadDocument,
+  getProductBySlug,
+  getProductByCategoryId,
+};

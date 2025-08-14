@@ -3,9 +3,10 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
 import ProductCard from "./ProductCard";
+import { useEffect, useState } from "react";
+import useProductStore from "../store/productStore";
 
-const ProductSlider = () => {
-
+const ProductSlider = ({products}) => {
   return (
     <div>
       <div className="container bg-white">
@@ -23,128 +24,12 @@ const ProductSlider = () => {
           modules={[Navigation]}
           className="ProductSlider"
         >
-          <SwiperSlide>
-            <ProductCard
-              image1={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png"
-              }
-              image2={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/thiet-ke-chua-co-ten-3496.png"
-              }
-              name={"Inverter Dye Hydrid 3kw"}
-              price={1000000}
-              discount={20}
-              isNew={true}
-              rating={4.5}
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <ProductCard
-              image1={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/2-1179.png"
-              }
-              image2={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/thiet-ke-chua-co-ten-3496.png"
-              }
-              name={
-                "Inverter Dye Hydrid 3kw asdf asf as fas fa sdfasdfasdf afasdf "
-              }
-              price={1000000}
-              discount={20}
-              isNew={false}
-              rating={4.5}
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <ProductCard
-              image1={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png"
-              }
-              image2={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/thiet-ke-chua-co-ten-3496.png"
-              }
-              name={"Inverter Dye Hydrid 3kw"}
-              price={1000000}
-              discount={20}
-              isNew={true}
-              rating={4.5}
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <ProductCard
-              image1={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/2-1179.png"
-              }
-              image2={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/thiet-ke-chua-co-ten-3496.png"
-              }
-              name={"Inverter Dye Hydrid 3kw"}
-              price={1000000}
-              discount={0}
-              isNew={false}
-              rating={4.5}
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <ProductCard
-              image1={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png"
-              }
-              image2={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/thiet-ke-chua-co-ten-3496.png"
-              }
-              name={"Inverter Dye Hydrid 3kw"}
-              price={1000000}
-              discount={20}
-              isNew={true}
-              rating={4.5}
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <ProductCard
-              image1={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/2-1179.png"
-              }
-              image2={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/thiet-ke-chua-co-ten-3496.png"
-              }
-              name={"Inverter Dye Hydrid 3kw"}
-              price={1000000}
-              discount={20}
-              isNew={false}
-              rating={4.5}
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <ProductCard
-              image1={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png"
-              }
-              image2={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/thiet-ke-chua-co-ten-3496.png"
-              }
-              name={"Inverter Dye Hydrid 3kw"}
-              price={1000000}
-              discount={20}
-              isNew={true}
-              rating={4.5}
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <ProductCard
-              image1={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/2-1179.png"
-              }
-              image2={
-                "https://powertech.vn/thumbs/540x540x2/upload/product/thiet-ke-chua-co-ten-3496.png"
-              }
-              name={"Inverter Dye Hydrid 3kw"}
-              price={1000000}
-              discount={20}
-              isNew={false}
-              rating={4.5}
-            />
-          </SwiperSlide>
+          {products &&
+            products.map((product) => (
+              <SwiperSlide key={product._id}>
+                <ProductCard product={product} />
+              </SwiperSlide>
+            ))}
         </Swiper>
       </div>
     </div>
