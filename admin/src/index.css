@@ -52,7 +52,7 @@ body {
   color: black !important;
 }
 
-.MuiButton-text {
+.MuiButton-text, .MuiTableCell-root {
   font-family: "Outfit", sans-serif !important;
 }
 

@@ -5,28 +5,28 @@ import { useState } from "react";
 
 const Attribute = ({ product, handleChangeValue }) => {
   const categories = [
-    { id: "660ef98c8b0f2e23d8ccfe71", name: "Color" },
-    { id: "660ef98c8b0f2e23d8ccfe72", name: "Size" },
-    { id: "660ef98c8b0f2e23d8ccfe73", name: "Material" },
-    { id: "660ef98c8b0f2e23d8ccfe74", name: "Brand" },
-    { id: "660ef98c8b0f2e23d8ccfe75", name: "Style" },
-    { id: "660ef98c8b0f2e23d8ccfe76", name: "Pattern" },
-    { id: "660ef98c8b0f2e23d8ccfe77", name: "Fit" },
-    { id: "660ef98c8b0f2e23d8ccfe78", name: "Occasion" },
-    { id: "660ef98c8b0f2e23d8ccfe79", name: "Season" },
+    { _id: "660ef98c8b0f2e23d8ccfe71", name: "Color" },
+    { _id: "660ef98c8b0f2e23d8ccfe72", name: "Size" },
+    { _id: "660ef98c8b0f2e23d8ccfe73", name: "Material" },
+    { _id: "660ef98c8b0f2e23d8ccfe74", name: "Brand" },
+    { _id: "660ef98c8b0f2e23d8ccfe75", name: "Style" },
+    { _id: "660ef98c8b0f2e23d8ccfe76", name: "Pattern" },
+    { _id: "660ef98c8b0f2e23d8ccfe77", name: "Fit" },
+    { _id: "660ef98c8b0f2e23d8ccfe78", name: "Occasion" },
+    { _id: "660ef98c8b0f2e23d8ccfe79", name: "Season" },
   ];
 
   const brands = [
-    { id: "660ef98c8b0f2e23d8ccfe71", name: "Nike" },
-    { id: "660ef98c8b0f2e23d8ccfe72", name: "Adidas" },
-    { id: "660ef98c8b0f2e23d8ccfe73", name: "Puma" },
-    { id: "660ef98c8b0f2e23d8ccfe74", name: "Reebok" },
+    { _id: "660ef98c8b0f2e23d8ccfe71", name: "Nike" },
+    { _id: "660ef98c8b0f2e23d8ccfe72", name: "Adidas" },
+    { _id: "660ef98c8b0f2e23d8ccfe73", name: "Puma" },
+    { _id: "660ef98c8b0f2e23d8ccfe74", name: "Reebok" },
   ];
 
   const status = [
-    { id: "draft", name: "Draft" },
-    { id: "active", name: "Active" },
-    { id: "archived", name: "Archived" },
+    { _id: "draft", name: "Draft" },
+    { _id: "active", name: "Active" },
+    { _id: "archived", name: "Archived" },
   ];
 
   const handleChangeSwitch = () => {

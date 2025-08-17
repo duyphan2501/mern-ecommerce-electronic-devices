@@ -11,7 +11,7 @@ const MySelect = ({ selectItems }) => {
       size="small"
       value={value}
       onChange={handleChange}
-      className="!rounded-xl !bg-gray-100"
+      className="!rounded-xl !bg-gray-100 w-full"
       sx={{
         fontFamily: "Outfit, sans-serif",
         ".MuiOutlinedInput-notchedOutline": {

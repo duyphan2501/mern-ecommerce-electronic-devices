@@ -17,7 +17,7 @@ const Layout = () => {
           <Sidebar />
         </div>
         <main
-          className={`${isOpenSidebar ? "w-[82%]" : "w-[94%]"} relative z-0`}
+          className={`${isOpenSidebar ? "w-[82%]" : "w-[94%]"} relative`}
         >
           <Header />
           <Outlet />

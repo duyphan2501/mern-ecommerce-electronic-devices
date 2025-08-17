@@ -7,8 +7,8 @@ const AttributeSelect = ({
   selectedItemId = "",
 }) => {
 
-  const selectedItem = selectedItemId && selectItems.find(item => item.id === selectedItemId)
-  const [value, setValue] = useState(selectedItem?.id || "");
+  const selectedItem = selectedItemId && selectItems.find(item => item._id === selectedItemId)
+  const [value, setValue] = useState(selectedItem?._id || "");
   const handleChange = (e) => {
     const selectedValue = e.target.value;
     setValue(selectedValue);
@@ -41,8 +41,8 @@ const AttributeSelect = ({
     >
       {selectItems.map((item) => (
         <MenuItem
-          value={item.id}
-          key={item.id}
+          value={item._id}
+          key={item._id}
           sx={{ fontFamily: "Outfit, sans-serif" }}
         >
           {item.name}

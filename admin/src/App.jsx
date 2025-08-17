@@ -8,6 +8,7 @@ import CreateProduct from "./Pages/Products/CreateProduct";
 import { Toaster } from "react-hot-toast";
 import PersistentLogin from "./components/PersistentLogin";
 import Layout from "./components/Layout";
+import ListCategory from "./Pages/Category/ListCategory";
 
 function App() {
   const { hasModels } = useContext(MyContext);
@@ -18,9 +19,10 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />}></Route>
           <Route element={<PersistentLogin />}>
-            <Route element={<Layout/>}>
+            <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />}></Route>
               <Route path="/products/list" element={<ListProduct />}></Route>
+              <Route path="/categories" element={<ListCategory />}></Route>
               <Route
                 path="/products/create"
                 element={<CreateProduct hasModels={hasModels} />}
