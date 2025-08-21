@@ -19,9 +19,6 @@ import VerifyEmail from "./pages/VerifyEmail";
 import PersistentLogin from "./components/PersistentLogin";
 
 function App() {
-
-  
-
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
@@ -43,7 +40,10 @@ function App() {
           <Route element={<PersistentLogin />}>
             <Route path="/" element={<Home />} />
             <Route path="/san-pham" element={<ProductPage />} />
-            <Route path="/san-pham/chi-tiet/:slug" element={<ProductDetail />} />
+            <Route
+              path="/san-pham/chi-tiet/:slug"
+              element={<ProductDetail />}
+            />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/my-account" element={<MyAccount />} />
@@ -52,7 +52,7 @@ function App() {
         <CartDrawer />
         <ViewMoreDialog />
       </BrowserRouter>
-      <Footer />
+      <Footer />s
     </>
   );
 }

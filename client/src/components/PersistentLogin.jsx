@@ -4,6 +4,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import MyContext from "../Context/MyContext";
 import toast from "react-hot-toast";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+
 const PersistentLogin = () => {
   const { refreshToken, isLoading } = useAuthStore();
   const { persist } = useContext(MyContext);
@@ -19,7 +20,6 @@ const PersistentLogin = () => {
         if (!persist) throw new Error();
         if (user) return;
         await refreshToken();
-        await loadCart(user?._id);
       } catch (error) {
         if (isMounted) {
           console.log(error);

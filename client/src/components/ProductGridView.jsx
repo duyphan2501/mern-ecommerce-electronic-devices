@@ -31,7 +31,6 @@ const ProductGridView = () => {
       try {
         const fetchedProduct = await getAllProducts();
         setProducts(fetchedProduct);
-        console.log(fetchedProduct);
       } catch (error) {
         console.log(error);
       }

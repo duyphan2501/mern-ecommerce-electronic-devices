@@ -38,7 +38,6 @@ export const addCartItem = async (userId, cartId, modelId, quantity) => {
   }
 };
 
-
 // userCart: object từ hgetall(cartKey)
 export const syncCartToMongo = async (userId, userCart) => {
   // convert { 'product:123': '2', 'product:456': '1' }
@@ -68,13 +67,18 @@ export const mergeCart = async (guestCartId, userId) => {
     return null; // guest cart trống thì bỏ qua
   }
 
-  // gộp từng sản phẩm vào giỏ user
-  for (const [productKey, qty] of Object.entries(guestCart)) {
-    await redisClient.hIncrBy(userKey, productKey, parseInt(qty));
-  }
+  const isExistingUserCart = await redisClient.exists(userKey);
 
-  // set TTL cho giỏ user
-  await redisClient.expire(userKey, CART_TTL);
+  if (!isExistingUserCart) {
+    // nếu user cart chưa tồn tại, tạo mới
+    await redisClient.hSet(userKey, ...Object.entries(guestCart).flat());
+  } else {
+    // gộp từng sản phẩm vào giỏ user
+    for (const [productKey, qty] of Object.entries(guestCart)) {
+      await redisClient.hIncrBy(userKey, productKey, parseInt(qty));
+    }
+  }
+  await redisClient.expire(userKey, USER_CART_TTL);
 
   // xóa giỏ guest
   await redisClient.del(guestKey);
@@ -174,10 +178,6 @@ export const removeCartItem = async (userId, cartId, modelId) => {
   await redisClient.hDel(cartKey, `product:${modelId}`);
 
   if (userId) {
-    await CartModel.updateOne(
-      { userId },
-      { $pull: { items: { modelId } } }
-    );
+    await CartModel.updateOne({ userId }, { $pull: { items: { modelId } } });
   }
 };
-
