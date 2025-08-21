@@ -10,7 +10,6 @@ import { useContext } from "react";
 
 export default function ViewMoreDialog() {
   const { isOpenModal, closeModal, selectedProduct } = useContext(MyContext);
-
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
   return (
@@ -32,7 +31,7 @@ export default function ViewMoreDialog() {
           </div>
           <section className="lg:flex gap-5 pb-5">
             <div className="">
-              <ProductZoom imageAddress={selectedProduct.images} />
+              <ProductZoom imageAddress={selectedProduct?.images} />
             </div>
             <section>
               <ProductDetailContent product={selectedProduct} />

@@ -14,6 +14,7 @@ import cloudinary from "../config/cloudinary.config.js";
 import fs from "fs";
 import extractPublicId from "../helper/extractPuclicId.js";
 import { sanitizeUser } from "../helper/filterFieldOject.js";
+import { mergeCart } from "../service/cart.service.js";
 
 const sendVerificationEmailAgain = async (req, res) => {
   try {
@@ -149,6 +150,10 @@ const login = async (req, res) => {
     user.refreshTokenExpireAt = expireDate;
     user.lastLogin = Date.now();
     await user.save();
+
+    // merge to use cart
+    const guestCartId = req.cookies.cartId
+    await mergeCart(guestCartId, user._id)
 
     return res.status(200).json({
       user: sanitizeUser(user),

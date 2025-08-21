@@ -7,6 +7,7 @@ const sanitizeUser = (user) => {
 //   delete result.resetPasswordToken;
 //   delete result.resetPasswordExpireAt;
   return {
+    _id: user._id,
     name: user.name,
     phone: user.phone,
     email: user.email,

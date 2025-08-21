@@ -5,10 +5,11 @@ import MyContext from "../Context/MyContext";
 import toast from "react-hot-toast";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 const PersistentLogin = () => {
-  const { user, refreshToken, isLoading } = useAuthStore();
+  const { refreshToken, isLoading } = useAuthStore();
   const { persist } = useContext(MyContext);
   const navigator = useNavigate();
   const location = useLocation();
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     let isMounted = true;
@@ -18,6 +19,7 @@ const PersistentLogin = () => {
         if (!persist) throw new Error();
         if (user) return;
         await refreshToken();
+        await loadCart(user?._id);
       } catch (error) {
         if (isMounted) {
           console.log(error);

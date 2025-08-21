@@ -2,72 +2,23 @@ import { useContext } from "react";
 import MyContext from "../Context/MyContext";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
-import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 import { IoClose } from "react-icons/io5";
 import CartItem from "./CartItem";
 import formatMoney from "../utils/MoneyFormat";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
+import useCartStore from "../store/cartStore";
 
 const CartDrawer = () => {
   const { isOpenCart, closeCart } = useContext(MyContext);
-  const products = [
-    {
-      image:
-        "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-      name: "Inverter Dye Hydrid 3kw",
-      quantity: 2,
-      price: 1000000,
-      rating: 4.5,
-      discount: 10,
-    },
-    {
-      image:
-        "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-      name: "Inverter Dye Hydrid 3kw",
-      quantity: 2,
-      price: 1000000,
-      rating: 4.5,
-      discount: 10,
-    },
-    {
-      image:
-        "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-      name: "Inverter Dye Hydrid 3kw",
-      quantity: 2,
-      price: 1000000,
-      rating: 4.5,
-      discount: 10,
-    },
-    {
-      image:
-        "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-      name: "Inverter Dye Hydrid 3kw",
-      quantity: 2,
-      price: 1000000,
-      rating: 4.5,
-      discount: 10,
-    },
-    {
-      image:
-        "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-      name: "Inverter Dye Hydrid 3kw",
-      quantity: 2,
-      price: 1000000,
-      rating: 4.5,
-      discount: 10,
-    },
-  ];
+  const cart = useCartStore((state) => state.cart);
 
-  const totalCost = calculateTotalCost();
+  const totalCost = cart?.items && calculateTotalCost();
 
   function calculateTotalCost() {
     let sum = 0;
-    products.forEach((product) => {
+    cart?.items.forEach((product) => {
       sum +=
         product.quantity *
         (product.price - (product.price * product.discount) / 100);
@@ -78,11 +29,12 @@ const CartDrawer = () => {
   const DrawerList = (
     <Box sx={{ width: 400 }} role="presentation">
       <div className="px-4 h-[60vh] overflow-y-scroll scroll">
-        {products.map((product, index) => (
-          <div className="" key={index} >
-            <CartItem product={product} />
-          </div>
-        ))}
+        {cart?.items &&
+          cart?.items.map((product, index) => (
+            <div className="" key={index}>
+              <CartItem product={product} userId={cart?.userId}/>
+            </div>
+          ))}
       </div>
       <div className="flex justify-center items-center h-[28vh]">
         <div className="w-8/10">
@@ -106,7 +58,7 @@ const CartDrawer = () => {
             <div className="flex gap-4 mt-2">
               <Button
                 component={Link}
-                to={"/cart"}
+                to={"/cart?"}
                 className="!w-full !py-3 !bg-blue-500 !text-white !font-bold hover:!bg-black"
                 onClick={closeCart}
               >
@@ -131,7 +83,7 @@ const CartDrawer = () => {
     <div>
       <Drawer open={isOpenCart} onClose={closeCart} anchor={"right"}>
         <h3 className="flex items-center justify-between p-3 font-semibold text-content">
-          Giỏ hàng ({products.length})
+          Giỏ hàng ({cart?.items?.length})
           <div className="hover:bg-gray-200 p-1 rounded-full cursor-pointer transition">
             <IoClose onClick={closeCart} size={25} />
           </div>

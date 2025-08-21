@@ -115,7 +115,7 @@ const ProductGridView = () => {
       <div className="my-4">
         {view === 0 ? (
           <div className="grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-3">
-            {products && products.map((product) => {
+            {/* {products && products.map((product) => {
               return (
                 <div className="" key={product._id}>
                   <ProductCard
@@ -123,7 +123,7 @@ const ProductGridView = () => {
                   />
                 </div>
               );
-            })}
+            })} */}
           </div>
         ) : (
           <div className="flex flex-col gap-4">

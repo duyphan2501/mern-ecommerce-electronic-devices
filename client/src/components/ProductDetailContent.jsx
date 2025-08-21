@@ -1,4 +1,4 @@
-import {  Rating, Stack } from "@mui/material";
+import { Rating, Stack } from "@mui/material";
 import { Link } from "react-router-dom";
 import QuantityButton from "./QuantityButton";
 import AddToCartBtn from "./AddToCartBtn";
@@ -7,10 +7,12 @@ import ProductModel from "./ProductModel";
 import formatMoney from "../utils/MoneyFormat";
 
 const ProductDetailContent = ({ product }) => {
-  const [selectedModelIndex, setSelectedModelIndex] = useState(0);
-  const model = product.modelsId[selectedModelIndex]
+  const [selectedModelIndex, setSelectedModelIndex] = useState(
+    product.selectedModelIndex || 0
+  );
+  const model = product.modelsId[selectedModelIndex];
 
-  const discountPrice = 
+  const discountPrice =
     model.salePrice - model.salePrice * (model.discount / 100);
 
   const formattedPrice = formatMoney(model.salePrice);
@@ -61,7 +63,7 @@ const ProductDetailContent = ({ product }) => {
               {model.discount === 0 ? (
                 <>
                   <p className="text-highlight font-bold text-xl">
-                    {formatMoney(model.salePrice)} 
+                    {formatMoney(model.salePrice)}
                   </p>
                 </>
               ) : (
@@ -80,7 +82,9 @@ const ProductDetailContent = ({ product }) => {
             </div>
             <div className="text-sm">
               Trong kho:{" "}
-              <span className="text-emerald-600 font-bold">{model.stockQuantity}</span>
+              <span className="text-emerald-600 font-bold">
+                {model.stockQuantity}
+              </span>
             </div>
           </div>
           <div className="flex gap-5">

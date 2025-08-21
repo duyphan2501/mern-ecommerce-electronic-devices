@@ -15,8 +15,7 @@ const modelSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: "products",
     required: true,
-  },
-});
+  }}, {timestamps: true});
 
 const ModelsModel = mongoose.model("models", modelSchema);
 

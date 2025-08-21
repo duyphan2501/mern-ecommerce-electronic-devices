@@ -5,16 +5,21 @@ import LazyComponentWrapper from "../components/LazyComponentWrapper";
 import { useEffect, useState } from "react";
 import useProductStore from "../store/productStore";
 import { useParams } from "react-router-dom";
+import { useContext } from "react";
+import MyContext from "../Context/MyContext";
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
   const { getProductBySlug } = useProductStore();
+  const { selectedProduct } = useContext(MyContext);
 
   useEffect(() => {
     const getProduct = async () => {
       try {
-        const fetchProduct = await getProductBySlug(slug);
+        let fetchProduct = await getProductBySlug(slug);
+        const selectedModelIndex = selectedProduct?.selectedModelIndex || 0;
+        fetchProduct = { ...fetchProduct, selectedModelIndex };
         setProduct(fetchProduct);
       } catch (error) {
         console.log(error);
