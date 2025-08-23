@@ -1,11 +1,7 @@
 import mongoose from "mongoose";
+import { userInfo } from "os";
 
 const addressSchema = new mongoose.Schema({
-  addressTpye: {
-    type: String,
-    enum: ["home", "office"],
-    default: "home",
-  },
   receiver: {
     type: String,
     require: [true, "Provide receiver"],
@@ -18,10 +14,6 @@ const addressSchema = new mongoose.Schema({
     type: String,
     require: [true, "Provide province"],
   },
-  district: {
-    type: String,
-    require: [true, "Provide district"],
-  },
   ward: {
     type: String,
     require: [true, "Provide ward"],
@@ -29,6 +21,20 @@ const addressSchema = new mongoose.Schema({
   addressDetail: {
     type: String,
     require: [true, "Provide address detail"],
+  },
+    addressType: {
+    type: String,
+    enum: ["home", "office"],
+    default: "home",
+  },
+  isDefault: {
+    type: Boolean,
+    default: false,
+  },
+  userId: {
+    type: mongoose.Schema.ObjectId,
+    ref: "users",
+    require: [true, "Provide userId"],
   },
 });
 

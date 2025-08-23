@@ -6,23 +6,23 @@ import useProductStore from "../store/productStore";
 const Home = () => {
   const [categories, setCategories] = useState();
   const [products, setProducts] = useState();
-  const [selectedCategory, setSelectedCategory] = useState()
+  const [selectedCategory, setSelectedCategory] = useState();
+  const { getProductByCategoryId } = useProductStore();
   const { getAllCategories } = useCategoryStore();
-  const {getProductByCategoryId} = useProductStore()
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const fetchedCategories = await getAllCategories();
         setCategories(fetchedCategories);
-        setSelectedCategory(fetchedCategories[0]._id)
+        setSelectedCategory(fetchedCategories[0]._id);
       } catch (error) {
         console.log(error);
       }
     };
-    fetchCategories()
+    fetchCategories();
   }, []);
-  
+
   useEffect(() => {
     if (!selectedCategory) return;
     const getProducts = async () => {

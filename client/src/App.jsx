@@ -1,24 +1,31 @@
 import { FaFacebookMessenger } from "react-icons/fa";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Suspense, lazy, useContext } from "react";
+import { Toaster } from "react-hot-toast";
+
+// Components thường dùng chung (load ngay từ đầu)
 import Header from "./components/Header";
 import TopStrip from "./components/TopStrip";
-import Home from "./pages/Home";
 import Footer from "./components/Footer";
-import ProductPage from "./pages/ProductPage";
-import ProductDetail from "./pages/ProductDetail";
 import ViewMoreDialog from "./components/ViewMoreDialog";
-import Login from "./pages/Login";
-import ChangePassword from "./pages/ChangePassword";
-import { Toaster } from "react-hot-toast";
 import CartDrawer from "./components/CartDrawer";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import MyAccount from "./pages/MyAccount";
-import Register from "./pages/Register";
-import VerifyEmail from "./pages/VerifyEmail";
 import PersistentLogin from "./components/PersistentLogin";
+import MyContext from "./Context/MyContext";
+
+// Lazy load cho các page
+const Home = lazy(() => import("./pages/Home"));
+const ProductPage = lazy(() => import("./pages/ProductPage"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Login = lazy(() => import("./pages/Login"));
+const ChangePassword = lazy(() => import("./pages/ChangePassword"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const MyAccount = lazy(() => import("./pages/MyAccount"));
+const Register = lazy(() => import("./pages/Register"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 
 function App() {
+  const { isOpenModal } = useContext(MyContext);
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
@@ -29,30 +36,41 @@ function App() {
           </div>
         </div>
       </div>
+
       <BrowserRouter>
         <TopStrip />
         <Header />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/reset-password/:token" element={<ChangePassword />} />
-          <Route element={<PersistentLogin />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/san-pham" element={<ProductPage />} />
-            <Route
-              path="/san-pham/chi-tiet/:slug"
-              element={<ProductDetail />}
-            />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/my-account" element={<MyAccount />} />
-          </Route>
-        </Routes>
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center h-screen">
+              <p>Loading...</p>
+            </div>
+          }
+        >
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/reset-password/:token" element={<ChangePassword />} />
+
+            <Route element={<PersistentLogin />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/san-pham" element={<ProductPage />} />
+              <Route
+                path="/san-pham/chi-tiet/:slug"
+                element={<ProductDetail />}
+              />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/my-account" element={<MyAccount />} />
+            </Route>
+          </Routes>
+        </Suspense>
+
         <CartDrawer />
-        <ViewMoreDialog />
+        {isOpenModal && <ViewMoreDialog />}
       </BrowserRouter>
-      <Footer />s
+      <Footer />
     </>
   );
 }

@@ -19,6 +19,7 @@ const CartDrawer = () => {
 
   const getCart = async() => {
     try {
+      console.log("Loading cart for user:", user?._id);
       await loadCart(user?._id);
     } catch (error) {
       console.error("Failed to load cart:", error);

@@ -117,10 +117,10 @@ const createProduct = async (req, res) => {
 
     // Parse ObjectId
     const parsedCategoryId = mongoose.Types.ObjectId.isValid(categoryId)
-      ? new mongoose.Types.ObjectId(categoryId)
+      ? new mongoose.Types.ObjectId(`${categoryId}`)
       : null;
     const parsedBrandId = mongoose.Types.ObjectId.isValid(brandId)
-      ? new mongoose.Types.ObjectId(brandId)
+      ? new mongoose.Types.ObjectId(`${brandId}`)
       : null;
 
     if (!parsedCategoryId || !parsedBrandId) {

@@ -1,8 +1,16 @@
+const estimateMoney = (money) => {
+  const remainder = money % 1000;
+  const integerPart = money - remainder;
+  const formatedPart = remainder < 500 ? 0 : 1000;
+  return integerPart + formatedPart;
+};
+
 const formatMoney = (money) => {
-    return new Intl.NumberFormat("vi-VN", {
+  const estimated = estimateMoney(money);
+  return new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
-  }).format(money);
-}
+  }).format(estimated);
+};
 
-export default formatMoney
+export default formatMoney;

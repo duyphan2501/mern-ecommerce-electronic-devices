@@ -12,6 +12,11 @@ export default function ViewMoreDialog() {
   const { isOpenModal, closeModal, selectedProduct } = useContext(MyContext);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+
+  if (!isOpenModal || !selectedProduct) {
+    return null;
+  }
+
   return (
     <>
       <Dialog

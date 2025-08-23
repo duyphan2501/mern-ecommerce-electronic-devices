@@ -4,13 +4,35 @@ import { Button } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
 import { useContext, useState } from "react";
 import MyContext from "../Context/MyContext";
+import useAddressStore from "../store/addressStore";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const AddressList = ({ title, address }) => {
   const { isOpenAddrFrm, openAddrFrm } = useContext(MyContext);
   const [selectedId, setSelectedId] = useState(null);
+  const [updateAddress, setUpdateAddress] = useState(null);
+  const { deleteAddress } = useAddressStore.getState();
+  const axiosPrivate = useAxiosPrivate();
 
   const handleSelect = (id) => {
     setSelectedId(id);
+  };
+
+  const handleCreate = () => {
+    setUpdateAddress(null);
+    openAddrFrm();
+  }
+
+  const handleDelete = (addressId) => {
+    deleteAddress(addressId, axiosPrivate);
+    if (selectedId === addressId) {
+      setSelectedId(null);
+    }
+  }
+
+  const handleUpdate = (address) => {
+    setUpdateAddress(address);
+    openAddrFrm();
   };
 
   return (
@@ -19,7 +41,7 @@ const AddressList = ({ title, address }) => {
         <h4 className="text-lg font-bold">{title}</h4>
         <Button
           className="!gap-1 !bg-white !border-1 !font-semibold  !border-blue-500 !rounded-md"
-          onClick={openAddrFrm}
+          onClick={handleCreate}
         >
           <FaPlus />
           Thêm địa chỉ mới
@@ -28,13 +50,15 @@ const AddressList = ({ title, address }) => {
       <div className="mt-5 space-y-5">
         {address.map((addr) => (
           <AddressCard
-            key={addr.id}
+            key={addr._id}
             address={addr}
-            selected={selectedId === addr.id}
-            onSelect={() => handleSelect(addr.id)}
+            selected={selectedId === addr._id}
+            onSelect={() => handleSelect(addr._id)}
+            onUpdate={() => handleUpdate(addr)}
+            onDelete={() => handleDelete(addr._id)}
           />
         ))}
-        {isOpenAddrFrm && <AddressForm />}
+        {isOpenAddrFrm && <AddressForm address={updateAddress}/>}
       </div>
     </div>
   );
