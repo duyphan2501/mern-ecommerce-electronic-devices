@@ -15,25 +15,24 @@ import {
 import useAddressStore from "../store/addressStore";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
-const AddressForm = ({ address = null }) => {
+const AddressForm = () => {
   const [provinces, setProvinces] = useState([]);
   const [wards, setWards] = useState([]);
   const [wardsList, setWardsList] = useState([]);
 
   const { createAddress, updateAddress, isLoadingAddress } = useAddressStore();
 
-  // Gom tất cả field vào 1 object
   const [formData, setFormData] = useState({
-    receiver: address?.receiver || "",
-    phone: address?.phone || "",
-    province: address?.province || "",
-    ward: address?.ward || "",
-    addressType: address?.addressType || "home",
-    addressDetail: address?.addressDetail || "",
-    isDefault: address?.isDefault || false,
+    receiver: "",
+    phone: "",
+    province: "",
+    ward: "",
+    addressType: "home",
+    addressDetail: "",
+    isDefault: false,
   });
 
-  const { isOpenAddrFrm, closeAddrFrm, fiLoader } = useContext(MyContext);
+  const { isOpenAddrFrm, closeAddrFrm, fiLoader, updateAddr } = useContext(MyContext);
   const axiosPrivate = useAxiosPrivate();
 
   const loadWards = (provinceName, allProvinces, allWards) => {
@@ -49,18 +48,35 @@ const AddressForm = ({ address = null }) => {
   };
 
   useEffect(() => {
-    Promise.all([fetch("./provinces.json"), fetch("./wards.json")])
-      .then(async ([pRes, wRes]) => {
+    const loadData = async () => {
+      try {
+        const [pRes, wRes] = await Promise.all([
+          fetch("./provinces.json"),
+          fetch("./wards.json"),
+        ]);
         const provincesData = await pRes.json();
         const wardsData = await wRes.json();
+
         setProvinces(provincesData);
         setWardsList(wardsData);
 
-        if (address) {
-          loadWards(address.province, provincesData, wardsData);
+        if (updateAddr) {
+          loadWards(updateAddr.province, provincesData, wardsData);
+          setFormData({
+            receiver: updateAddr.receiver || "",
+            phone: updateAddr.phone || "",
+            province: updateAddr.province || "",
+            ward: updateAddr.ward || "",
+            addressType: updateAddr.addressType || "home",
+            addressDetail: updateAddr.addressDetail || "",
+            isDefault: updateAddr.isDefault || false,
+          });
         }
-      })
-      .catch((err) => console.error("Lỗi khi load dữ liệu:", err));
+      } catch (err) {
+        console.error("Lỗi khi load dữ liệu:", err);
+      }
+    };
+    loadData();
   }, []);
 
   const handleProvinceChange = (e) => {
@@ -76,7 +92,7 @@ const AddressForm = ({ address = null }) => {
   const handleChange = (field) => (e) => {
     const value =
       e.target.type === "checkbox" ? e.target.checked : e.target.value;
-    
+
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -90,15 +106,18 @@ const AddressForm = ({ address = null }) => {
     };
   }, [isOpenAddrFrm]);
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isLoadingAddress) return;  
+    if (isLoadingAddress) return;
     let success = false;
     if (address) {
-      success = await updateAddress({
-        ...formData,
-        id: address._id,
-      }, axiosPrivate);
+      success = await updateAddress(
+        {
+          ...formData,
+          id: address._id,
+        },
+        axiosPrivate
+      );
     } else {
       success = await createAddress(formData, axiosPrivate);
     }
@@ -111,7 +130,7 @@ const AddressForm = ({ address = null }) => {
       <div className="bg-white rounded-md p-5 z-50 border-b shadow-md w-[500px]">
         <div className="flex justify-between items-center border-b-2 pb-2 border-gray-300">
           <h4 className="font-semibold text-lg">
-            {address ? "Chỉnh Sửa Địa Chỉ Giao Hàng" : "Thêm Địa Chỉ Giao Hàng"}
+            {updateAddr ? "Chỉnh Sửa Địa Chỉ Giao Hàng" : "Thêm Địa Chỉ Giao Hàng"}
           </h4>
           <div
             className="size-8 rounded-full p-1 cursor-pointer hover:bg-gray-200 flex justify-center items-center"

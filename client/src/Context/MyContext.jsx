@@ -25,6 +25,7 @@ export const MyContextProvider = ({ children }) => {
   );
   const [selectedProduct, setSelectedProduct] = useState({});
   const fiLoader = <FiLoader size={20} className="animate-spin" />;
+  const [updateAddr, setUpdateAddr] = useState(null)
 
   const values = {
     isOpenModal,
@@ -41,6 +42,8 @@ export const MyContextProvider = ({ children }) => {
     selectedProduct,
     setSelectedProduct,
     fiLoader,
+    updateAddr,
+    setUpdateAddr,
   };
 
 

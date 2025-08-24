@@ -13,6 +13,7 @@ import PersistentLogin from "./components/PersistentLogin";
 import MyContext from "./Context/MyContext";
 import useAuthStore from "./store/authStore";
 import useCartStore from "./store/cartStore";
+import AddressForm from "./components/AddressForm";
 
 // Lazy load cho các page
 const Home = lazy(() => import("./pages/Home"));
@@ -27,7 +28,7 @@ const Register = lazy(() => import("./pages/Register"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 
 function App() {
-  const { isOpenModal } = useContext(MyContext);
+  const { isOpenModal, isOpenAddrFrm } = useContext(MyContext);
   const user = useAuthStore((state) => state.user);
   const loadCart = useCartStore((state) => state.loadCart);
 
@@ -86,6 +87,8 @@ function App() {
 
         <CartDrawer />
         {isOpenModal && <ViewMoreDialog />}
+        {isOpenAddrFrm && <AddressForm />}
+
       </BrowserRouter>
       <Footer />
     </>

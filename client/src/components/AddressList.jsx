@@ -7,10 +7,9 @@ import MyContext from "../Context/MyContext";
 import useAddressStore from "../store/addressStore";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
-const AddressList = ({ title, address }) => {
-  const { isOpenAddrFrm, openAddrFrm } = useContext(MyContext);
+const AddressList = ({ title, address, isCheckout=false }) => {
+  const { setUpdateAddr, openAddrFrm } = useContext(MyContext);
   const [selectedId, setSelectedId] = useState(null);
-  const [updateAddress, setUpdateAddress] = useState(null);
   const { deleteAddress } = useAddressStore.getState();
   const axiosPrivate = useAxiosPrivate();
 
@@ -19,7 +18,7 @@ const AddressList = ({ title, address }) => {
   };
 
   const handleCreate = () => {
-    setUpdateAddress(null);
+    setUpdateAddr(null);
     openAddrFrm();
   }
 
@@ -31,7 +30,7 @@ const AddressList = ({ title, address }) => {
   }
 
   const handleUpdate = (address) => {
-    setUpdateAddress(address);
+    setUpdateAddr(address);
     openAddrFrm();
   };
 
@@ -52,13 +51,13 @@ const AddressList = ({ title, address }) => {
           <AddressCard
             key={addr._id}
             address={addr}
-            selected={selectedId === addr._id}
+            selected={selectedId === addr._id || addr.isDefault}
             onSelect={() => handleSelect(addr._id)}
             onUpdate={() => handleUpdate(addr)}
             onDelete={() => handleDelete(addr._id)}
+            isCheckout={isCheckout}
           />
         ))}
-        {isOpenAddrFrm && <AddressForm address={updateAddress}/>}
       </div>
     </div>
   );
