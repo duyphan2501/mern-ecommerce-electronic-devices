@@ -1,6 +1,6 @@
 import { FaFacebookMessenger } from "react-icons/fa";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Suspense, lazy, useContext } from "react";
+import { Suspense, lazy, useContext, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 
 // Components thường dùng chung (load ngay từ đầu)
@@ -11,6 +11,8 @@ import ViewMoreDialog from "./components/ViewMoreDialog";
 import CartDrawer from "./components/CartDrawer";
 import PersistentLogin from "./components/PersistentLogin";
 import MyContext from "./Context/MyContext";
+import useAuthStore from "./store/authStore";
+import useCartStore from "./store/cartStore";
 
 // Lazy load cho các page
 const Home = lazy(() => import("./pages/Home"));
@@ -26,6 +28,21 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 
 function App() {
   const { isOpenModal } = useContext(MyContext);
+  const user = useAuthStore((state) => state.user);
+  const loadCart = useCartStore((state) => state.loadCart);
+
+  const getCart = async() => {
+    try {
+      console.log("Loading cart for user:", user?._id);
+      await loadCart(user?._id);
+    } catch (error) {
+      console.error("Failed to load cart:", error);
+    }
+  }
+  useEffect(() => {
+    getCart();
+  }, [user, loadCart]);
+
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />

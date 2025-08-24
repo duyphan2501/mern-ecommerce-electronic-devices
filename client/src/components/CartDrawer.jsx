@@ -9,27 +9,10 @@ import formatMoney from "../utils/MoneyFormat";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import useCartStore from "../store/cartStore";
-import useAuthStore from "../store/authStore";
 
 const CartDrawer = () => {
   const { isOpenCart, closeCart } = useContext(MyContext);
   const cart = useCartStore((state) => state.cart);
-  const user = useAuthStore((state) => state.user);
-  const loadCart = useCartStore((state) => state.loadCart);
-
-  const getCart = async() => {
-    try {
-      console.log("Loading cart for user:", user?._id);
-      await loadCart(user?._id);
-    } catch (error) {
-      console.error("Failed to load cart:", error);
-    }
-  }
-
-  useEffect(() => {
-    getCart();
-  }, [user, loadCart]);
-
 
   const totalCost = cart?.items && calculateTotalCost();
 

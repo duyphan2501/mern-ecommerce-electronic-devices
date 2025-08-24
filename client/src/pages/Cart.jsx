@@ -2,58 +2,34 @@ import { Button, Checkbox } from "@mui/material";
 import CartPageItem from "../components/CartPageItem";
 import formatMoney from "../utils/MoneyFormat";
 import { Link } from "react-router-dom";
+import useCartStore from "../store/cartStore";
+import useAuthStore from "../store/authStore";
 
-const products = [
-  {
-    image:
-      "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-    name: "Inverter Dye Hydrid 3kw",
-    quantity: 2,
-    price: 1000000,
-    rating: 4.5,
-    discount: 10,
-  },
-  {
-    image:
-      "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-    name: "Inverter Dye Hydrid 3kw",
-    quantity: 2,
-    price: 1000000,
-    rating: 4.5,
-    discount: 10,
-  },
-  {
-    image:
-      "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-    name: "Inverter Dye Hydrid 3kw",
-    quantity: 2,
-    price: 1000000,
-    rating: 4.5,
-    discount: 10,
-  },
-  {
-    image:
-      "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-    name: "Inverter Dye Hydrid 3kw",
-    quantity: 2,
-    price: 1000000,
-    rating: 4.5,
-    discount: 10,
-  },
-  {
-    image:
-      "https://powertech.vn/thumbs/540x540x2/upload/product/capture-4067.png",
-    name: "Inverter Dye Hydrid 3kw",
-    quantity: 2,
-    price: 1000000,
-    rating: 4.5,
-    discount: 10,
-  },
-];
-
-const totalCost = calculateTotalCost();
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
+
 const Cart = () => {
+  const cart = useCartStore((state) => state.cart);
+  const user = useAuthStore((state) => state.user);
+  const { updateCartItem, removeCartItem } = useCartStore();
+
+  const totalCost = calculateTotalCost(cart?.items || []);
+  
+  const handleUpdateQuantity = (modelId, newQuantity) => {
+    updateCartItem(user?._id, modelId, newQuantity);
+  };
+
+  const handleRemoveItem = (modelId) => {
+    removeCartItem(user?._id, modelId);
+  };
+
+  const handleSelectedItem = (modelId) => {
+    if (selectedItems.includes(modelId)) {
+      setSelectedItems(selectedItems.filter((id) => id !== modelId));
+    } else {
+      setSelectedItems([...selectedItems, modelId]);
+    }
+  };
+
   return (
     <div className=" py-10">
       <div className="container">
@@ -66,15 +42,14 @@ const Cart = () => {
               <p className="">
                 Có{" "}
                 <span className="text-highlight font-bold ">
-                  {products.length}
+                  {cart?.items?.length}
                 </span>{" "}
                 sản phẩm trong giỏ hàng
               </p>
             </div>
             <div className="rounded-md bg-gray-300 p-2 flex font-bold items-center">
-              <div className="w-3/8 flex items-center">
-                <Checkbox {...label} defaultChecked />
-                Tất cả ({products.length} Sản phẩm)
+              <div className="w-4/9 flex items-center">
+                Sản phẩm
               </div>
               <div className="flex flex-1 justify-between">
                 <div className="flex-1">Đơn giá</div>
@@ -83,10 +58,14 @@ const Cart = () => {
                 <div className="w-10">Xoá</div>
               </div>
             </div>
-            {products.map((product, index) => {
+            {cart?.items.map((item) => {
               return (
-                <div className="" key={index}>
-                  <CartPageItem product={product} />
+                <div className="" key={item.modelId}>
+                  <CartPageItem
+                    item={item}
+                    onUpdate={handleUpdateQuantity}
+                    onDelete={handleRemoveItem}
+                  />
                 </div>
               );
             })}
@@ -129,12 +108,10 @@ const Cart = () => {
   );
 };
 
-function calculateTotalCost() {
+function calculateTotalCost(items) {
   let sum = 0;
-  products.forEach((product) => {
-    sum +=
-      product.quantity *
-      (product.price - (product.price * product.discount) / 100);
+  items.forEach((item) => {
+    sum += item.quantity * (item.price - (item.price * item.discount) / 100);
   });
   return sum;
 }
