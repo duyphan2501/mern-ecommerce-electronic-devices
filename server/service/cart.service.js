@@ -13,9 +13,6 @@ export const addCartItem = async (userId, cartId, modelId, quantity) => {
   const cartKey = userId ? `cart:${userId}` : `cart:${cartId}`;
   const productKey = `product:${modelId}`;
 
-  // tăng số lượng trong Redis
-  await redisClient.hIncrBy(cartKey, productKey, quantity);
-
   if (userId) {
     const updated = await CartModel.findOneAndUpdate(
       { userId, "items.modelId": modelId },
@@ -32,8 +29,11 @@ export const addCartItem = async (userId, cartId, modelId, quantity) => {
       );
     }
 
+    // tăng số lượng trong Redis
+    await redisClient.hIncrBy(cartKey, productKey, quantity);
     await redisClient.expire(cartKey, USER_CART_TTL);
   } else {
+    await redisClient.hIncrBy(cartKey, productKey, quantity);
     await redisClient.expire(cartKey, GUEST_CART_TTL);
   }
 };

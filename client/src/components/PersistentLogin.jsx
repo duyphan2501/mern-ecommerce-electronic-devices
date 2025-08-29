@@ -17,8 +17,7 @@ const PersistentLogin = () => {
 
     const refresh = async () => {
       try {
-        if (!persist) throw new Error();
-        if (user) return;
+        if (user || !persist) return;
         await refreshToken();
       } catch (error) {
         if (isMounted) {

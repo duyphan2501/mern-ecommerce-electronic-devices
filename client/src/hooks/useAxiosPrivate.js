@@ -6,12 +6,16 @@ import MyContext from "../Context/MyContext.jsx";
 const useAxiosPrivate = () => {
   const { refreshToken } = useAuthStore();
   const { persist } = useContext(MyContext);
+
   useEffect(() => {
     const requestInterceptor = axiosPrivate.interceptors.request.use(
       (config) => {
         const token = useAuthStore.getState().accessToken;
-        if (!config.headers.Authorization && token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        if (token) {
+          config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${token}`,
+          };
         }
         return config;
       },
@@ -30,10 +34,13 @@ const useAxiosPrivate = () => {
           prevRequest._retry = true;
           try {
             const refreshed = await refreshToken();
-            prevRequest.headers.Authorization = `Bearer ${refreshed.accessToken}`;
+            prevRequest.headers = {
+              ...prevRequest.headers,
+              Authorization: `Bearer ${refreshed.accessToken}`,
+            };
             return axiosPrivate(prevRequest);
           } catch (err) {
-            await useAuthStore.getState().logout();
+            useAuthStore.getState().logout();
             return Promise.reject(err);
           }
         }
@@ -45,7 +52,7 @@ const useAxiosPrivate = () => {
       axiosPrivate.interceptors.request.eject(requestInterceptor);
       axiosPrivate.interceptors.response.eject(responseInterceptor);
     };
-  }, []);
+  }, [refreshToken, persist]);
 
   return axiosPrivate;
 };

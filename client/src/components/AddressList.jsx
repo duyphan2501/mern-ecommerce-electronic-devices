@@ -1,4 +1,3 @@
-import AddressForm from "./AddressForm";
 import AddressCard from "./AddressCard";
 import { Button } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
@@ -51,7 +50,7 @@ const AddressList = ({ title, address, isCheckout=false }) => {
           <AddressCard
             key={addr._id}
             address={addr}
-            selected={selectedId === addr._id || addr.isDefault}
+            selected={selectedId === addr._id || (!selectedId && addr.isDefault)}
             onSelect={() => handleSelect(addr._id)}
             onUpdate={() => handleUpdate(addr)}
             onDelete={() => handleDelete(addr._id)}

@@ -14,6 +14,8 @@ import MyContext from "./Context/MyContext";
 import useAuthStore from "./store/authStore";
 import useCartStore from "./store/cartStore";
 import AddressForm from "./components/AddressForm";
+import useAxiosPrivate from "./hooks/useAxiosPrivate";
+import useAddressStore from "./store/addressStore";
 
 // Lazy load cho các page
 const Home = lazy(() => import("./pages/Home"));
@@ -26,6 +28,7 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const MyAccount = lazy(() => import("./pages/MyAccount"));
 const Register = lazy(() => import("./pages/Register"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 
 function App() {
   const { isOpenModal, isOpenAddrFrm } = useContext(MyContext);
@@ -43,6 +46,21 @@ function App() {
   useEffect(() => {
     getCart();
   }, [user, loadCart]);
+
+  const getAllAddresses = useAddressStore((state) => state.getAllAddresses);
+  const axiosPrivate = useAxiosPrivate();
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchAddresses = async () => {
+      try {
+        await getAllAddresses(axiosPrivate);
+      } catch (error) {
+        console.error("Error fetching addresses:", error);
+      }
+    };
+    fetchAddresses();
+  }, [user]);
 
   return (
     <>
@@ -81,6 +99,7 @@ function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/my-account" element={<MyAccount />} />
+              <Route path="/payment/success" element={<PaymentSuccess/>} />
             </Route>
           </Routes>
         </Suspense>

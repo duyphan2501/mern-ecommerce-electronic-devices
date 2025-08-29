@@ -8,8 +8,12 @@ import categoryRouter from "./routes/category.route.js";
 import productRouter from "./routes/product.route.js";
 import cartRouter from "./routes/cart.route.js";
 import addressRouter from "./routes/address.route.js";
+import paymentRouter from "./routes/payment.route.js";
+import orderRouter from "./routes/order.route.js";
+import { startNgrokAndConfirmWebhook } from "./config/payos.init.js";
 
-dotenv.config();
+
+dotenv.config({quiet: true});
 const app = express();
 
 app.use(cookieParser());
@@ -25,12 +29,15 @@ app.use("/api/user", userRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
-app.use("/api/address", addressRouter)
+app.use("/api/address", addressRouter);
+app.use("/api/payment", paymentRouter);
+app.use("/api/order", orderRouter);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log("Server is running on Port", PORT);
+    startNgrokAndConfirmWebhook()
   });
 });

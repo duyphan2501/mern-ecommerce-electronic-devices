@@ -1,32 +1,22 @@
 import { Button } from "@mui/material";
 import CheckoutItem from "../components/CheckoutItem";
 import formatMoney from "../utils/MoneyFormat";
-import { useContext, useEffect, useMemo } from "react";
+import { useContext, useMemo } from "react";
 import MyContext from "../Context/MyContext";
 import AddressForm from "../components/AddressForm";
 import AddressList from "../components/AddressList";
 import useCartStore from "../store/cartStore";
-import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAddressStore from "../store/addressStore";
+import usePaymentStore from "../store/paymentStore";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const Checkout = () => {
-  const { isOpenAddrFrm } = useContext(MyContext);
+  const { isOpenAddrFrm, fiLoader } = useContext(MyContext);
   const cart = useCartStore((state) => state.cart);
   const totalCost = useMemo(() => calculateTotalCost(cart?.items), [cart]);
   const addresses = useAddressStore((state) => state.addresses);
-  const getAllAddresses = useAddressStore((state) => state.getAllAddresses);
+  const { isPaymentLoading, createPayment } = usePaymentStore();
   const axiosPrivate = useAxiosPrivate();
-
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      try {
-        await getAllAddresses(axiosPrivate);
-      } catch (error) {
-        console.error("Error fetching addresses:", error);
-      }
-    };
-    fetchAddresses();
-  }, []);
 
   return (
     <div className="py-10 flex justify-center ">
@@ -52,22 +42,25 @@ const Checkout = () => {
                 <CheckoutItem item={item} key={item.modelId} />
               ))}
             </div>
-             <div className="flex justify-between items-center">
-                  <div className="">Vận chuyển: </div>
-                  <div className="">Free</div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="">Thuế: </div>
-                  <div className="">...</div>
-                </div>
+            <div className="flex justify-between items-center">
+              <div className="">Vận chuyển: </div>
+              <div className="">Free</div>
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="">Thuế: </div>
+              <div className="">...</div>
+            </div>
             <div className="flex justify-between items-center py-2">
               <p className="font-semibold">Tiền cần thanh toán:</p>
               <p className="font-bold text-highlight text-lg">
                 {formatMoney(totalCost)}
               </p>
             </div>
-            <Button className="!w-full !bg-blue-500 !text-white !font-bold hover:!bg-black  ">
-              Đặt hàng
+            <Button
+              className="!w-full !bg-blue-500 !text-white !font-bold hover:!bg-black"
+              onClick={() => createPayment(axiosPrivate, cart?.items)}
+            >
+              Đặt hàng {isPaymentLoading && fiLoader}
             </Button>
           </div>
         </div>

@@ -1,6 +1,6 @@
   import dotenv from "dotenv";
   import { verifyAccessToken } from "../helper/jwt_service.js";
-  dotenv.config();
+  dotenv.config({quiet:true});
 
   const checkAuth = async (req, res, next) => {
     const accessToken =
