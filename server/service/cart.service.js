@@ -1,6 +1,7 @@
 import redisClient from "../config/init.redis.js";
 import { formatCartItemInfo } from "../helper/cart.helper.js";
 import CartModel from "../model/cart.model.js";
+import { reserveStock } from "./reservation.service.js";
 
 const USER_CART_TTL = 60 * 60 * 24 * 7; // 7 ngày
 const GUEST_CART_TTL = 60 * 60 * 24 * 2; // 7 ngày
@@ -43,15 +44,36 @@ export const syncCartToMongo = async (userId, userCart) => {
   // convert { 'product:123': '2', 'product:456': '1' }
   const items = Object.entries(userCart).map(([key, qty]) => ({
     modelId: key.replace("product:", ""),
-    quantity: parseInt(qty),
+    quantity: parseInt(qty, 10),
   }));
 
+  const syncedItems = [];
+
+  for (const item of items) {
+    const { modelId, quantity } = item;
+
+    try {
+      // validate + đặt chỗ stock (chỉ khi user login)
+      await reserveStock(userId, modelId, quantity);
+
+      // push vào danh sách hợp lệ
+      syncedItems.push(item);
+    } catch (err) {
+      console.warn(
+        `Không thể giữ chỗ cho sản phẩm ${modelId} với quantity=${quantity}: ${err.message}`
+      );
+      // Nếu muốn, có thể push với số lượng điều chỉnh hoặc bỏ qua hẳn item này
+    }
+  }
+
   // upsert giỏ hàng cho user
-  await CartModel.findOneAndUpdate(
+  await CartModel.updateOne(
     { userId },
-    { items },
-    { upsert: true, new: true }
+    { items: syncedItems },
+    { upsert: true }
   );
+
+  return syncedItems;
 };
 
 // merge guest cart -> user cart
@@ -166,6 +188,8 @@ export const updateCartItem = async (userId, cartId, modelId, quantity) => {
       { userId, "items.modelId": modelId },
       { $set: { "items.$.quantity": quantity } }
     );
+
+    await reserveStock(userId, modelId, quantity)
   }
 };
 

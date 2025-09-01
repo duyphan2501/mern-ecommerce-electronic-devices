@@ -1,13 +1,14 @@
-import ModelsModel from "../model/productModel.model.js";
 import { v4 as uuidv4 } from "uuid";
-import redisClient from "../config/init.redis.js";
 import {
   addCartItem,
   loadCart,
   removeCartItem,
-  syncCartToMongo,
   updateCartItem,
 } from "../service/cart.service.js";
+import {
+  cancelStockReservation,
+  reserveStock,
+} from "../service/reservation.service.js";
 
 const addToCart = async (req, res) => {
   try {
@@ -19,7 +20,6 @@ const addToCart = async (req, res) => {
         .status(400)
         .json({ message: "Missing information!", success: false });
     }
-
     let cartKey;
 
     if (userId) {
@@ -34,23 +34,8 @@ const addToCart = async (req, res) => {
       }
       cartKey = `cart:${cartId}`;
     }
-
-    // kiểm tra tồn kho
-    const model = await ModelsModel.findById(modelId);
-    if (!model) {
-      return res
-        .status(404)
-        .json({ message: "Model not found", success: false });
-    }
-
-    const productKey = `product:${modelId}`;
-    const currentQty =
-      parseInt(await redisClient.hGet(cartKey, productKey)) || 0;
-    const newQty = currentQty + quantity;
-
-    if (newQty > model.stockQuantity) {
-      return res.status(400).json({ message: "Out of stock", success: false });
-    }
+    // đặt chỗ
+    await reserveStock(userId, modelId, quantity);
 
     // cập nhật giỏ trong Redis
     await addCartItem(userId, cartId, modelId, quantity);
@@ -61,6 +46,7 @@ const addToCart = async (req, res) => {
       cart: await loadCart(userId, cartId),
     });
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: error.message || error, success: false });
@@ -85,6 +71,7 @@ const getCart = async (req, res) => {
       .status(200)
       .json({ cart, message: "Cart loaded", success: true });
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: error.message || error, success: false });
@@ -106,6 +93,10 @@ const updateCart = async (req, res) => {
         .json({ message: "Missing information!", success: false });
     }
 
+    // kiểm tra và update kho tạm
+    await reserveStock(userId, modelId, quantity)
+
+    // update cart và reset reservation
     await updateCartItem(userId, cartId, modelId, quantity);
 
     return res.status(200).json({
@@ -141,7 +132,7 @@ const removeFromCart = async (req, res) => {
     }
 
     await removeCartItem(userId, cartId, modelId);
-
+    await cancelStockReservation(userId, modelId);
     return res.status(200).json({
       message: "Item removed from cart successfully",
       success: true,
