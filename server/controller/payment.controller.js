@@ -1,58 +1,42 @@
 import { payOS } from "../config/payos.init.js";
 import dotenv from "dotenv";
 import orderModel from "../model/order.model.js";
-import { generateOrderCode } from "../service/order.service.js";
+import { createNewOrder } from "../service/order.service.js";
+import { cancelStockReservation } from "../service/reservation.service.js";
+import CartModel from "../model/cart.model.js";
+import { removeCartItem } from "../service/cart.service.js";
 
 dotenv.config({ quiet: true });
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 
 const createPayment = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { cartItems } = req.body;
+    const { cartItems, address } = req.body;
 
-    if (!cartItems || !orderCode)
+    if (!address)
       return res.status(400).json({
-        message: "Order is empty or orderCode is missing!",
+        message: "Address is missing!",
         success: false,
       });
 
-    const items = cartItems.map((item) => {
-      const name = item.modelName
-        ? `${item.productName} - ${item.modelName}`
-        : item.productName;
+    if (!cartItems)
+      return res.status(400).json({
+        message: "Order is empty!",
+        success: false,
+      });
 
-      return {
-        name,
-        quantity: item.quantity,
-        price: item.price,
-      };
-    });
-
-    const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
-    const orderCode = await generateOrderCode();
-
-    // Tạo đơn trong DB
-    const newOrder = await orderModel.create({
-      orderCode,
-      userId,
-      items,
-      totalPrice,
-      payment: {
-        provider: "payos",
-        status: "pending",
-      },
-    });
+    const {itemsPayos, newOrder} = await createNewOrder(cartItems, userId, address, "payos")
 
     // Gọi PayOS
     const payload = {
-      orderCode,
-      amount: totalPrice,
-      description: `Thanh toan don hang ${orderCode}`,
-      items,
-      cancelUrl: `${FRONTEND_URL}/checkout`,
+      orderCode: newOrder.orderCode,
+      amount: newOrder.totalPrice,
+      description: newOrder.orderId,
+      items: itemsPayos,
+      cancelUrl: `${BACKEND_URL}/api/payment/cancel`,
       returnUrl: `${FRONTEND_URL}/payment/success`,
       expiredAt: Math.floor(Date.now() / 1000) + 15 * 60,
     };
@@ -113,21 +97,16 @@ const verifyWebhookData = async (req, res) => {
         success: false,
       });
 
-    // Xử lý theo trạng thái thanh toán
     if (verifiedData.code === "00") {
-      const paymentInfo = await payOS.getPaymentLinkInformation(
-        verifiedData.orderCode
-      );
-
-      if (paymentInfo.status === "CANCELLED") {
-        // xoá đơn hàng
-        order.payment.status = "cancelled";
-      } else if (paymentInfo.status === "PAID") {
-        // Thanh toán thành công
-        order.payment.status = "paid";
-      } else {
-        order.payment.status = "failed";
+      order.status = "processing";
+      order.payment.status = "paid";
+      // xoá giỏ hàng
+      const userId = order.userId;
+      for (const item of order.items) {
+        await removeCartItem(userId, null, item.modelId);
+        await cancelStockReservation(userId, item.modelId, true);
       }
+      await CartModel.deleteOne({ userId });
     } else {
       // Thanh toán thất bại
       order.payment.status = "failed";
@@ -140,8 +119,29 @@ const verifyWebhookData = async (req, res) => {
     res.status(200).json({ data: verifiedData, success: true });
   } catch (error) {
     console.error("Webhook error:", error);
-    res.status(400).json({ success: false, message: "invalid signature" });
+    res.status(500).json({ success: false, message: "invalid signature" });
   }
 };
 
-export { createPayment, getPaymentInfo, verifyWebhookData };
+const cancelPayment = async (req, res) => {
+  try {
+    const { orderCode, status, cancel } = req.query;
+    if (cancel && status === "CANCELLED") {
+      const order = await orderModel.findOne({ orderCode });
+      if (!order)
+        return res.status(404).json({
+          message: "Order does not exist!",
+          success: false,
+        });
+
+      order.payment.status = "cancelled";
+      await order.save();
+    }
+    return res.redirect(`${FRONTEND_URL}/checkout`);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message || error, success: false });
+  }
+};
+
+export { createPayment, getPaymentInfo, verifyWebhookData, cancelPayment };

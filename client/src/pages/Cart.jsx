@@ -13,7 +13,7 @@ const Cart = () => {
   const { updateCartItem, removeCartItem } = useCartStore();
 
   const totalCost = calculateTotalCost(cart?.items || []);
-  
+
   const handleUpdateQuantity = (modelId, newQuantity) => {
     updateCartItem(user?._id, modelId, newQuantity);
   };
@@ -48,9 +48,7 @@ const Cart = () => {
               </p>
             </div>
             <div className="rounded-md bg-gray-300 p-2 flex font-bold items-center">
-              <div className="w-4/9 flex items-center">
-                Sản phẩm
-              </div>
+              <div className="w-4/9 flex items-center">Sản phẩm</div>
               <div className="flex flex-1 justify-between">
                 <div className="flex-1">Đơn giá</div>
                 <div className="flex-1">Số lượng</div>
@@ -109,6 +107,7 @@ const Cart = () => {
 };
 
 function calculateTotalCost(items) {
+  if (!items) return 0;
   let sum = 0;
   items.forEach((item) => {
     sum += item.quantity * (item.price - (item.price * item.discount) / 100);

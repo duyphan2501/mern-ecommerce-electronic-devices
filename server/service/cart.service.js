@@ -1,13 +1,16 @@
 import redisClient from "../config/init.redis.js";
 import { formatCartItemInfo } from "../helper/cart.helper.js";
 import CartModel from "../model/cart.model.js";
-import { reserveStock } from "./reservation.service.js";
+import { cancelStockReservation, reserveStock } from "./reservation.service.js";
 
 const USER_CART_TTL = 60 * 60 * 24 * 7; // 7 ngày
 const GUEST_CART_TTL = 60 * 60 * 24 * 2; // 7 ngày
 
-export const addCartItem = async (userId, cartId, modelId, quantity) => {
+const addCartItem = async (userId, cartId, modelId, quantity) => {
+  if (quantity === 0) return;
   if (!modelId || !quantity) {
+    console.log("ModelId: ", modelId);
+    console.log("quantity: ", quantity);
     throw new Error("Missing modelId or quantity");
   }
 
@@ -39,81 +42,95 @@ export const addCartItem = async (userId, cartId, modelId, quantity) => {
   }
 };
 
-// userCart: object từ hgetall(cartKey)
-export const syncCartToMongo = async (userId, userCart) => {
-  // convert { 'product:123': '2', 'product:456': '1' }
-  const items = Object.entries(userCart).map(([key, qty]) => ({
-    modelId: key.replace("product:", ""),
-    quantity: parseInt(qty, 10),
-  }));
-
-  const syncedItems = [];
-
-  for (const item of items) {
-    const { modelId, quantity } = item;
-
-    try {
-      // validate + đặt chỗ stock (chỉ khi user login)
-      await reserveStock(userId, modelId, quantity);
-
-      // push vào danh sách hợp lệ
-      syncedItems.push(item);
-    } catch (err) {
-      console.warn(
-        `Không thể giữ chỗ cho sản phẩm ${modelId} với quantity=${quantity}: ${err.message}`
-      );
-      // Nếu muốn, có thể push với số lượng điều chỉnh hoặc bỏ qua hẳn item này
-    }
-  }
-
-  // upsert giỏ hàng cho user
-  await CartModel.updateOne(
-    { userId },
-    { items: syncedItems },
-    { upsert: true }
-  );
-
-  return syncedItems;
-};
-
-// merge guest cart -> user cart
-export const mergeCart = async (guestCartId, userId) => {
-  if (!guestCartId) return null;
+const mergeCart = async (guestCartId, userId) => {
+  if (!guestCartId || !userId) return null;
 
   const guestKey = `cart:${guestCartId}`;
   const userKey = `cart:${userId}`;
 
-  // lấy toàn bộ giỏ guest
+  // lấy giỏ guest từ Redis
   const guestCart = await redisClient.hGetAll(guestKey);
   if (!guestCart || Object.keys(guestCart).length === 0) {
-    return null; // guest cart trống thì bỏ qua
+    await redisClient.del(guestKey); // dọn dẹp luôn nếu rỗng
+    return null;
   }
 
-  const isExistingUserCart = await redisClient.exists(userKey);
+  // lấy giỏ user từ DB
+  const userCartDb = await CartModel.findOne({ userId });
+  let updatedItems = userCartDb?.items ? [...userCartDb.items] : [];
 
-  if (!isExistingUserCart) {
-    // nếu user cart chưa tồn tại, tạo mới
-    await redisClient.hSet(userKey, ...Object.entries(guestCart).flat());
-  } else {
-    // gộp từng sản phẩm vào giỏ user
-    for (const [productKey, qty] of Object.entries(guestCart)) {
-      await redisClient.hIncrBy(userKey, productKey, parseInt(qty));
+  // merge guestCart -> userCart
+  for (const [productKey, qty] of Object.entries(guestCart)) {
+    const modelId = productKey.replace("product:", "");
+    const addQuantity = parseInt(qty);
+    let cartItem = updatedItems.find((item) => item.modelId == modelId);
+    const oldQuantity = cartItem ? cartItem.quantity : 0;
+    if (cartItem) {
+      cartItem.quantity += addQuantity;
+    } else {
+      cartItem = { modelId, quantity: addQuantity };
+      updatedItems.push(cartItem);
+    }
+    await cancelStockReservation(null, guestCartId, modelId);
+    try {
+      // gọi reserveStock, hàm này sẽ return số lượng thực sự có thể giữ
+      const {reservedQty} = await reserveStock(
+        userId,
+        null, 
+        modelId,
+        cartItem.quantity,
+        true 
+      );
+
+      // nếu reservedQty < cartItem.quantity => điều chỉnh lại theo stock
+      if (reservedQty < cartItem.quantity) {
+        console.warn(
+          `Stock limited for modelId=${modelId}, set quantity from ${cartItem.quantity} -> ${reservedQty}`
+        );
+        cartItem.quantity = reservedQty;
+      }
+    } catch (err) {
+      console.warn(
+        `Reserve stock failed for modelId=${modelId}: ${err.message}`
+      );
+
+      // rollback về số lượng trước khi cộng
+      if (oldQuantity > 0) {
+        cartItem.quantity = oldQuantity;
+      } else {
+        // nếu item mới thêm thì bỏ luôn
+        updatedItems = updatedItems.filter((item) => item.modelId != modelId);
+      }
     }
   }
-  await redisClient.expire(userKey, USER_CART_TTL);
 
-  // xóa giỏ guest
+  // update DB sau khi merge & điều chỉnh
+  await CartModel.updateOne(
+    { userId },
+    { $set: { items: updatedItems } },
+    { upsert: true }
+  );
+
+  // xoá guestCart Redis
   await redisClient.del(guestKey);
 
-  // sync mongodb
-  const userCart = await redisClient.hGetAll(userKey);
-  await syncCartToMongo(userId, userCart);
+  // sync lại Redis theo DB mới
+  const redisData = {};
+  for (const item of updatedItems) {
+    redisData[`product:${item.modelId}`] = item.quantity.toString();
+  }
 
-  return userCart;
+  await redisClient.del(userKey); // clear giỏ cũ
+  if (Object.keys(redisData).length > 0) {
+    await redisClient.hSet(userKey, redisData);
+    await redisClient.expire(userKey, USER_CART_TTL);
+  }
+
+  return redisData;
 };
 
 // loadCart: userId có thể null (guest)
-export const loadCart = async (userId, cartId) => {
+const loadCart = async (userId, cartId) => {
   let cart = null;
 
   if (userId) {
@@ -175,7 +192,7 @@ export const loadCart = async (userId, cartId) => {
   return cart;
 };
 
-export const updateCartItem = async (userId, cartId, modelId, quantity) => {
+const updateCartItem = async (userId, cartId, modelId, quantity) => {
   if (!userId && !cartId) {
     throw new Error("No cart found");
   }
@@ -189,11 +206,11 @@ export const updateCartItem = async (userId, cartId, modelId, quantity) => {
       { $set: { "items.$.quantity": quantity } }
     );
 
-    await reserveStock(userId, modelId, quantity)
+    await reserveStock(userId, modelId, quantity);
   }
 };
 
-export const removeCartItem = async (userId, cartId, modelId) => {
+const removeCartItem = async (userId, cartId, modelId) => {
   if (!userId && !cartId) {
     throw new Error("No cart found");
   }
@@ -205,3 +222,5 @@ export const removeCartItem = async (userId, cartId, modelId) => {
     await CartModel.updateOne({ userId }, { $pull: { items: { modelId } } });
   }
 };
+
+export { addCartItem, updateCartItem, removeCartItem, mergeCart, loadCart };

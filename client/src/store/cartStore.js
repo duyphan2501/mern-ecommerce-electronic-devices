@@ -28,7 +28,7 @@ const useCartStore = create((set) => {
       set({ cart: res.data.cart });
       return res.data.cart;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to load cart");
+      console.log(error)
     } finally {
       set({ isLoading: false });
     }

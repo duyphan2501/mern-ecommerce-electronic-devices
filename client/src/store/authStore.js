@@ -164,10 +164,10 @@ const useAuthStore = create((set) => ({
     }
   },
 
-  logout: async () => {
+  logout: async (axiosPrivate) => {
     set({ isLoading: true, message: null });
     try {
-      const res = await axios.get(`${API_URL}/api/user/logout`);
+      const res = await axiosPrivate.get(`${API_URL}/api/user/logout`);
       set({
         ...initialState,
         message: res.data.message || "Logout successfully",

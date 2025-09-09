@@ -6,27 +6,39 @@ import MyContext from "../Context/MyContext";
 import useAddressStore from "../store/addressStore";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
-const AddressList = ({ title, address, isCheckout=false }) => {
+const AddressList = ({
+  title,
+  address,
+  isCheckout = false,
+  setSelectedAddress = null,
+}) => {
+  if (!address) return;
+  const defaultAddress = address.find((addr) => addr.isDefault === true);
+  if (defaultAddress && setSelectedAddress) setSelectedAddress(defaultAddress);
   const { setUpdateAddr, openAddrFrm } = useContext(MyContext);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState(defaultAddress?._id || null);
   const { deleteAddress } = useAddressStore.getState();
   const axiosPrivate = useAxiosPrivate();
 
   const handleSelect = (id) => {
     setSelectedId(id);
+    if (setSelectedAddress) {
+      const selectedAddress = address.find((addr) => addr._id === id);
+      setSelectedAddress(selectedAddress);
+    }
   };
 
   const handleCreate = () => {
     setUpdateAddr(null);
     openAddrFrm();
-  }
+  };
 
   const handleDelete = (addressId) => {
     deleteAddress(addressId, axiosPrivate);
     if (selectedId === addressId) {
       setSelectedId(null);
     }
-  }
+  };
 
   const handleUpdate = (address) => {
     setUpdateAddr(address);
@@ -50,7 +62,9 @@ const AddressList = ({ title, address, isCheckout=false }) => {
           <AddressCard
             key={addr._id}
             address={addr}
-            selected={selectedId === addr._id || (!selectedId && addr.isDefault)}
+            selected={
+              selectedId === addr._id || (!selectedId && addr.isDefault)
+            }
             onSelect={() => handleSelect(addr._id)}
             onUpdate={() => handleUpdate(addr)}
             onDelete={() => handleDelete(addr._id)}

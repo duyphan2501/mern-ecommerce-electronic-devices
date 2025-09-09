@@ -14,6 +14,7 @@ import { Menu, MenuItem } from "@mui/material";
 import { FaRegSmileWink } from "react-icons/fa";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
+import useAxiosPrivate from "../hooks/useAxiosPrivate.js"
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -39,10 +40,11 @@ const Header = () => {
 
   const { openCart } = useContext(MyContext);
   const { user, logout } = useAuthStore();
+  const axiosPrivate = useAxiosPrivate()
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await logout(axiosPrivate);
       toast.success(useAuthStore.getState().message);
       navigator("/")
     } catch (error) {

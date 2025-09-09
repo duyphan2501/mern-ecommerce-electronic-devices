@@ -2,7 +2,8 @@ import mongoose from 'mongoose'
 
 const reservationSchema = new mongoose.Schema({
   modelId: {type: String, required: true},
-  userId:{type: String, required: true},
+  userId: String,
+  guestId: String,
   quantity: {type: Number, required: true, min: 1},
   expireAt: { type: Date, required: true },
   isCheckout: {type: Boolean, default: false}

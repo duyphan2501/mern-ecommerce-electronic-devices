@@ -4,17 +4,18 @@ import { create } from "zustand";
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const usePaymentStore = create(set => {
-    const createPayment = async(axiosPrivate, cartItems) => {
+    const createPayment = async(axiosPrivate, cartItems, address) => {
         set({isPaymentLoading: true})
         try {
-            const res = await axiosPrivate.post(`${API_URL}/api/payment/create`, cartItems)
+            console.log(cartItems)
+            const res = await axiosPrivate.post(`${API_URL}/api/payment/create`, {cartItems, address})
             const checkoutUrl = res.data.url
             window.location.href = checkoutUrl
         } catch (error) {
             console.log(error)
-            toast.error()
+            toast.error(error.response.data.message)
         } finally {
-            set({isPaymentLoading: true})
+            set({isPaymentLoading: false})
         }
     }
 

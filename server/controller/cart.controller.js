@@ -29,19 +29,21 @@ const addToCart = async (req, res) => {
         cartId = uuidv4();
         res.cookie("cartId", cartId, {
           httpOnly: true,
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: 4 * 24 * 60 * 60 * 1000,
         });
       }
       cartKey = `cart:${cartId}`;
     }
     // đặt chỗ
-    await reserveStock(userId, modelId, quantity);
-
+    const {changed} = await reserveStock(userId, cartId, modelId, quantity);
     // cập nhật giỏ trong Redis
-    await addCartItem(userId, cartId, modelId, quantity);
+    await addCartItem(userId, cartId, modelId, changed);
 
+    const outOfStockQty = quantity - changed;
+    if (outOfStockQty !== 0)
+      throw new Error(`Hết hàng!${changed!==0? `Chỉ tăng số lượng thêm ${changed}`:""}`)
     return res.status(200).json({
-      message: "Added to cart successfully",
+      message: "Thêm thành công!",
       success: true,
       cart: await loadCart(userId, cartId),
     });
@@ -94,7 +96,7 @@ const updateCart = async (req, res) => {
     }
 
     // kiểm tra và update kho tạm
-    await reserveStock(userId, modelId, quantity)
+    await reserveStock(userId, cartId, modelId, quantity, true)
 
     // update cart và reset reservation
     await updateCartItem(userId, cartId, modelId, quantity);
@@ -132,7 +134,7 @@ const removeFromCart = async (req, res) => {
     }
 
     await removeCartItem(userId, cartId, modelId);
-    await cancelStockReservation(userId, modelId);
+    await cancelStockReservation(userId, cartId, modelId);
     return res.status(200).json({
       message: "Item removed from cart successfully",
       success: true,
