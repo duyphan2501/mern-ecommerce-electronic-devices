@@ -11,11 +11,13 @@ const reserveStock = async (
   if (!userId && !guestId) return;
 
   const expireAt = new Date(Date.now() + 1000 * 60 * 60 * 2); // 2 giờ
+  let reservation;
 
-  let reservation = await ReservationModel.findOne({
-    modelId,
-    $or: [{ userId }, { guestId }],
-  });
+  if (userId) {
+    reservation = await ReservationModel.findOne({ modelId, userId });
+  } else if (guestId) {
+    reservation = await ReservationModel.findOne({ modelId, guestId });
+  }
 
   let oldQuantity = reservation ? reservation.quantity : 0;
   let newQuantity = oldQuantity;
@@ -32,67 +34,70 @@ const reserveStock = async (
 
     if (diff !== 0) {
       if (diff > 0) {
-        // cần thêm hàng => check stock
-        const model =
-          await ModelsModel.findById(modelId).select("stockQuantity");
-
-        if (!model || model.stockQuantity <= 0) {
-          // không còn hàng => giữ nguyên reservation cũ
-          return {
-            reservedQty: reservation.quantity,
-            changed: 0,
-          };
-        }
-
-        // chỉ lấy được tối đa số stock hiện tại
-        const addable = Math.min(diff, model.stockQuantity);
-
-        await ModelsModel.updateOne(
-          { _id: modelId, stockQuantity: { $gte: addable } },
-          { $inc: { stockQuantity: -addable } }
+        // cần thêm hàng => check + trừ trong 1 bước
+        let updatedModel = await ModelsModel.updateOne(
+          { _id: modelId, stockQuantity: { $gte: diff } },
+          { $inc: { stockQuantity: -diff } },
+          { new: true }
         );
 
-        newQuantity = reservation.quantity + addable;
+        if (!updatedModel.modifiedCount) {
+          // không đủ diff, lấy hết còn lại
+          const modelLeft = await ModelsModel.findOneAndUpdate(
+            { _id: modelId, stockQuantity: { $gte: 1 } },
+            { $set: { stockQuantity: 0 } },
+            { new: false } // trả về trước khi set
+          );
+
+          if (!modelLeft) {
+            return {
+              reservedQty: reservation.quantity,
+              changed: 0,
+            };
+          }
+
+          diff = modelLeft.stockQuantity; 
+        }
+        reservation.quantity += diff;
+        newQuantity = reservation.quantity
       } else {
         // giảm số lượng => hoàn kho
         await ModelsModel.updateOne(
           { _id: modelId },
           { $inc: { stockQuantity: -diff } } // diff < 0 => -diff > 0 => hoàn lại
         );
+        reservation.quantity = newQuantity;
       }
     }
 
-    reservation.quantity = newQuantity;
     reservation.expireAt = expireAt;
     await reservation.save();
   } else {
     // === CREATE NEW ===
-    const model = await ModelsModel.findById(modelId).select("stockQuantity");
-    if (!model || model.stockQuantity <= 0) {
+    const updatedModel = await ModelsModel.updateOne(
+      { _id: modelId, stockQuantity: { $gte: quantity } },
+      { $inc: { stockQuantity: -quantity } },
+      { new: true }
+    );
+
+    if (!updatedModel.modifiedCount) {
       throw new Error("Out of stock");
     }
-
-    const reservable = Math.min(quantity, model.stockQuantity);
-
-    await ModelsModel.updateOne(
-      { _id: modelId, stockQuantity: { $gte: reservable } },
-      { $inc: { stockQuantity: -reservable } }
-    );
 
     reservation = await ReservationModel.create({
       modelId,
       userId,
       guestId,
-      quantity: reservable,
+      quantity,
       expireAt,
     });
 
-    newQuantity = reservable;
+    newQuantity = quantity;
   }
 
   return {
-    reservedQty: reservation.quantity, // tổng số lượng đang giữ
-    changed: newQuantity - oldQuantity, // số lượng thay đổi (+ thêm, - bớt)
+    reservedQty: reservation.quantity,
+    changed: newQuantity - oldQuantity,
   };
 };
 
@@ -104,18 +109,15 @@ const cancelStockReservation = async (
 ) => {
   if (!modelId || (!userId && !guestId)) return;
 
+  const filter = userId ? { modelId, userId } : { modelId, guestId };
+
   if (checkout) {
-    await ReservationModel.updateOne(
-      { $or: [{ userId }, { guestId }], modelId },
-      { isCheckout: true }
-    );
+    await ReservationModel.updateOne(filter, { isCheckout: true });
   } else {
-    await ReservationModel.updateOne(
-      { $or: [{ userId }, { guestId }], modelId },
-      { expireAt: new Date() }
-    );
+    await ReservationModel.updateOne(filter, { expireAt: new Date() });
   }
-  await ReservationModel.deleteOne({ $or: [{ userId }, { guestId }], modelId });
+
+  await ReservationModel.deleteOne(filter);
 };
 
 export { reserveStock, cancelStockReservation };

@@ -4,19 +4,15 @@ import { IoMdArrowDropdown } from "react-icons/io";
 
 const QuantityMenu = ({ quantity, handleChange }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedQuantity, setSelectedQuantity] = useState(quantity);
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
   const handleSelectItem = (value) => {
-    const currentValue = selectedQuantity;
-    setSelectedQuantity(value);
     try {
       handleChange(value);
     } catch (error) {
-      selectedQuantity(currentValue);
       console.error("Failed to update quantity:", error);
     }
     setAnchorEl(null);
@@ -28,7 +24,7 @@ const QuantityMenu = ({ quantity, handleChange }) => {
         className="px-1 flex items-center gap-1 rounded-md cursor-pointer hover:bg-gray-300 bg-gray-200 "
         onClick={handleClick}
       >
-        S.L: {selectedQuantity} <IoMdArrowDropdown />
+        S.L: {quantity} <IoMdArrowDropdown />
       </span>
       <Menu
         id="demo-positioned-menu"

@@ -35,15 +35,20 @@ const addToCart = async (req, res) => {
       cartKey = `cart:${cartId}`;
     }
     // đặt chỗ
-    const {changed} = await reserveStock(userId, cartId, modelId, quantity);
+    const { changed } = await reserveStock(userId, cartId, modelId, quantity);
+
     // cập nhật giỏ trong Redis
     await addCartItem(userId, cartId, modelId, changed);
 
     const outOfStockQty = quantity - changed;
     if (outOfStockQty !== 0)
-      throw new Error(`Hết hàng!${changed!==0? `Chỉ tăng số lượng thêm ${changed}`:""}`)
+      return res.status(400).json({
+        message: `Out of stock!${changed !== 0 ? `Quantity increases only ${changed}` : ""}`,
+        success: false,
+      });
+
     return res.status(200).json({
-      message: "Thêm thành công!",
+      message: "Added successfully!",
       success: true,
       cart: await loadCart(userId, cartId),
     });
@@ -65,7 +70,7 @@ const getCart = async (req, res) => {
     if (!userId && !cartId) {
       return res
         .status(400)
-        .json({ message: "No cart found", success: false, cart: null });
+        .json({ message: "Cart is empty", success: false, cart: null });
     }
     const cart = await loadCart(userId, cartId);
 
@@ -96,10 +101,23 @@ const updateCart = async (req, res) => {
     }
 
     // kiểm tra và update kho tạm
-    await reserveStock(userId, cartId, modelId, quantity, true)
+    const { reservedQty, changed } = await reserveStock(
+      userId,
+      cartId,
+      modelId,
+      quantity,
+      true
+    );
 
     // update cart và reset reservation
-    await updateCartItem(userId, cartId, modelId, quantity);
+    await updateCartItem(userId, cartId, modelId, reservedQty);
+
+    if (reservedQty !== quantity)
+      return res.status(400).json({
+        message: `Out of stock! ${changed !== 0 ? `Quantity changed ${changed}` : ""}`,
+        success: false,
+        cart: await loadCart(userId, cartId),
+      });
 
     return res.status(200).json({
       message: "Cart updated successfully",
@@ -107,6 +125,7 @@ const updateCart = async (req, res) => {
       cart: await loadCart(userId, cartId),
     });
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: error.message || error, success: false });

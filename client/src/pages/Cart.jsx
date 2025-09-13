@@ -14,8 +14,12 @@ const Cart = () => {
 
   const totalCost = calculateTotalCost(cart?.items || []);
 
-  const handleUpdateQuantity = (modelId, newQuantity) => {
-    updateCartItem(user?._id, modelId, newQuantity);
+  const handleUpdateQuantity = async(modelId, newQuantity) => {
+    try {
+      await updateCartItem(user?._id, modelId, newQuantity);
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   const handleRemoveItem = (modelId) => {

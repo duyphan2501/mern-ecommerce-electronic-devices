@@ -42,6 +42,8 @@ const useCartStore = create((set) => {
       toast.success(res.data.message);
       set({ cart: res.data.cart });
     } catch (error) {
+      if (error.response.status === 400)
+        set({ cart: error.response.data.cart });
       toast.error(error.response?.data?.message || "Failed to update cart");
     } finally {
       set({ isLoading: false });
