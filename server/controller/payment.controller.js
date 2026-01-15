@@ -98,7 +98,7 @@ const verifyWebhookData = async (req, res) => {
       });
 
     if (verifiedData.code === "00") {
-      order.status = "processing";
+      order.status = "pending";
       order.payment.status = "paid";
       // xoá giỏ hàng
       const userId = order.userId;

@@ -384,7 +384,7 @@ export default function StockTable() {
                       checked={isItemSelected}
                       inputProps={{
                         "aria-labelledby": labelId,
-                      }}
+                      }}  
                       onClick={(event) => handleClick(event, row.id)}
                     />
                   </TableCell>

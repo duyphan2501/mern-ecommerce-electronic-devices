@@ -29,7 +29,7 @@ const ProductDetail = () => {
   }, [slug, getProductBySlug]);
 
   return (
-    <>
+    <>  
       {product && (
         <div className="bg-white">
           <div className="container">

@@ -10,12 +10,14 @@ const label = { inputProps: { "aria-label": "Checkbox demo" } };
 const Cart = () => {
   const cart = useCartStore((state) => state.cart);
   const user = useAuthStore((state) => state.user);
-  const { updateCartItem, removeCartItem } = useCartStore();
+  const { isLoading, updateCartItem, removeCartItem } = useCartStore();
 
   const totalCost = calculateTotalCost(cart?.items || []);
 
   const handleUpdateQuantity = async(modelId, newQuantity) => {
     try {
+      if (isLoading)
+        return;
       await updateCartItem(user?._id, modelId, newQuantity);
     } catch (error) {
       console.log(error)

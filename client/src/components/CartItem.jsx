@@ -11,10 +11,12 @@ const CartItem = ({ product, userId }) => {
     product.price - product.price * (product.discount / 100)
   );
   const { closeCart } = useContext(MyContext);
-  const { updateCartItem, removeCartItem } = useCartStore();
+  const { isLoading, updateCartItem, removeCartItem } = useCartStore();
 
   const handleUpdateQuantity = async (newQuantity) => {
     try {
+      if (isLoading)
+        return;
       await updateCartItem(userId, product.modelId, newQuantity);
     } catch (error) {
       console.error("Failed to update quantity:", error);

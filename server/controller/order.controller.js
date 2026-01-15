@@ -16,4 +16,19 @@ const getNextOrderCode = async () => {
   }
 };
 
-export { getNextOrderCode };
+const getAllOrders = async (req, res) => {
+  try {
+    const orders = await orderModel.find({status: {$nin: ["processing", "draft"]}}).sort({ createdAt: -1 });
+    return res.status(200).json({
+      orders,
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || error,
+      success: false,
+    });
+  }
+};
+
+export { getNextOrderCode, getAllOrders };

@@ -13,9 +13,25 @@ const statusArr = ["pending", "delivery", "completed"];
 
 const OrderItem = ({ order, openViewDetail, isViewDetail }) => {
   const [status, setStatus] = useState(statusArr[0]);
-  const handleChange = (event) => {
-    setStatus(event.target.value);
-  };
+  <FormControl fullWidth>
+          <Select
+            id="demo-simple-select"
+            value={status}
+            size="small"
+            onChange={handleChange}
+            sx={{ fontFamily: "Outfit, sans-serif" }}
+          >
+            {statusArr.map((stat, index) => (
+              <MenuItem
+                key={index}
+                value={stat}
+                sx={{ fontFamily: "Outfit, sans-serif" }}
+              >
+                {stat}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
   return (
     <tr className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 text-black">
       <td className="pl-4 py-4">

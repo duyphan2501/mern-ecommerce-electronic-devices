@@ -203,7 +203,6 @@ const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  
 }));
 
 export default useAuthStore;

@@ -32,7 +32,7 @@ const AddressList = ({
     setUpdateAddr(null);
     openAddrFrm();
   };
-
+  
   const handleDelete = (addressId) => {
     deleteAddress(addressId, axiosPrivate);
     if (selectedId === addressId) {

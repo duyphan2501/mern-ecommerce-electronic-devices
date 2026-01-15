@@ -4,7 +4,7 @@ import CartModel from "../model/cart.model.js";
 import { cancelStockReservation, reserveStock } from "./reservation.service.js";
 
 const USER_CART_TTL = 60 * 60 * 24 * 7; // 7 ngày
-const GUEST_CART_TTL = 60 * 60 * 24 * 2; // 7 ngày
+const GUEST_CART_TTL = 60 * 60 * 24 * 2; // 2 ngày
 
 const addCartItem = async (userId, cartId, modelId, quantity) => {
   if (quantity === 0) return;

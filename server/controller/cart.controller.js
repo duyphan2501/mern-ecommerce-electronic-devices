@@ -68,9 +68,10 @@ const getCart = async (req, res) => {
     let { cartId } = req.cookies;
 
     if (!userId && !cartId) {
-      return res
-        .status(400)
-        .json({ message: "Cart is empty", success: false, cart: null });
+      return res.status(200).json({
+        cart: { items: [] },
+        success: true
+      });
     }
     const cart = await loadCart(userId, cartId);
 

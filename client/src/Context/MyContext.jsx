@@ -19,13 +19,13 @@ export const MyContextProvider = ({ children }) => {
   const [isOpenAddrFrm, setIsOpenAddrFrm] = useState(false);
   const openAddrFrm = () => setIsOpenAddrFrm(true);
   const closeAddrFrm = () => setIsOpenAddrFrm(false);
+  const [updateAddr, setUpdateAddr] = useState(null)
 
   const [persist, setPersist] = useState(
     JSON.parse(localStorage.getItem("persist")) || false
   );
   const [selectedProduct, setSelectedProduct] = useState({});
   const fiLoader = <FiLoader size={20} className="animate-spin" />;
-  const [updateAddr, setUpdateAddr] = useState(null)
 
   const values = {
     isOpenModal,
