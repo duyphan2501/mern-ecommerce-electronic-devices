@@ -6,7 +6,7 @@ const reservationSchema = new mongoose.Schema({
   guestId: String,
   quantity: {type: Number, required: true, min: 1},
   expireAt: { type: Date, required: true },
-  isCheckout: {type: Boolean, default: false}
+  isCheckout: { type: Boolean, default: false }
 });
 
 reservationSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });

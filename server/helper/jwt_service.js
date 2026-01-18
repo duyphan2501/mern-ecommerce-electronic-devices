@@ -2,10 +2,10 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config({quiet:true});
 
-const generateAccessTokenAndSetCookie = async (res, userId) => {
+const generateAccessTokenAndSetCookie = async (res, payload) => {
   const token = await new Promise((resolve, reject) => {
     jwt.sign(
-      { userId },
+      payload,
       process.env.ACCESS_TOKEN_SECRET_KEY,
       { expiresIn: "15m" },
       (err, token) => {
@@ -25,10 +25,10 @@ const generateAccessTokenAndSetCookie = async (res, userId) => {
   return token;
 };
 
-const generateRefreshTokenAndSetCookie = async (res, userId) => {
+const generateRefreshTokenAndSetCookie = async (res, payload) => {
   const token = await new Promise((resolve, reject) => {
     jwt.sign(
-      { userId },
+      payload,
       process.env.REFRESH_TOKEN_SECRET_KEY,
       { expiresIn: "7d" },
       (err, token) => {

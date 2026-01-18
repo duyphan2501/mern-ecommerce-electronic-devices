@@ -5,8 +5,6 @@ import { Link } from "react-router-dom";
 import useCartStore from "../store/cartStore";
 import useAuthStore from "../store/authStore";
 
-const label = { inputProps: { "aria-label": "Checkbox demo" } };
-
 const Cart = () => {
   const cart = useCartStore((state) => state.cart);
   const user = useAuthStore((state) => state.user);
@@ -14,13 +12,12 @@ const Cart = () => {
 
   const totalCost = calculateTotalCost(cart?.items || []);
 
-  const handleUpdateQuantity = async(modelId, newQuantity) => {
+  const handleUpdateQuantity = async (modelId, newQuantity) => {
     try {
-      if (isLoading)
-        return;
+      if (isLoading) return;
       await updateCartItem(user?._id, modelId, newQuantity);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
@@ -39,8 +36,8 @@ const Cart = () => {
   return (
     <div className=" py-10">
       <div className="container">
-        <div className="flex gap-10 mt-2">
-          <div className="w-3/4 bg-white rounded-md shadow border-[1px] border-gray-300 p-5">
+        <div className="lg:flex gap-10 mt-2">
+          <div className="lg:w-3/4 mb-5 lg:mb-0 bg-white rounded-md shadow border-[1px] border-gray-300 p-5">
             <div className="pb-4 space-y-1 lg:flex justify-between items-center">
               <h3 className="text-xl font-bold font-sans uppercase">
                 Giỏ hàng của bạn
@@ -62,19 +59,32 @@ const Cart = () => {
                 <div className="w-10">Xoá</div>
               </div>
             </div>
-            {cart?.items.map((item) => {
-              return (
-                <div className="" key={item.modelId}>
-                  <CartPageItem
-                    item={item}
-                    onUpdate={handleUpdateQuantity}
-                    onDelete={handleRemoveItem}
-                  />
+            {cart.items && cart.items.length === 0 ? (
+              <div className="flex justify-center items-center h-fit my-5">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Giỏ hàng của bạn trống
+                  </h3>
+                  <p className="text-gray-600">
+                    Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm.
+                  </p>
                 </div>
-              );
-            })}
+              </div>
+            ) : (
+              cart?.items.map((item) => {
+                return (
+                  <div className="" key={item.modelId}>
+                    <CartPageItem
+                      item={item}
+                      onUpdate={handleUpdateQuantity}
+                      onDelete={handleRemoveItem}
+                    />
+                  </div>
+                );
+              })
+            )}
           </div>
-          <div className="w-1/4 ">
+          <div className="lg:w-1/4 ">
             <div className="sticky top-37 bg-white p-5 rounded-md shadow border-[1px] border-gray-300">
               <h4 className="text-center font-bold text-lg border-b-2 pb-2 mb-2 border-gray-200">
                 Cart Summary

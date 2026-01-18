@@ -29,12 +29,24 @@ const CartDrawer = () => {
   const DrawerList = (
     <Box sx={{ width: 400 }} role="presentation">
       <div className="px-4 h-[60vh] overflow-y-scroll scroll">
-        {cart?.items &&
+        {cart?.items && cart?.items.length === 0 ? (
+          <div className="flex justify-center items-center h-full">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">
+                Giỏ hàng của bạn trống
+              </h3>
+              <p className="text-gray-600">
+                Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm.
+              </p>
+            </div>
+          </div>
+        ) : (
           cart?.items.map((product, index) => (
             <div className="" key={index}>
-              <CartItem product={product} userId={cart?.userId}/>
+              <CartItem product={product} userId={cart?.userId} />
             </div>
-          ))}
+          ))
+        )}
       </div>
       <div className="flex justify-center items-center h-[28vh]">
         <div className="w-8/10">
@@ -83,7 +95,7 @@ const CartDrawer = () => {
     <div>
       <Drawer open={isOpenCart} onClose={closeCart} anchor={"right"}>
         <h3 className="flex items-center justify-between p-3 font-semibold text-content">
-          Giỏ hàng ({cart?.items?.length})
+          Giỏ hàng ({cart?.items?.length || 0})
           <div className="hover:bg-gray-200 p-1 rounded-full cursor-pointer transition">
             <IoClose onClick={closeCart} size={25} />
           </div>

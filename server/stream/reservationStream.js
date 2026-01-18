@@ -9,27 +9,19 @@ export function watchReservationTTLRelease(mongoose) {
     });
 
   changeStream.on("change", async (event) => {
+    if (event.operationType !== "delete") return;
+
     const before = event.fullDocumentBeforeChange;
     if (!before) return;
-    const isExpired = before.expireAt <= new Date()
-    try {
-      // Chỉ hoàn kho nếu delete do TTL (hết hạn)
-      if (!before.isCheckout && isExpired) {
-        await ModelsModel.updateOne(
-          { _id: before.modelId },
-          { $inc: { stockQuantity: before.quantity } }
-        );
-        console.log(
-          `[TTL] released reservation for ${before.modelId} x${before.quantity} by ${before.userId}`
-        );
-      } else {
-        // Xoá thủ công (checkout/cancel) => bỏ qua, KHÔNG hoàn kho
-        console.log(
-          `[RESV] manual delete ignored for ${before.modelId} x${before.quantity}`
-        );
-      }
-    } catch (err) {
-      console.error("Error handling TTL release:", err);
+
+    if (before.isCheckout === false) {
+      await ModelsModel.updateOne(
+        { _id: before.modelId },
+        { $inc: { stockQuantity: before.quantity } },
+      );
+      console.log(
+        `[RELEASED] Model: ${before.modelId}, Qty: ${before.quantity}`,
+      );
     }
   });
 

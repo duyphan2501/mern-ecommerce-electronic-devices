@@ -64,7 +64,11 @@ const useCartStore = create((set) => {
     }
   };
 
-  return { isLoading: false, cart: null, addToCart, loadCart, updateCartItem, removeCartItem };
+  const clearCart = () => {
+    set({ cart: {items: []} });
+  };
+
+  return { isLoading: false, cart: null, addToCart, loadCart, updateCartItem, removeCartItem, clearCart };
 });
 
 export default useCartStore;

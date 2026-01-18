@@ -141,8 +141,14 @@ const login = async (req, res) => {
       });
 
     // generate token and set cookie
-    const accessToken = await generateAccessTokenAndSetCookie(res, user._id);
-    const refreshToken = await generateRefreshTokenAndSetCookie(res, user._id);
+    const accessToken = await generateAccessTokenAndSetCookie(res, {
+      userId: user._id,
+      email: user.email,
+    });
+    const refreshToken = await generateRefreshTokenAndSetCookie(res, {
+      userId: user._id,
+      email: user.email,
+    });
 
     // save token in db
     user.refreshToken = refreshToken;
@@ -152,8 +158,8 @@ const login = async (req, res) => {
     await user.save();
 
     // merge to use cart
-    const guestCartId = req.cookies.cartId
-    await mergeCart(guestCartId, user._id)
+    const guestCartId = req.cookies.cartId;
+    await mergeCart(guestCartId, user._id);
 
     return res.status(200).json({
       user: sanitizeUser(user),
@@ -461,11 +467,14 @@ const refreshToken = async (req, res) => {
     }
 
     // generate new token
-    const accessToken = await generateAccessTokenAndSetCookie(res, user._id);
-    const newRefreshToken = await generateRefreshTokenAndSetCookie(
-      res,
-      user._id
-    );
+    const accessToken = await generateAccessTokenAndSetCookie(res, {
+      userId: user._id,
+      email: user.email,
+    });
+    const newRefreshToken = await generateRefreshTokenAndSetCookie(res, {
+      userId: user._id,
+      email: user.email,
+    });
 
     // save token in db
     user.refreshToken = newRefreshToken;

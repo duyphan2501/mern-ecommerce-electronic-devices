@@ -6,7 +6,8 @@ const reserveStock = async (
   guestId = null,
   modelId,
   quantity,
-  isUpdate = false
+  isUpdate = false,
+  isCheckout = false
 ) => {
   if (!userId && !guestId) return;
 
@@ -21,6 +22,15 @@ const reserveStock = async (
 
   let oldQuantity = reservation ? reservation.quantity : 0;
   let newQuantity = oldQuantity;
+  console.log({isCheckout, reserved: newQuantity, quantity});
+
+  if (isCheckout && newQuantity === quantity) {
+    console.log("Checkout match, no change");
+    return {
+      reservedQty: reservation.quantity,
+      changed: 0,
+    };
+  }
 
   if (reservation) {
     // === UPDATE EXISTING ===
@@ -94,6 +104,7 @@ const reserveStock = async (
 
     newQuantity = quantity;
   }
+  console.log("Reserved:", reservation);
 
   return {
     reservedQty: reservation.quantity,
@@ -101,23 +112,14 @@ const reserveStock = async (
   };
 };
 
-const cancelStockReservation = async (
-  userId = null,
-  guestId = null,
-  modelId,
-  checkout = false
-) => {
-  if (!modelId || (!userId && !guestId)) return;
-
+const cancelStockReservation = async (userId = null, guestId = null, modelId, isCheckout = false) => {
   const filter = userId ? { modelId, userId } : { modelId, guestId };
-
-  if (checkout) {
-    await ReservationModel.updateOne(filter, { isCheckout: true });
+  if (isCheckout) {
+    await ReservationModel.updateOne(filter, { $set: { isCheckout: true } });
+    await ReservationModel.deleteOne(filter);
   } else {
-    await ReservationModel.updateOne(filter, { expireAt: new Date() });
+    await ReservationModel.deleteOne(filter);
   }
-
-  await ReservationModel.deleteOne(filter);
 };
 
 export { reserveStock, cancelStockReservation };

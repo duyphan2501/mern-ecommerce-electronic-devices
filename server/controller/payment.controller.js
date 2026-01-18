@@ -1,10 +1,7 @@
 import { payOS } from "../config/payos.init.js";
 import dotenv from "dotenv";
 import orderModel from "../model/order.model.js";
-import { createNewOrder } from "../service/order.service.js";
-import { cancelStockReservation } from "../service/reservation.service.js";
-import CartModel from "../model/cart.model.js";
-import { removeCartItem } from "../service/cart.service.js";
+import { createNewOrder, handleOrderCreation } from "../service/order.service.js";
 
 dotenv.config({ quiet: true });
 
@@ -14,6 +11,7 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
 const createPayment = async (req, res) => {
   try {
     const userId = req.user.userId;
+    const email = req.user.email;
     const { cartItems, address } = req.body;
 
     if (!address)
@@ -28,7 +26,7 @@ const createPayment = async (req, res) => {
         success: false,
       });
 
-    const {itemsPayos, newOrder} = await createNewOrder(cartItems, userId, address, "payos")
+    const {itemsPayos, newOrder} = await createNewOrder(cartItems, userId, email, address, "payos")
 
     // Gọi PayOS
     const payload = {
@@ -37,7 +35,7 @@ const createPayment = async (req, res) => {
       description: newOrder.orderId,
       items: itemsPayos,
       cancelUrl: `${BACKEND_URL}/api/payment/cancel`,
-      returnUrl: `${FRONTEND_URL}/payment/success`,
+      returnUrl: `${FRONTEND_URL}/order-success`,
       expiredAt: Math.floor(Date.now() / 1000) + 15 * 60,
     };
 
@@ -101,12 +99,7 @@ const verifyWebhookData = async (req, res) => {
       order.status = "pending";
       order.payment.status = "paid";
       // xoá giỏ hàng
-      const userId = order.userId;
-      for (const item of order.items) {
-        await removeCartItem(userId, null, item.modelId);
-        await cancelStockReservation(userId, item.modelId, true);
-      }
-      await CartModel.deleteOne({ userId });
+      await handleOrderCreation(order);
     } else {
       // Thanh toán thất bại
       order.payment.status = "failed";

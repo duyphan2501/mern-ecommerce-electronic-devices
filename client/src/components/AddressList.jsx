@@ -5,6 +5,7 @@ import { useContext, useState } from "react";
 import MyContext from "../Context/MyContext";
 import useAddressStore from "../store/addressStore";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import { useEffect } from "react";
 
 const AddressList = ({
   title,
@@ -12,19 +13,29 @@ const AddressList = ({
   isCheckout = false,
   setSelectedAddress = null,
 }) => {
-  if (!address) return;
-  const defaultAddress = address.find((addr) => addr.isDefault === true);
-  if (defaultAddress && setSelectedAddress) setSelectedAddress(defaultAddress);
   const { setUpdateAddr, openAddrFrm } = useContext(MyContext);
-  const [selectedId, setSelectedId] = useState(defaultAddress?._id || null);
+  const [selectedId, setSelectedId] = useState(null);
   const { deleteAddress } = useAddressStore.getState();
   const axiosPrivate = useAxiosPrivate();
+
+  // 1. Tìm địa chỉ mặc định
+  const defaultAddress = address?.find((addr) => addr.isDefault === true);
+
+  // 2. Sử dụng useEffect để set địa chỉ mặc định khi component mount hoặc danh sách thay đổi
+  useEffect(() => {
+    if (isCheckout && defaultAddress && setSelectedAddress) {
+      setSelectedAddress(defaultAddress);
+      setSelectedId(defaultAddress._id);
+    }
+  }, [address, isCheckout]);
+
+  if (!address) return null;
 
   const handleSelect = (id) => {
     setSelectedId(id);
     if (setSelectedAddress) {
-      const selectedAddress = address.find((addr) => addr._id === id);
-      setSelectedAddress(selectedAddress);
+      const foundAddress = address.find((addr) => addr._id === id);
+      setSelectedAddress(foundAddress);
     }
   };
 

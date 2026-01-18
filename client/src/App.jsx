@@ -16,6 +16,7 @@ import useCartStore from "./store/cartStore";
 import AddressForm from "./components/AddressForm";
 import useAxiosPrivate from "./hooks/useAxiosPrivate";
 import useAddressStore from "./store/addressStore";
+import OrderSuccess from "./pages/OrderSuccess";
 
 // Lazy load cho các page
 const Home = lazy(() => import("./pages/Home"));
@@ -100,6 +101,7 @@ function App() {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/my-account" element={<MyAccount />} />
               <Route path="/payment/success" element={<PaymentSuccess/>} />
+              <Route path="/order-success" element={<OrderSuccess/>} />
             </Route>
           </Routes>
         </Suspense>
