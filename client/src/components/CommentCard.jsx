@@ -1,5 +1,5 @@
 import { Rating, Stack } from "@mui/material";
-import formatDate from "../utils/DateFormat";
+import {formatDate} from "../utils/DateFormat";
 
 const CommentCard = ({ comment }) => {
   const date = formatDate(comment.date);

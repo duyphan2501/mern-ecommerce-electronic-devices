@@ -33,7 +33,7 @@ const ProductDetail = () => {
       {product && (
         <div className="bg-white">
           <div className="container">
-            <section className="lg:flex gap-5 py-5">
+            <section className="lg:flex gap-5 py-10">
               <div className="">
                 <ProductZoom imageAddress={product.images} />
               </div>

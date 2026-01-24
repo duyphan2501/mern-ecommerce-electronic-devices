@@ -174,7 +174,7 @@ const useAuthStore = create((set) => ({
       });
     } catch (error) {
       set({
-        message: error.response.data.message || "Logout failed",
+        message: error.response?.data.message || "Logout failed",
         isLoading: false,
       });
       throw error;

@@ -14,7 +14,8 @@ import { Menu, MenuItem } from "@mui/material";
 import { FaRegSmileWink } from "react-icons/fa";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
-import useAxiosPrivate from "../hooks/useAxiosPrivate.js"
+import useAxiosPrivate from "../hooks/useAxiosPrivate.js";
+import useCartStore from "../store/cartStore.js";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -28,7 +29,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
-  const navigator = useNavigate()
+  const navigator = useNavigate();
 
   const openProfile = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -38,15 +39,17 @@ const Header = () => {
     setAnchorEl(null);
   };
 
+  const cart = useCartStore((state) => state.cart);
+
   const { openCart } = useContext(MyContext);
   const { user, logout } = useAuthStore();
-  const axiosPrivate = useAxiosPrivate()
+  const axiosPrivate = useAxiosPrivate();
 
   const handleLogout = async () => {
     try {
       await logout(axiosPrivate);
       toast.success(useAuthStore.getState().message);
-      navigator("/")
+      navigator("/");
     } catch (error) {
       toast.error(useAuthStore.getState().message);
       console.log(error);
@@ -90,7 +93,7 @@ const Header = () => {
               {user ? (
                 <li className="size-10 flex justify-end items-center flex-1">
                   <Button
-                    className="!bg-gray-100 hover:!bg-gray-300 !items-center !normal-case !text-gray-500 !gap-1"
+                    className="!bg-gray-100 hover:!bg-gray-300 !items-center !normal-case !text-gray-500 !gap-1 text-nowrap"
                     aria-controls={openProfile ? "basic-menu" : undefined}
                     aria-haspopup="true"
                     aria-expanded={openProfile ? "true" : undefined}
@@ -138,13 +141,26 @@ const Header = () => {
                   >
                     <MenuItem
                       component={Link}
-                      to={"/my-account"}
+                      to={"/my-account/profile"}
                       onClick={handleClose}
                     >
-                      Profile
+                      Hồ sơ cá nhân
                     </MenuItem>
-                    <MenuItem onClick={handleClose}>My account</MenuItem>
-                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                    <MenuItem
+                      component={Link}
+                      to={"/my-account/address"}
+                      onClick={handleClose}
+                    >
+                      Sổ địa chỉ
+                    </MenuItem>
+                    <MenuItem
+                      component={Link}
+                      to={"/my-account/orders"}
+                      onClick={handleClose}
+                    >
+                      Đơn hàng của tôi
+                    </MenuItem>
+                    <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
                   </Menu>
                 </li>
               ) : (
@@ -168,10 +184,12 @@ const Header = () => {
               <li>
                 {/* <Link to={"/wishlist"}> */}
                 <Tooltip title="Đơn hàng" arrow>
-                  <IconButton aria-label="wishlist">
-                    <StyledBadge badgeContent={4} color="secondary">
-                      <IoBagCheckOutline className="text-[#0d68f3]" />
-                    </StyledBadge>
+                  <IconButton
+                    aria-label="orders"
+                    component={Link}
+                    to={"/my-account/orders"}
+                  >
+                    <IoBagCheckOutline className="text-[#0d68f3]" />
                   </IconButton>
                 </Tooltip>
                 {/* </Link> */}
@@ -179,7 +197,10 @@ const Header = () => {
               <li>
                 <Tooltip title="Giỏ hàng" arrow>
                   <IconButton aria-label="cart" onClick={openCart}>
-                    <StyledBadge badgeContent={4} color="secondary">
+                    <StyledBadge
+                      badgeContent={cart?.items.length || 0}
+                      color="secondary"
+                    >
                       <IoCartOutline className="text-[#0d68f3]" />
                     </StyledBadge>
                   </IconButton>

@@ -17,6 +17,7 @@ import AddressForm from "./components/AddressForm";
 import useAxiosPrivate from "./hooks/useAxiosPrivate";
 import useAddressStore from "./store/addressStore";
 import OrderSuccess from "./pages/OrderSuccess";
+import OrderTracking from "./pages/OrderTracking";
 
 // Lazy load cho các page
 const Home = lazy(() => import("./pages/Home"));
@@ -38,12 +39,13 @@ function App() {
 
   const getCart = async() => {
     try {
-      console.log("Loading cart for user:", user?._id);
       await loadCart(user?._id);
     } catch (error) {
       console.error("Failed to load cart:", error);
     }
   }
+
+
   useEffect(() => {
     getCart();
   }, [user, loadCart]);
@@ -99,9 +101,10 @@ function App() {
               />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
-              <Route path="/my-account" element={<MyAccount />} />
+              <Route path="/my-account/:tab" element={<MyAccount />} />
               <Route path="/payment/success" element={<PaymentSuccess/>} />
               <Route path="/order-success" element={<OrderSuccess/>} />
+              <Route path="/order/:orderId" element={<OrderTracking/>} />
             </Route>
           </Routes>
         </Suspense>

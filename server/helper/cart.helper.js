@@ -20,6 +20,7 @@ async function formatCartItemInfo(items) {
         productId: product?._id,
         productName: product?.productName,
         images: product?.images,
+        slug: product?.productUrl,
       };
     })
   );

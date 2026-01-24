@@ -17,7 +17,7 @@ const CheckoutItem = ({ item }) => {
       </div>
       <div className=" font-semibold">
         {formatMoney(
-          (item.price - (item.price * item.discount) / 100) * item.quantity
+          (item.price - (item.price * item.discount) / 100)
         )}
       </div>
     </div>

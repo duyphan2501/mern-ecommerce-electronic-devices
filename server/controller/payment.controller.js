@@ -20,7 +20,7 @@ const createPayment = async (req, res) => {
         success: false,
       });
 
-    if (!cartItems)
+    if (!cartItems || cartItems.length === 0)
       return res.status(400).json({
         message: "Order is empty!",
         success: false,

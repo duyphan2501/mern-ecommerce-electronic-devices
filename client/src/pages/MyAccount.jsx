@@ -5,12 +5,11 @@ import {
   MdOutlineLogout,
 } from "react-icons/md";
 import { IoBagCheckOutline } from "react-icons/io5";
-import { Component, useContext, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import Profile from "../components/MyAccount/Profile";
 import Address from "../components/MyAccount/Address";
-import MyContext from "../Context/MyContext";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Order from "../components/MyAccount/Order";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
@@ -26,33 +25,33 @@ const tabs = [
   {
     icon: <MdPersonOutline size={25} />,
     label: "Thông tin tài khoản",
+    id: "profile",
   },
   {
     icon: <MdOutlineLocationOn size={25} />,
     label: "Sổ địa chỉ",
+    id: "address",
   },
   {
     icon: <IoBagCheckOutline size={22} />,
     label: "Đơn hàng của tôi",
+    id: "orders",
   },
 ];
 
 const MyAccount = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  const handleActiveTab = (index) => {
-    setActiveTab(index);
-  };
-
-  const { logout, user, message } = useAuthStore();
-
+  const tab = useParams().tab;
+  const activeTab = tabs.findIndex((t) => t.id === tab) !== -1 
+                  ? tabs.findIndex((t) => t.id === tab) 
+                  : 0;
+  const { logout, user } = useAuthStore();
   const handleLogout = async () => {
     try {
-      await logout();
-      // toast.success(useAuthStore.getState().message);
-      toast.success(message);
+      await logout(axiosPrivate);
+      toast.success(useAuthStore.getState().message);
+      window.location.href = "/";
     } catch (error) {
-      // toast.error(useAuthStore.getState().message);
-      toast.error(message);
+      toast.error(useAuthStore.getState().message);
       console.log(error);
     }
   };
@@ -84,8 +83,8 @@ const MyAccount = () => {
 
   return (
     <div>
-      <div className="container py-10 lg:px-20 md:flex gap-5">
-        <div className="md:w-1/4 bg-white rounded-md border border-gray-200 shadow h-fit">
+      <div className="container py-10 lg:px-20 lg:flex gap-5">
+        <div className="lg:w-1/4 min-w-[300px] bg-white rounded-md border border-gray-200 shadow h-fit">
           <div className="flex flex-col justify-center items-center gap-1 p-5">
             <div className="size-25 rounded-full border-5 border-blue-200 relative group flex items-center justify-center">
               {isLoading.avatar ? (
@@ -132,7 +131,8 @@ const MyAccount = () => {
                       activeTab === index &&
                       "!shadow-[inset_4px_0_0_#dc2626] !bg-gray-200"
                     }`}
-                    onClick={() => handleActiveTab(index)}
+                    component={Link}
+                    to={`/my-account/${tab.id}`}
                   >
                     <span className="w-7">{tab.icon}</span>
                     {tab.label}
@@ -155,7 +155,7 @@ const MyAccount = () => {
             </ul>
           </div>
         </div>
-        <div className="md:w-3/4 md:mt-0 mt-4">
+        <div className="w-full lg:mt-0 mt-4">
           {activeTab === 0 && <Profile />}
           {activeTab === 1 && <Address />}
           {activeTab === 2 && <Order />}

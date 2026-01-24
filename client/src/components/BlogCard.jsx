@@ -1,5 +1,5 @@
 import { FaRegClock } from "react-icons/fa";
-import formatDate from "../utils/DateFormat";
+import {formatDate} from "../utils/DateFormat";
 
 const BlogCard = ({ image, title, content, date }) => {
   return (

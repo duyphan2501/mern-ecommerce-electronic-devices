@@ -1,8 +1,7 @@
 import { publishSendOrderEmail } from "../helper/message.helper.js";
-import CartModel from "../model/cart.model.js";
 import orderModel from "../model/order.model.js";
-import { removeCartItem } from "./cart.service.js";
-import { cancelStockReservation, reserveStock } from "./reservation.service.js";
+import ModelsModel from "../model/productModel.model.js";
+import {  reserveStock } from "./reservation.service.js";
 
 async function generateOrderCode() {
   const now = new Date();
@@ -17,7 +16,7 @@ async function generateOrderCode() {
     now.getDate(),
     0,
     0,
-    0
+    0,
   );
   const endOfDay = new Date(
     now.getFullYear(),
@@ -25,7 +24,7 @@ async function generateOrderCode() {
     now.getDate(),
     23,
     59,
-    59
+    59,
   );
 
   const countToday = await orderModel.countDocuments({
@@ -44,7 +43,7 @@ const createNewOrder = async (
   email,
   address,
   provider,
-  orderStatus = "pending"
+  orderStatus = "pending",
 ) => {
   const items = [];
   const itemsPayos = [];
@@ -57,13 +56,14 @@ const createNewOrder = async (
     const discountPrice =
       Math.round((item.price * (1 - item.discount / 100)) / 1000) * 1000;
 
-    await reserveStock(userId, null, item.modelId, item.quantity, false, true);
+    await reserveStock(userId, null, item.modelId, item.quantity, true);
 
     items.push({
       modelId: item.modelId,
       name,
       quantity: item.quantity,
       price: discountPrice,
+      image: item.images[0] || "",
     });
     itemsPayos.push({ name, quantity: item.quantity, price: discountPrice });
   }
@@ -72,7 +72,7 @@ const createNewOrder = async (
 
   const orderId = await generateOrderCode();
   const orderCode = Number(
-    `${Date.now()}`.slice(-7) + Math.floor(Math.random() * 90 + 10)
+    `${Date.now()}`.slice(-7) + Math.floor(Math.random() * 90 + 10),
   ); // ra 9 chữ số ngẫu nhiên từ timestamp
 
   // Tạo đơn trong DB
@@ -90,6 +90,7 @@ const createNewOrder = async (
       province: address.province,
       addressDetail: address.addressDetail,
     },
+    status: orderStatus,
     payment: {
       provider: provider,
       status: orderStatus,
@@ -104,16 +105,17 @@ const createNewOrder = async (
   };
 };
 
-const handleOrderCreation = async (
-  order
-) => {
-  const userId = order.userId;
-  for (const item of order.items) {
-    await removeCartItem(userId, null, item.modelId);
-    await cancelStockReservation(userId, null, item.modelId, true);
-  }
-  await CartModel.deleteOne({ userId });
+const handleOrderCreation = async (order) => {
   await publishSendOrderEmail(order);
 };
 
-export { generateOrderCode, createNewOrder, handleOrderCreation };
+const restockOrderItems = async (order) => {
+  const promises = order.items.map((item) =>
+    ModelsModel.findByIdAndUpdate(item.modelId, {
+      $inc: { stockQuantity: item.quantity },
+    }),
+  );
+  await Promise.all(promises);
+};
+
+export { generateOrderCode, createNewOrder, handleOrderCreation, restockOrderItems };

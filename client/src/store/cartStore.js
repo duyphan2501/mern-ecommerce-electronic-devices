@@ -28,7 +28,7 @@ const useCartStore = create((set) => {
       set({ cart: res.data.cart });
       return res.data.cart;
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       set({ isLoading: false });
     }
@@ -54,21 +54,31 @@ const useCartStore = create((set) => {
     set({ isLoading: true });
     try {
       const url = `${API_URL}/api/cart/item/delete`;
-      const res = await axios.delete(url, {data: { userId, modelId } });
+      const res = await axios.delete(url, { data: { userId, modelId } });
       toast.success(res.data.message);
       set({ cart: res.data.cart });
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to remove item from cart");
+      toast.error(
+        error.response?.data?.message || "Failed to remove item from cart",
+      );
     } finally {
       set({ isLoading: false });
     }
   };
 
   const clearCart = () => {
-    set({ cart: {items: []} });
+    set({ cart: { items: [] } });
   };
 
-  return { isLoading: false, cart: null, addToCart, loadCart, updateCartItem, removeCartItem, clearCart };
+  return {
+    isLoading: false,
+    cart: { items: [] },
+    addToCart,
+    loadCart,
+    updateCartItem,
+    removeCartItem,
+    clearCart,
+  };
 });
 
 export default useCartStore;

@@ -70,7 +70,7 @@ const getCart = async (req, res) => {
     if (!userId && !cartId) {
       return res.status(200).json({
         cart: { items: [] },
-        success: true
+        success: true,
       });
     }
     const cart = await loadCart(userId, cartId);
@@ -107,7 +107,6 @@ const updateCart = async (req, res) => {
       cartId,
       modelId,
       quantity,
-      true
     );
 
     // update cart và reset reservation

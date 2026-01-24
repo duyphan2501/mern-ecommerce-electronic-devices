@@ -6,7 +6,6 @@ const reserveStock = async (
   guestId = null,
   modelId,
   quantity,
-  isUpdate = false,
   isCheckout = false
 ) => {
   if (!userId && !guestId) return;
@@ -21,11 +20,9 @@ const reserveStock = async (
   }
 
   let oldQuantity = reservation ? reservation.quantity : 0;
-  let newQuantity = oldQuantity;
-  console.log({isCheckout, reserved: newQuantity, quantity});
+  let newQuantity = oldQuantity !== 0 ? oldQuantity + quantity : quantity;
 
   if (isCheckout && newQuantity === quantity) {
-    console.log("Checkout match, no change");
     return {
       reservedQty: reservation.quantity,
       changed: 0,
@@ -33,12 +30,6 @@ const reserveStock = async (
   }
 
   if (reservation) {
-    // === UPDATE EXISTING ===
-    if (!isUpdate) {
-      newQuantity = reservation.quantity + quantity; // cộng thêm
-    } else {
-      newQuantity = quantity; // set lại tuyệt đối
-    }
 
     let diff = newQuantity - reservation.quantity;
 
@@ -104,8 +95,6 @@ const reserveStock = async (
 
     newQuantity = quantity;
   }
-  console.log("Reserved:", reservation);
-
   return {
     reservedQty: reservation.quantity,
     changed: newQuantity - oldQuantity,

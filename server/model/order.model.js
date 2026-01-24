@@ -16,6 +16,7 @@ const orderSchema = new mongoose.Schema(
         name: { type: String, required: true },
         quantity: { type: Number, required: true, min: 1  },
         price: { type: Number, required: true},
+        image: { type: String },
       },
     ],
     shippingInfo: {
@@ -29,7 +30,7 @@ const orderSchema = new mongoose.Schema(
     description: { type: String },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "shipping", "delivered", "cancelled", "processing", "draft"],
+      enum: ["pending", "confirmed", "shipping", "delivered", "cancelled", "processing", "draft", "deleted"],
       default: "draft",
     },
     payment: {

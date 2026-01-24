@@ -1,6 +1,6 @@
 import { IconButton } from "@mui/material";
 import { IoIosArrowDown } from "react-icons/io";
-import formatDate from "../utils/DateFormat";
+import {formatDate} from "../utils/DateFormat";
 import formatMoney from "../utils/MoneyFormat";
 
 const OrderItem = ({ order, openViewDetail, isViewDetail }) => {
