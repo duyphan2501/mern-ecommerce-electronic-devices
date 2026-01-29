@@ -1,84 +1,173 @@
 import { create } from "zustand";
-import toast from "react-hot-toast";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 axios.defaults.withCredentials = true;
 
-const useCartStore = create((set) => {
-  const addToCart = async (cartData) => {
+const useCartStore = create((set, get) => ({
+  /* =======================
+      STATE
+  ======================== */
+  isLoading: false,
+
+  cart: {
+    items: [],
+  },
+
+  /* =======================
+      LOCAL HELPER
+  ======================== */
+  updateCartStore: (modelId, finalQty) => {
+    const cart = get().cart;
+
+    if (!cart || !cart.items) return;
+
+    const existItem = cart.items.find((item) => item.modelId === modelId);
+
+    // ❌ không tồn tại & qty = 0 → bỏ qua
+    if (!existItem && finalQty === 0) return;
+
+    // ✅ thêm mới
+    if (!existItem && finalQty > 0) {
+      set((state) => ({
+        cart: {
+          ...state.cart,
+          items: [...state.cart.items, { modelId, quantity: finalQty }],
+        },
+      }));
+      return;
+    }
+
+    // ✅ update qty
+    set((state) => ({
+      cart: {
+        ...state.cart,
+        items: state.cart.items.map((item) =>
+          item.modelId === modelId ? { ...item, quantity: finalQty } : item,
+        ),
+      },
+    }));
+  },
+
+  /* =======================
+      ADD TO CART
+  ======================== */
+  addToCart: async (cartData) => {
     set({ isLoading: true });
+
     try {
-      const url = `${API_URL}/api/cart/add`;
-      const res = await axios.post(url, cartData);
+      const res = await axios.post(`${API_URL}/api/cart/add`, cartData);
+
+      const finalQty = res.data.currentCartQty;
+
+      get().updateCartStore(cartData.modelId, finalQty);
+
       toast.success(res.data.message);
-      set({ cart: res.data.cart });
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to add to cart");
+      const data = error.response?.data;
+
+      toast.error(data?.message || "Thêm giỏ hàng thất bại");
+
+      // ⚠️ thiếu hàng → backend trả qty thật
+      if (
+        error.response?.status === 400 &&
+        data?.currentCartQty !== undefined
+      ) {
+        get().updateCartStore(cartData.modelId, data.currentCartQty);
+      }
     } finally {
       set({ isLoading: false });
     }
-  };
+  },
 
-  const loadCart = async (userId) => {
+  /* =======================
+      LOAD CART
+  ======================== */
+  loadCart: async (userId) => {
     set({ isLoading: true });
+
     try {
-      const url = `${API_URL}/api/cart/get/${userId || "guest"}`;
-      const res = await axios.get(url);
-      set({ cart: res.data.cart });
+      const res = await axios.get(
+        `${API_URL}/api/cart/get/${userId || "guest"}`,
+      );
+
+      set({
+        cart: res.data.cart || { items: [] },
+      });
+
       return res.data.cart;
     } catch (error) {
-      console.log(error);
+      console.log("Load cart error:", error);
     } finally {
       set({ isLoading: false });
     }
-  };
+  },
 
-  const updateCartItem = async (userId, modelId, quantity) => {
+  /* =======================
+      UPDATE ITEM QTY
+  ======================== */
+  updateCartItem: async (userId, modelId, quantity) => {
     set({ isLoading: true });
+
     try {
-      const url = `${API_URL}/api/cart/update`;
-      const res = await axios.put(url, { userId, modelId, quantity });
+      const res = await axios.put(`${API_URL}/api/cart/update`, {
+        userId,
+        modelId,
+        quantity,
+      });
+
+      const finalQty = res.data.currentCartQty;
+
+      get().updateCartStore(modelId, finalQty);
+
       toast.success(res.data.message);
-      set({ cart: res.data.cart });
     } catch (error) {
-      if (error.response.status === 400)
-        set({ cart: error.response.data.cart });
-      toast.error(error.response?.data?.message || "Failed to update cart");
+      const data = error.response?.data;
+
+      toast.error(data?.message || "Cập nhật giỏ hàng lỗi");
+
+      if (
+        error.response?.status === 400 &&
+        data?.currentCartQty !== undefined
+      ) {
+        get().updateCartStore(modelId, data.currentCartQty);
+      }
     } finally {
       set({ isLoading: false });
     }
-  };
+  },
 
-  const removeCartItem = async (userId, modelId) => {
+  /* =======================
+      REMOVE ITEM
+  ======================== */
+  removeCartItem: async (userId, modelId) => {
     set({ isLoading: true });
+
     try {
-      const url = `${API_URL}/api/cart/item/delete`;
-      const res = await axios.delete(url, { data: { userId, modelId } });
+      const res = await axios.delete(`${API_URL}/api/cart/item/delete`, {
+        data: { userId, modelId },
+      });
+
+      set({
+        cart: res.data.cart || { items: [] },
+      });
+
       toast.success(res.data.message);
-      set({ cart: res.data.cart });
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to remove item from cart",
-      );
+      toast.error(error.response?.data?.message || "Xóa sản phẩm thất bại");
     } finally {
       set({ isLoading: false });
     }
-  };
+  },
 
-  const clearCart = () => {
+  /* =======================
+      CLEAR CART
+  ======================== */
+  clearCart: () => {
     set({ cart: { items: [] } });
-  };
-
-  return {
-    isLoading: false,
-    cart: { items: [] },
-    addToCart,
-    loadCart,
-    updateCartItem,
-    removeCartItem,
-    clearCart,
-  };
-});
+  },
+}));
 
 export default useCartStore;

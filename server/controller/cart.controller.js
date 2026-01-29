@@ -1,59 +1,101 @@
 import { v4 as uuidv4 } from "uuid";
 import {
-  addCartItem,
   loadCart,
   removeCartItem,
-  updateCartItem,
+  syncRedisCartToMongo,
 } from "../service/cart.service.js";
 import {
   cancelStockReservation,
   reserveStock,
 } from "../service/reservation.service.js";
+import { StockService } from "../service/stock.service.js";
+import redisClient from "../config/init.redis.js";
+import CartModel from "../model/cart.model.js";
+import { CART_TTL_MS } from "../config/constants.js";
 
 const addToCart = async (req, res) => {
   try {
     const { modelId, quantity, userId } = req.body;
     let { cartId } = req.cookies;
 
+    const ownerId = userId || cartId || uuidv4();
+    const isUser = Boolean(userId);
+
+    // 1. Lấy số lượng hiện tại từ Redis
+    const currentQty =
+      (await redisClient.hGet(`cart:${ownerId}`, `product:${modelId}`)) || 0;
+    const targetQty = parseInt(currentQty) + parseInt(quantity);
+
+    // 2. Thực thi qua Lua (Check kho + Trừ kho + Giữ chỗ)
+    const finalQty = await StockService.reserve(ownerId, modelId, targetQty, isUser);
+
+    // 3. Set cookie nếu là khách mới
+    if (!userId && !cartId) {
+      res.cookie("cartId", ownerId, { httpOnly: true, maxAge: CART_TTL_MS.GUEST });
+    }
+
+    // 4. Nếu là User, đồng bộ vào MongoDB (Background task - không đợi)
+    await syncRedisCartToMongo(userId, modelId, finalQty);
+
+    const isFullSuccess = finalQty === targetQty;
+    return res.status(isFullSuccess ? 200 : 400).json({
+      success: isFullSuccess,
+      message: isFullSuccess
+        ? "Thêm thành công"
+        : finalQty !== 0
+          ? `Chỉ còn ${finalQty} sản phẩm`
+          : "Hết hàng",
+      currentCartQty: finalQty,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: error.message || error, success: false });
+  }
+};
+
+const updateCart = async (req, res) => {
+  try {
+    const { userId, modelId, quantity } = req.body;
+    const { cartId } = req.cookies;
+
+    if (!userId && !cartId) {
+      return res.status(400).json({ message: "No cart found", success: false });
+    }
+
     if (!modelId || !quantity) {
       return res
         .status(400)
         .json({ message: "Missing information!", success: false });
     }
-    let cartKey;
 
-    if (userId) {
-      cartKey = `cart:${userId}`;
-    } else {
-      if (!cartId) {
-        cartId = uuidv4();
-        res.cookie("cartId", cartId, {
-          httpOnly: true,
-          maxAge: 4 * 24 * 60 * 60 * 1000,
-        });
-      }
-      cartKey = `cart:${cartId}`;
+    const ownerId = userId || cartId || uuidv4();
+    const isUser = Boolean(userId);
+
+    const targetQty = parseInt(quantity);
+
+    // 2. Thực thi qua Lua (Check kho + Trừ kho + Giữ chỗ)
+    const finalQty = await StockService.reserve(ownerId, modelId, targetQty, isUser);
+
+    // 3. Set cookie nếu là khách mới
+    if (!userId && !cartId) {
+      res.cookie("cartId", ownerId, { httpOnly: true, maxAge: CART_TTL_MS.GUEST });
     }
-    // đặt chỗ
-    const { changed } = await reserveStock(userId, cartId, modelId, quantity);
 
-    // cập nhật giỏ trong Redis
-    await addCartItem(userId, cartId, modelId, changed);
+    // 4. Nếu là User, đồng bộ vào MongoDB (Background task - không đợi)
+    await syncRedisCartToMongo(userId, modelId, finalQty);
 
-    const outOfStockQty = quantity - changed;
-    if (outOfStockQty !== 0)
-      return res.status(400).json({
-        message: `Out of stock!${changed !== 0 ? `Quantity increases only ${changed}` : ""}`,
-        success: false,
-      });
-
-    return res.status(200).json({
-      message: "Added successfully!",
-      success: true,
-      cart: await loadCart(userId, cartId),
+    const isFullSuccess = finalQty === targetQty;
+    return res.status(isFullSuccess ? 200 : 400).json({
+      success: isFullSuccess,
+      message: isFullSuccess
+        ? "Cập nhật thành công"
+        : finalQty !== 0
+          ? `Chỉ còn ${finalQty} sản phẩm`
+          : "Hết hàng",
+      currentCartQty: finalQty,
     });
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ message: error.message || error, success: false });
@@ -78,52 +120,6 @@ const getCart = async (req, res) => {
     return res
       .status(200)
       .json({ cart, message: "Cart loaded", success: true });
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ message: error.message || error, success: false });
-  }
-};
-
-const updateCart = async (req, res) => {
-  try {
-    const { userId, modelId, quantity } = req.body;
-    const { cartId } = req.cookies;
-
-    if (!userId && !cartId) {
-      return res.status(400).json({ message: "No cart found", success: false });
-    }
-
-    if (!modelId || !quantity) {
-      return res
-        .status(400)
-        .json({ message: "Missing information!", success: false });
-    }
-
-    // kiểm tra và update kho tạm
-    const { reservedQty, changed } = await reserveStock(
-      userId,
-      cartId,
-      modelId,
-      quantity,
-    );
-
-    // update cart và reset reservation
-    await updateCartItem(userId, cartId, modelId, reservedQty);
-
-    if (reservedQty !== quantity)
-      return res.status(400).json({
-        message: `Out of stock! ${changed !== 0 ? `Quantity changed ${changed}` : ""}`,
-        success: false,
-        cart: await loadCart(userId, cartId),
-      });
-
-    return res.status(200).json({
-      message: "Cart updated successfully",
-      success: true,
-      cart: await loadCart(userId, cartId),
-    });
   } catch (error) {
     console.log(error);
     return res

@@ -11,9 +11,10 @@ import addressRouter from "./routes/address.route.js";
 import paymentRouter from "./routes/payment.route.js";
 import orderRouter from "./routes/order.route.js";
 import { startNgrokAndConfirmWebhook } from "./config/payos.init.js";
+import { startInventoryWorker } from "./workers/inventory.worker.js";
+import { rebuildStockRedis } from "./service/stock.service.js";
 
-
-dotenv.config({quiet: true});
+dotenv.config({ quiet: true });
 const app = express();
 
 app.use(cookieParser());
@@ -22,7 +23,7 @@ app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true, // Cho phép gửi cookie
-  })
+  }),
 );
 
 app.use("/api/user", userRouter);
@@ -36,8 +37,10 @@ app.use("/api/order", orderRouter);
 const PORT = process.env.PORT || 3000;
 
 connectDB().then(() => {
-  app.listen(PORT, () => {
+  app.listen(PORT, async () => {
     console.log("Server is running on Port", PORT);
-    startNgrokAndConfirmWebhook()
+    startNgrokAndConfirmWebhook();
+    startInventoryWorker();
+    await rebuildStockRedis();
   });
 });

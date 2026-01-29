@@ -36,7 +36,7 @@ const CartItem = ({ product, userId }) => {
       <Link to={`/san-pham/chi-tiet/${product.slug}`} onClick={closeCart}>
         <div className="size-25 rounded-md overflow-hidden">
           <img
-            src={product.images[0]}
+            src={product?.images?.[0]}
             alt=""
             className="w-full h-full object-cover hover:scale-105 transition"
           />

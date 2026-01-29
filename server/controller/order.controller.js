@@ -214,7 +214,7 @@ const reOrder = async (req, res) => {
     
     for (const item of existingOrder.items) {
       try {
-        const result = await reserveStock(userId, null, item.modelId, item.quantity, true);
+        const result = await reserveStock(userId, null, item.modelId, item.quantity, true, true);
         results.push({
           modelId: item.modelId,
           status: "success",

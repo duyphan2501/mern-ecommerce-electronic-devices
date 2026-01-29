@@ -1,229 +1,227 @@
+import { CART_TTL_REDIS } from "../config/constants.js";
 import redisClient from "../config/init.redis.js";
 import { formatCartItemInfo } from "../helper/cart.helper.js";
 import CartModel from "../model/cart.model.js";
-import { cancelStockReservation, reserveStock } from "./reservation.service.js";
+import { MERGE_CART_LUA, REMOVE_ITEM_LUA } from "../scripts/cart.lua.js";
+import { StockService } from "./stock.service.js";
 
 const USER_CART_TTL = 60 * 60 * 24 * 7; // 7 ngày
 const GUEST_CART_TTL = 60 * 60 * 24 * 2; // 2 ngày
 
-const addCartItem = async (userId, cartId, modelId, quantity) => {
-  if (quantity === 0) return;
-  if (!modelId || !quantity) {
-    throw new Error("Missing modelId or quantity");
-  }
-
-  const cartKey = userId ? `cart:${userId}` : `cart:${cartId}`;
-  const productKey = `product:${modelId}`;
-
-  if (userId) {
-    const updated = await CartModel.updateOne(
-      { userId, "items.modelId": modelId },
-      { $inc: { "items.$.quantity": quantity } },
-      { new: true }
-    );
-
-    if (!updated.modifiedCount) {
-      // nếu chưa có item đó, push vào giỏ
-      await CartModel.updateOne(
-        { userId },
-        { $push: { items: { modelId, quantity } } },
-        { upsert: true, new: true }
+const syncRedisCartToMongo = async (userId, modelId, finalQty) => {
+  if (!userId || !modelId) return;
+  (async () => {
+    try {
+      // 1. Thử cập nhật phần tử đã tồn tại trong mảng
+      const result = await CartModel.updateOne(
+        { userId, "items.modelId": modelId },
+        { $set: { "items.$.quantity": finalQty } },
       );
-    }
 
-    // tăng số lượng trong Redis
-    await redisClient.hIncrBy(cartKey, productKey, quantity);
-    await redisClient.expire(cartKey, USER_CART_TTL);
-  } else {
-    await redisClient.hIncrBy(cartKey, productKey, quantity);
-    await redisClient.expire(cartKey, GUEST_CART_TTL);
-  }
+      // 2. Nếu không tìm thấy phần tử để cập nhật
+      if ((result.matchedCount === 0) & (finalQty > 0)) {
+        await CartModel.updateOne(
+          { userId },
+          { $push: { items: { modelId, quantity: finalQty } } },
+          { upsert: true }, // Tạo mới giỏ hàng nếu userId chưa từng có giỏ
+        );
+      }
+
+      // 3. Nếu số lượng sau khi update là 0, xóa luôn item khỏi DB
+      if (finalQty <= 0) {
+        await CartModel.updateOne(
+          { userId },
+          { $pull: { items: { modelId } } },
+        );
+      }
+    } catch (err) {
+      console.error("DB Sync Error:", err);
+    }
+  })();
 };
 
 const mergeCart = async (guestCartId, userId) => {
-  if (!guestCartId || !userId) return null;
-
   const guestKey = `cart:${guestCartId}`;
   const userKey = `cart:${userId}`;
+  const now = Math.floor(Date.now() / 1000);
 
-  // lấy giỏ guest từ Redis
+  // 1. Lấy giỏ guest từ Redis (Hash)
   const guestCart = await redisClient.hGetAll(guestKey);
   if (!guestCart || Object.keys(guestCart).length === 0) {
-    await redisClient.del(guestKey);
-    return null;
+    return await loadCart(userId, null);
   }
 
-  // lấy giỏ user từ DB (nếu có)
-  const userCartDb = await CartModel.findOne({ userId }).lean();
-  let updatedItems = userCartDb?.items ? [...userCartDb.items] : [];
+  const mergeResults = [];
 
-  // song song xử lý các item
-  const results = await Promise.all(
-    Object.entries(guestCart).map(async ([productKey, qty]) => {
-      const modelId = productKey.replace("product:", "");
-      const addQuantity = parseInt(qty, 10);
+  // 2. Chuyển hàng Atomic (Dùng for thay vì Promise.all để tránh quá tải Redis)
+  for (const [field, qty] of Object.entries(guestCart)) {
+    const modelId = field.replace("product:", "");
 
-      let cartItem = updatedItems.find((item) => item.modelId == modelId);
-      const oldQuantity = cartItem ? cartItem.quantity : 0;
+    // Chuyển hàng từ Guest sang User ngay trong Redis
+    const finalQty = await redisClient.eval(MERGE_CART_LUA, {
+      keys: [
+        `reservation:${guestCartId}:${modelId}`,
+        `reservation:${userId}:${modelId}`,
+        `stock:${modelId}`,
+        userKey,
+        "reservation:zset",
+      ],
+      arguments: [
+        modelId,
+        qty,
+        CART_TTL_REDIS.USER.toString(),
+        CART_TTL_REDIS.RESERVATION.toString(),
+      ],
+    });
 
-      if (cartItem) {
-        cartItem.quantity += addQuantity;
-      } else {
-        cartItem = { modelId, quantity: addQuantity };
-        updatedItems.push(cartItem);
-      }
+    mergeResults.push({ modelId, quantity: finalQty });
+  }
 
-      // huỷ reservation guest trước
-      await cancelStockReservation(null, guestCartId, modelId);
+  // 3. Đồng bộ MongoDB (Dùng bulkWrite để chỉ gửi 1 request duy nhất)
+  const ops = mergeResults.map((item) => ({
+    updateOne: {
+      filter: { userId, "items.modelId": item.modelId },
+      update: { $set: { "items.$.quantity": item.quantity } },
+    },
+  }));
 
-      try {
-        const { reservedQty } = await reserveStock(
-          userId,
-          null,
-          modelId,
-          cartItem.quantity,
-          true
-        );
+  // Với các item chưa có trong DB cũ của User
+  const existingCart = await CartModel.findOne({ userId }).lean();
+  for (const item of mergeResults) {
+    if (!existingCart?.items.find((i) => i.modelId === item.modelId)) {
+      ops.push({
+        updateOne: {
+          filter: { userId },
+          update: { $push: { items: item } },
+          upsert: true,
+        },
+      });
+    }
+  }
 
-        if (reservedQty < cartItem.quantity) {
-          console.warn(
-            `Stock limited for modelId=${modelId}, set quantity from ${cartItem.quantity} -> ${reservedQty}`
-          );
-          cartItem.quantity = reservedQty;
-        }
-        return cartItem;
-      } catch (err) {
-        console.warn(`Reserve stock failed for modelId=${modelId}: ${err.message}`);
-        if (oldQuantity > 0) {
-          cartItem.quantity = oldQuantity;
-          return cartItem;
-        } else {
-          // bỏ item mới
-          return null;
-        }
-      }
-    })
-  );
+  if (ops.length > 0) await CartModel.bulkWrite(ops);
 
-  // loại bỏ item null
-  updatedItems = results.filter(Boolean);
-
-  // cập nhật Mongo (1 lần duy nhất)
-  await CartModel.updateOne(
-    { userId },
-    { $set: { items: updatedItems } },
-    { upsert: true }
-  );
-
-  // xoá guest cart Redis
+  // 4. Dọn dẹp & Trả về giỏ hàng mới
   await redisClient.del(guestKey);
-
-  // cập nhật Redis user theo DB mới
-  const redisData = {};
-  for (const item of updatedItems) {
-    redisData[`product:${item.modelId}`] = item.quantity.toString();
-  }
-
-  await redisClient.del(userKey);
-  if (Object.keys(redisData).length > 0) {
-    await redisClient.hSet(userKey, redisData);
-    await redisClient.expire(userKey, USER_CART_TTL);
-  }
-
-  return redisData;
+  return await loadCart(userId, null);
 };
-
 
 // loadCart: userId có thể null (guest)
 const loadCart = async (userId, cartId) => {
-  let cart = null;
+  const ownerId = userId || cartId;
+  const redisKey = `cart:${ownerId}`;
+  let redisCart = await redisClient.hGetAll(redisKey);
+  const isUser = Boolean(userId);
 
-  if (userId) {
-    const redisKey = `cart:${userId}`;
-    const redisCart = await redisClient.hGetAll(redisKey);
-
-    if (redisCart && Object.keys(redisCart).length > 0) {
-      const items = Object.entries(redisCart).map(([key, qty]) => ({
-        modelId: key.replace("product:", ""),
-        quantity: parseInt(qty, 10),
-      }));
-
-      cart = {
-        userId,
-        items: await formatCartItemInfo(items),
-      };
-    } else {
-      const mongoCart = await CartModel.findOne({ userId }).lean();
-      if (mongoCart) {
-        cart = {
+  // 1. Nạp từ DB nếu Redis trống
+  if (Object.keys(redisCart).length === 0 && userId) {
+    const mongoCart = await CartModel.findOne({ userId }).lean();
+    if (mongoCart?.items.length) {
+      for (const item of mongoCart.items) {
+        // Reserve lại từ DB, hàm reserve của bạn đã tự update Redis Cart rồi
+        await StockService.reserve(
           userId,
-          items: await formatCartItemInfo(mongoCart.items),
-        };
-
-        for (const item of mongoCart.items) {
-          await redisClient.hSet(
-            redisKey,
-            `product:${item.modelId}`,
-            item.quantity
-          );
-        }
-        await redisClient.expire(redisKey, USER_CART_TTL);
-      } else {
-        cart = { userId, items: [] };
+          item.modelId.toString(),
+          item.quantity,
+          isUser
+        );
       }
+      redisCart = await redisClient.hGetAll(redisKey);
     }
-  } else {
-    if (!cartId) return { items: [] };
+  }
 
-    const redisKey = `cart:${cartId}`;
-    const redisCart = await redisClient.hGetAll(redisKey);
+  // 2. Kiểm tra và "Hồi sinh" giỏ hàng
+  const finalItems = [];
+  const itemsToDelete = [];
+  const itemsToUpdate = [];
 
-    if (redisCart && Object.keys(redisCart).length > 0) {
-      const items = Object.entries(redisCart).map(([key, qty]) => ({
-        modelId: key.replace("product:", ""),
-        quantity: parseInt(qty, 10),
-      }));
+  for (const [key, qtyStr] of Object.entries(redisCart)) {
+    const modelId = key.replace("product:", "");
+    const qty = parseInt(qtyStr, 10);
 
-      cart = {
-        cartId,
-        items: await formatCartItemInfo(items), // enrich cho guest
-      };
+    // Kiểm tra Hash Reservation
+    const reserved = await redisClient.hGet(
+      `reservation:${ownerId}:${modelId}`,
+      "qty",
+    );
+
+    if (!reserved) {
+      // Thử hồi sinh
+      const recoveredQty = await StockService.reserve(ownerId, modelId, qty, isUser);
+
+      if (recoveredQty > 0) {
+        finalItems.push({ modelId, quantity: recoveredQty });
+        if (recoveredQty !== qty) {
+          itemsToUpdate.push({ modelId, quantity: recoveredQty });
+        }
+      } else {
+        // Hết sạch hàng -> Đưa vào danh sách xóa
+        itemsToDelete.push(modelId);
+      }
     } else {
-      cart = { cartId, items: [] };
-      await redisClient.expire(redisKey, GUEST_CART_TTL);
+      finalItems.push({ modelId, quantity: parseInt(reserved, 10) });
     }
   }
 
-  return cart;
-};
-
-const updateCartItem = async (userId, cartId, modelId, quantity) => {
-  if (!userId && !cartId) {
-    throw new Error("No cart found");
-  }
-
-  const cartKey = userId ? `cart:${userId}` : `cart:${cartId}`;
-  await redisClient.hSet(cartKey, `product:${modelId}`, quantity);
-
-  if (userId) {
-    await CartModel.updateOne(
-      { userId, "items.modelId": modelId },
-      { $set: { "items.$.quantity": quantity } }
+  // 3. ĐỒNG BỘ NGƯỢC (SYNC)
+  // Xóa/Cập nhật Redis Cart
+  if (itemsToDelete.length > 0) {
+    await redisClient.hDel(
+      redisKey,
+      itemsToDelete.map((id) => `product:${id}`),
     );
   }
+
+  // Đồng bộ MongoDB (chỉ dành cho User)
+  if (userId && (itemsToDelete.length > 0 || itemsToUpdate.length > 0)) {
+    // Xóa item hết hàng khỏi DB
+    if (itemsToDelete.length > 0) {
+      await CartModel.updateOne(
+        { userId },
+        { $pull: { items: { modelId: { $in: itemsToDelete } } } },
+      );
+    }
+    // Cập nhật item bị giảm số lượng trong DB
+    for (const item of itemsToUpdate) {
+      await CartModel.updateOne(
+        { userId, "items.modelId": item.modelId },
+        { $set: { "items.$.quantity": item.quantity } },
+      );
+    }
+  }
+
+  return {
+    userId,
+    cartId,
+    items: await formatCartItemInfo(finalItems),
+  };
 };
 
 const removeCartItem = async (userId, cartId, modelId) => {
-  if (!userId && !cartId) {
-    throw new Error("No cart found");
-  }
+  const ownerId = userId || cartId;
+  if (!ownerId) throw new Error("Không tìm thấy thông tin định danh");
 
-  const cartKey = userId ? `cart:${userId}` : `cart:${cartId}`;
-  await redisClient.hDel(cartKey, `product:${modelId}`);
+  const mIdStr = modelId.toString();
 
+  // 1. Chạy Lua Script để hoàn kho tức thì trong 1 nốt nhạc
+  await redisClient.eval(REMOVE_ITEM_LUA, {
+    keys: [
+      `stock:${mIdStr}`,
+      `reservation:${ownerId}:${mIdStr}`,
+      `cart:${ownerId}`,
+      "reservation:zset"
+    ],
+    arguments: [mIdStr]
+  });
+
+  // 2. Đồng bộ MongoDB (Chỉ cho User - chạy ngầm)
   if (userId) {
-    await CartModel.updateOne({ userId }, { $pull: { items: { modelId } } });
+    CartModel.updateOne(
+      { userId },
+      { $pull: { items: { modelId: mIdStr } } }
+    ).catch(err => console.error("MongoDB Sync Error:", err));
   }
 };
 
-export { addCartItem, updateCartItem, removeCartItem, mergeCart, loadCart };
+
+export { syncRedisCartToMongo, removeCartItem, mergeCart, loadCart };

@@ -1,7 +1,7 @@
 import { publishSendOrderEmail } from "../helper/message.helper.js";
 import orderModel from "../model/order.model.js";
 import ModelsModel from "../model/productModel.model.js";
-import {  reserveStock } from "./reservation.service.js";
+import { reserveStock } from "./reservation.service.js";
 
 async function generateOrderCode() {
   const now = new Date();
@@ -56,7 +56,7 @@ const createNewOrder = async (
     const discountPrice =
       Math.round((item.price * (1 - item.discount / 100)) / 1000) * 1000;
 
-    await reserveStock(userId, null, item.modelId, item.quantity, true);
+    await reserveStock(userId, null, item.modelId, item.quantity, true, true);
 
     items.push({
       modelId: item.modelId,

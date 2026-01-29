@@ -23,22 +23,28 @@ const ProductCard = ({ product }) => {
 
   // ⚡ Memo hóa giá, format, isNew
   const discountPrice = useMemo(
-    () => selectedModel.salePrice - selectedModel.salePrice * (selectedModel.discount / 100),
-    [selectedModel.salePrice, selectedModel.discount]
+    () =>
+      selectedModel.salePrice -
+      selectedModel.salePrice * (selectedModel.discount / 100),
+    [selectedModel.salePrice, selectedModel.discount],
   );
 
   const formattedPrice = useMemo(
     () => formatMoney(selectedModel.salePrice),
-    [selectedModel.salePrice]
+    [selectedModel.salePrice],
   );
 
   const formattedDiscountPrice = useMemo(
     () => formatMoney(discountPrice),
-    [discountPrice]
+    [discountPrice],
   );
 
   const isNew = useMemo(() => {
-    return (Date.now() - new Date(selectedModel.createdAt).getTime()) / (1000 * 60 * 60 * 24) < 7;
+    return (
+      (Date.now() - new Date(selectedModel.createdAt).getTime()) /
+        (1000 * 60 * 60 * 24) <
+      7
+    );
   }, [selectedModel.createdAt]);
 
   // ⚡ Tách hàm để tránh tạo lại trong render
@@ -63,11 +69,7 @@ const ProductCard = ({ product }) => {
       modelId: selectedModel._id,
       quantity: 1,
     };
-    try {
-      await addToCart(cartData);
-    } catch (error) {
-      console.error("Failed to add to cart:", error);
-    }
+    await addToCart(cartData);
   };
 
   return (
@@ -143,11 +145,13 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* ✅ Dropdown chỉ render khi mở */}
-            {product.modelsId.length > 1 && (
-              <div
-              >
+            {product?.modelsId?.length > 1 && (
+              <div>
                 <Tooltip title="Model khác" placement="bottom" arrow>
-                  <IconButton className="!bg-gray-100 !p-1 hover:!bg-gray-200 relative" onClick={() => setIsOpen(!isOpen)}>
+                  <IconButton
+                    className="!bg-gray-100 !p-1 hover:!bg-gray-200 relative"
+                    onClick={() => setIsOpen(!isOpen)}
+                  >
                     <IoMdArrowDropdown
                       size={25}
                       className={`${
