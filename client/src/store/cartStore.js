@@ -59,12 +59,15 @@ const useCartStore = create((set, get) => ({
 
     try {
       const res = await axios.post(`${API_URL}/api/cart/add`, cartData);
-
       const finalQty = res.data.currentCartQty;
-
+      toast.success(res.data.message);
+      if (finalQty <= 1) {
+        const cart = await get().loadCart(cartData.userId);
+        set({ cart });
+        return;
+      }
       get().updateCartStore(cartData.modelId, finalQty);
 
-      toast.success(res.data.message);
     } catch (error) {
       const data = error.response?.data;
 
@@ -100,6 +103,7 @@ const useCartStore = create((set, get) => ({
       return res.data.cart;
     } catch (error) {
       console.log("Load cart error:", error);
+      return { items: [] };
     } finally {
       set({ isLoading: false });
     }
@@ -150,9 +154,12 @@ const useCartStore = create((set, get) => ({
         data: { userId, modelId },
       });
 
-      set({
-        cart: res.data.cart || { items: [] },
-      });
+      set((state) => ({
+        cart: {
+          ...state.cart,
+          items: state.cart.items.filter((item) => item.modelId !== modelId),
+        },
+      }));
 
       toast.success(res.data.message);
     } catch (error) {

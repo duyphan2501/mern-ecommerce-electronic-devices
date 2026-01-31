@@ -51,7 +51,7 @@ const addToCart = async (req, res) => {
     return res
       .status(500)
       .json({ message: error.message || error, success: false });
-  }
+  } 
 };
 
 const updateCart = async (req, res) => {
@@ -153,7 +153,6 @@ const removeFromCart = async (req, res) => {
     return res.status(200).json({
       message: "Item removed from cart successfully",
       success: true,
-      cart: await loadCart(userId, cartId),
     });
   } catch (error) {
     return res
