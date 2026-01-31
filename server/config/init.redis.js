@@ -8,7 +8,7 @@ dotenv.config({ quiet: true });
 
 const REDIS_CHANNEL = "order_events";
 
-const client = createClient({
+const redisClient = createClient({
   username: process.env.REDIS_USERNAME,
   password: process.env.REDIS_PASSWORD,
   socket: {
@@ -17,9 +17,9 @@ const client = createClient({
   },
 });
 
-client.on("error", (err) => console.log("Redis Client Error", err));
-client.on("connect", () => console.log("Redis Client connected successfully"));
-await client.connect();
+redisClient.on("error", (err) => console.log("Redis Client Error", err));
+redisClient.on("connect", () => console.log("Redis Client connected successfully"));
+await redisClient.connect();
 
 // --- CLIENT 2: Dành riêng cho SUBSCRIBER (Lắng nghe) ---
 const subscriberClient = createClient({
@@ -58,4 +58,4 @@ async function subscribeToOrderEvents() {
 
 subscribeToOrderEvents();
 
-export default client;
+export default redisClient;

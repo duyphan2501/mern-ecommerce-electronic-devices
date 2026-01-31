@@ -27,31 +27,40 @@ const addToCart = async (req, res) => {
     const targetQty = parseInt(currentQty) + parseInt(quantity);
 
     // 2. Thực thi qua Lua (Check kho + Trừ kho + Giữ chỗ)
-    const finalQty = await StockService.reserve(ownerId, modelId, targetQty, isUser);
+    const [finalQty, status] = await StockService.reserve(
+      ownerId,
+      modelId,
+      targetQty,
+      isUser,
+    );
 
     // 3. Set cookie nếu là khách mới
     if (!userId && !cartId) {
-      res.cookie("cartId", ownerId, { httpOnly: true, maxAge: CART_TTL_MS.GUEST });
+      res.cookie("cartId", ownerId, {
+        httpOnly: true,
+        maxAge: CART_TTL_MS.GUEST,
+      });
     }
 
     // 4. Nếu là User, đồng bộ vào MongoDB (Background task - không đợi)
     await syncRedisCartToMongo(userId, modelId, finalQty);
 
-    const isFullSuccess = finalQty === targetQty;
+    const isFullSuccess = status === 0;
+    const message = isFullSuccess
+      ? "Cập nhật thành công"
+      : status === 2
+        ? `Chỉ còn ${finalQty} sản phẩm`
+        : "Hết hàng";
     return res.status(isFullSuccess ? 200 : 400).json({
       success: isFullSuccess,
-      message: isFullSuccess
-        ? "Thêm thành công"
-        : finalQty !== 0
-          ? `Chỉ còn ${finalQty} sản phẩm`
-          : "Hết hàng",
+      message,
       currentCartQty: finalQty,
     });
   } catch (error) {
     return res
       .status(500)
       .json({ message: error.message || error, success: false });
-  } 
+  }
 };
 
 const updateCart = async (req, res) => {
@@ -75,24 +84,32 @@ const updateCart = async (req, res) => {
     const targetQty = parseInt(quantity);
 
     // 2. Thực thi qua Lua (Check kho + Trừ kho + Giữ chỗ)
-    const finalQty = await StockService.reserve(ownerId, modelId, targetQty, isUser);
+    const [finalQty, status ] = await StockService.reserve(
+      ownerId,
+      modelId,
+      targetQty,
+      isUser,
+    );
 
     // 3. Set cookie nếu là khách mới
     if (!userId && !cartId) {
-      res.cookie("cartId", ownerId, { httpOnly: true, maxAge: CART_TTL_MS.GUEST });
+      res.cookie("cartId", ownerId, {
+        httpOnly: true,
+        maxAge: CART_TTL_MS.GUEST,
+      });
     }
 
     // 4. Nếu là User, đồng bộ vào MongoDB (Background task - không đợi)
     await syncRedisCartToMongo(userId, modelId, finalQty);
-
-    const isFullSuccess = finalQty === targetQty;
+    const isFullSuccess = status === 0
+    const message = isFullSuccess
+      ? "Cập nhật thành công"
+      : status === 2
+        ? `Chỉ còn ${finalQty} sản phẩm`
+        : "Hết hàng";
     return res.status(isFullSuccess ? 200 : 400).json({
       success: isFullSuccess,
-      message: isFullSuccess
-        ? "Cập nhật thành công"
-        : finalQty !== 0
-          ? `Chỉ còn ${finalQty} sản phẩm`
-          : "Hết hàng",
+      message,
       currentCartQty: finalQty,
     });
   } catch (error) {

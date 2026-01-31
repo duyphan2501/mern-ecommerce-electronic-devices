@@ -5,6 +5,10 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const usePaymentStore = create((set) => {
   const createPayment = async (axiosPrivate, cartItems, address) => {
+    if (!cartItems || cartItems.length === 0) {
+      toast.error("Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi đặt hàng.");
+      return null;
+    }
     set({ isPaymentLoading: true });
     try {
       console.log(cartItems);

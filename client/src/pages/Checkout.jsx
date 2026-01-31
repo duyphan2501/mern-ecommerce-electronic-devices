@@ -32,7 +32,7 @@ const Checkout = () => {
       cartItems: cart?.items,
       address: selectedAddress,
       provider: "cod",
-      orderStatus: "pending",
+      orderStatus: "draft",
     });
 
     if (res.success) {

@@ -1,7 +1,11 @@
 import { getCartExpireAt, getReserveExpireAt } from "../config/constants.js";
 import redisClient from "../config/init.redis.js";
 import ModelsModel from "../model/productModel.model.js";
-import { RESERVE_LUA, RECLAIM_LUA } from "../scripts/stock.lua.js";
+import {
+  RESERVE_LUA,
+  RECLAIM_LUA,
+  CONFIRM_ORDER_LUA,
+} from "../scripts/stock.lua.js";
 
 const StockService = {
   reserve: (ownerId, modelId, targetQty, isUser = true) =>
@@ -24,6 +28,23 @@ const StockService = {
       keys: ["reservation:zset"],
       arguments: [Math.floor(Date.now() / 1000).toString()],
     }),
+  confirm: ({ item, userId }) =>
+    redisClient.eval(CONFIRM_ORDER_LUA, {
+      keys: [
+        `stock:${item.modelId}`,
+        `reservation:${userId}:${item.modelId}`,
+        `cart:${userId}`,
+        "reservation:zset",
+      ],
+      arguments: [item.modelId.toString()],
+    }),
+  getStockinfo: async (modelId) => {
+    const stockData = await redisClient.hGetAll(`stock:${modelId}`);
+    return {
+      available: parseInt(stockData.available) || 0,
+      reserved: parseInt(stockData.reserved) || 0,
+    };
+  },
 };
 
 async function rebuildStockRedis() {

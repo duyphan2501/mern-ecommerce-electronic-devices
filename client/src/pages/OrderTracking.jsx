@@ -226,6 +226,7 @@ const OrderTracking = () => {
               <h3 className="font-bold uppercase">Phương thức thanh toán</h3>
             </div>
             <p className="text-gray-700">{paymentLabelMap[currentOrder.payment.provider]}</p>
+            <p className="text-gray-700">Trạng thái: {currentOrder.payment.status === "paid" ? "Đã thanh toán" : "Chưa thanh toán"}</p>
           </div>
         </div>
       </div>

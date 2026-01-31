@@ -1,7 +1,7 @@
 import { payOS } from "../config/payos.init.js";
 import dotenv from "dotenv";
 import orderModel from "../model/order.model.js";
-import { createNewOrder, handleOrderCreation } from "../service/order.service.js";
+import { completeOrderCheckout, createNewOrder, handleOrderCreation } from "../service/order.service.js";
 
 dotenv.config({ quiet: true });
 
@@ -12,7 +12,7 @@ const createPayment = async (req, res) => {
   try {
     const userId = req.user.userId;
     const email = req.user.email;
-    const { cartItems, address } = req.body;
+    const { cartItems, address, provider, orderStatus } = req.body;
 
     if (!address)
       return res.status(400).json({
@@ -26,7 +26,13 @@ const createPayment = async (req, res) => {
         success: false,
       });
 
-    const {itemsPayos, newOrder} = await createNewOrder(cartItems, userId, email, address, "payos")
+    const { newOrder, orderItems } = await createNewOrder({cartItems, userId, email, address, provider, orderStatus: orderStatus || "draft"});
+
+    const itemsPayos = orderItems.map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+    }));
 
     // Gọi PayOS
     const payload = {
@@ -96,8 +102,8 @@ const verifyWebhookData = async (req, res) => {
       });
 
     if (verifiedData.code === "00") {
-      order.status = "pending";
       order.payment.status = "paid";
+      await completeOrderCheckout(order);
       // xoá giỏ hàng
       await handleOrderCreation(order);
     } else {

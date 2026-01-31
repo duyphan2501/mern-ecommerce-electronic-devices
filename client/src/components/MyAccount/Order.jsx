@@ -115,57 +115,6 @@ const Order = () => {
             Tìm kiếm
           </Button>
         </div>
-
-        {/* <div className="mt-4">
-          {orders.length === 0 ? (
-            <div className="flex flex-col gap-1 justify-center items-center h-full">
-              <div className="size-40 ">
-                <img
-                  src="https://frontend.tikicdn.com/_desktop-next/static/img/account/empty-order.png"
-                  alt=""
-                  className="size-full object-contain"
-                />
-              </div>
-              <p>Chưa có đơn hàng</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto scroll-x">
-              <table className="w-full whitespace-nowrap border border-gray-200">
-                <thead className="bg-gray-100 text-left">
-                  <tr>
-                    <th className="pl-6 py-4 text-center"></th>
-                    <th className="px-6 py-4">Mã đơn hàng</th>
-                    <th className="px-6 py-4">Ngày tạo</th>
-                    <th className="px-6 py-4">Khách hàng</th>
-                    <th className="px-6 py-4">Địa chỉ</th>
-                    <th className="px-6 py-4">Sđt</th>
-                    <th className="px-6 py-4">Tổng tiền</th>
-                    <th className="px-6 py-4">Thanh toán</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.map((order, index) => (
-                    <Fragment key={order.id}>
-                      <OrderItem
-                        order={order}
-                        openViewDetail={() =>
-                          setIsViewDetal((prev) =>
-                            prev === index ? null : index
-                          )
-                        }
-                        isViewDetail={isViewDetail === index}
-                      />
-
-                      {isViewDetail === index && (
-                        <OrderItemExpand products={order.products} />
-                      )}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div> */}
         <OrderList orders={orders}/>
       </div>
     </div>

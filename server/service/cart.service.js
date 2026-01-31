@@ -147,7 +147,7 @@ const loadCart = async (userId, cartId) => {
 
     if (!reserved) {
       // Thử hồi sinh
-      const recoveredQty = await StockService.reserve(ownerId, modelId, qty, isUser);
+      const [recoveredQty, _] = await StockService.reserve(ownerId, modelId, qty, isUser);
 
       if (recoveredQty > 0) {
         finalItems.push({ modelId, quantity: recoveredQty });

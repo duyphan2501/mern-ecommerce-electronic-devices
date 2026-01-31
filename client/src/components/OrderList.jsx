@@ -7,6 +7,8 @@ import useOrderStore from "../store/orderStore";
 import { formatDateTime } from "../utils/DateFormat";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import ConfirmModal from "./ConfirmModal";
+import useCartStore from "../store/cartStore";
+import useAuthStore from "../store/authStore";
 
 const OrderList = ({ orders }) => {
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -36,15 +38,22 @@ const OrderList = ({ orders }) => {
 
   const handleReOrder = async (orderId) => {
     if (!orderId || isLoading) return;
+
     const result = await reOrder(axiosPrivate, orderId);
-    if (result && result.success) {
+    if (result?.success) {
+      const user = useAuthStore.getState().user;
+      await useCartStore.getState().loadCart(user?._id);
       navigate("/cart");
     }
   };
 
   const handleDeleteOrder = async () => {
     if (!selectedOrder || isLoading) return;
-    const deletedOrder = await setOrderStatus(axiosPrivate, selectedOrder._id, "deleted");
+    const deletedOrder = await setOrderStatus(
+      axiosPrivate,
+      selectedOrder._id,
+      "deleted",
+    );
     if (deletedOrder) {
       setOrders(orders.filter((order) => order._id !== deletedOrder._id));
     }
@@ -89,14 +98,26 @@ const OrderList = ({ orders }) => {
   }
 
   return (
-    <div className=""> 
+    <div className="">
       {/* Cancel Confirmation Modal */}
       {showCancelModal && selectedOrder && (
         <ConfirmModal
-          title={selectedOrder.type === "cancel" ? "Xác nhận huỷ đơn" : "Xác nhận xoá đơn"}
+          title={
+            selectedOrder.type === "cancel"
+              ? "Xác nhận huỷ đơn"
+              : "Xác nhận xoá đơn"
+          }
           order={selectedOrder}
-          confirmMessage={selectedOrder.type === "cancel" ? "Bạn có chắc chắn muốn hủy đơn hàng này không?" : "Bạn có chắc chắn muốn xoá đơn hàng này không?"}
-          onConfirm={selectedOrder.type === "cancel" ? confirmCancelOrder : handleDeleteOrder}
+          confirmMessage={
+            selectedOrder.type === "cancel"
+              ? "Bạn có chắc chắn muốn hủy đơn hàng này không?"
+              : "Bạn có chắc chắn muốn xoá đơn hàng này không?"
+          }
+          onConfirm={
+            selectedOrder.type === "cancel"
+              ? confirmCancelOrder
+              : handleDeleteOrder
+          }
           onCancel={closeCancelModal}
         />
       )}

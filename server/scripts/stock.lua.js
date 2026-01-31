@@ -4,46 +4,49 @@ const RESERVE_LUA = `
 
 local stockKey, reserveKey, cartKey, zsetKey = KEYS[1], KEYS[2], KEYS[3], KEYS[4]
 local modelId = ARGV[1]
-local targetQty = tonumber(ARGV[2])
+local requestedQty = tonumber(ARGV[2])
 local cartExpireAt = tonumber(ARGV[3])
 local reserveExpireAt = tonumber(ARGV[4])
 
--- 1. Lấy lượng hàng đang giữ hiện tại (kiểu HASH)
 local oldQty = tonumber(redis.call("HGET", reserveKey, "qty")) or 0
-local diff = targetQty - oldQty
+local available = tonumber(redis.call("HGET", stockKey, "available")) or 0
+local diff = requestedQty - oldQty
+local status = 0 -- 0: OK, 1: Out of stock, 2: Adjusted
 
--- 2. Kiểm tra tồn kho khả dụng
-if diff > 0 then
-    local available = tonumber(redis.call("HGET", stockKey, "available")) or 0
-    if available < diff then
-        diff = available
-        targetQty = oldQty + diff
-    end
+-- Trường hợp 1: Muốn tăng nhưng kho đã hết sạch
+if diff > 0 and available <= 0 then 
+    return { oldQty, 1 } 
 end
 
--- 3. Cập nhật Stock (Chống oversell)
+-- Trường hợp 2: Muốn tăng nhưng kho không đủ (Điều chỉnh)
+local finalTargetQty = requestedQty
+if diff > 0 and available < diff then
+    diff = available
+    finalTargetQty = oldQty + diff
+    status = 2
+end
+
+-- Cập nhật Stock
 if diff ~= 0 then
     redis.call("HINCRBY", stockKey, "available", -diff)
     redis.call("HINCRBY", stockKey, "reserved", diff)
 end
 
--- 4. Đồng bộ dữ liệu
-if targetQty <= 0 then
+-- Cập nhật dữ liệu giỏ hàng & giữ chỗ
+if finalTargetQty <= 0 then
     redis.call("DEL", reserveKey)
     redis.call("HDEL", cartKey, "product:" .. modelId)
     redis.call("ZREM", zsetKey, reserveKey)
 else 
-    -- Cập nhật giữ chỗ (Hết hạn sớm)
-    redis.call("HSET", reserveKey, "qty", targetQty, "expireAt", reserveExpireAt)
+    redis.call("HSET", reserveKey, "qty", finalTargetQty, "expireAt", reserveExpireAt)
     redis.call("ZADD", zsetKey, reserveExpireAt, reserveKey)
-    
-    -- Cập nhật giỏ hàng (Hết hạn muộn)
-    redis.call("HSET", cartKey, "product:" .. modelId, targetQty)
-    redis.call("EXPIREAT", cartKey, cartExpireAt) -- Gia hạn toàn bộ giỏ
+    redis.call("HSET", cartKey, "product:" .. modelId, finalTargetQty)
+    redis.call("EXPIREAT", cartKey, cartExpireAt)
 end
 
-return targetQty
+return { finalTargetQty, status }
 `;
+
 
 // SCRIPT 2: Hoàn kho tự động khi hết hạn
 const RECLAIM_LUA = `
@@ -82,5 +85,23 @@ end
 
 return #keys
 `;
+const CONFIRM_ORDER_LUA = `
+-- KEYS: 1.stockKey, 2.reserveKey, 3.cartKey, 4.zsetKey
+-- ARGV: 1.modelId
 
-export { RESERVE_LUA, RECLAIM_LUA };
+local qty = tonumber(redis.call("HGET", KEYS[2], "qty")) or 0
+
+if qty > 0 then
+    -- 1. Giảm lượng 'reserved' vì hàng đã đi thật (available đã trừ từ lúc AddToCart)
+    redis.call("HINCRBY", KEYS[1], "reserved", -qty)
+    
+    -- 2. Dọn rác
+    redis.call("DEL", KEYS[2])
+    redis.call("ZREM", KEYS[4], KEYS[2])
+    redis.call("HDEL", KEYS[3], "product:" .. ARGV[1])
+    
+    return qty
+end
+return 0
+`;
+export { RESERVE_LUA, RECLAIM_LUA, CONFIRM_ORDER_LUA };
