@@ -13,6 +13,7 @@ import orderRouter from "./routes/order.route.js";
 import { startNgrokAndConfirmWebhook } from "./config/payos.init.js";
 import { startInventoryWorker } from "./workers/inventory.worker.js";
 import { rebuildStockRedis } from "./service/stock.service.js";
+import errorHandler from "./middleware/error.middleware.js";
 
 dotenv.config({ quiet: true });
 const app = express();
@@ -33,6 +34,8 @@ app.use("/api/cart", cartRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/order", orderRouter);
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3000;
 

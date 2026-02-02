@@ -14,11 +14,11 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  categoryId: {
+  categoryIds: [{
     type: mongoose.Schema.ObjectId,
     ref: "categories",
     required: true,
-  },
+  }],
   status: {
     type: String,
     enum: ["draft", "active", "archived"],

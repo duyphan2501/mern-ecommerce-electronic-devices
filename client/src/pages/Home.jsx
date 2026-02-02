@@ -7,20 +7,31 @@ const Home = () => {
   const [categories, setCategories] = useState();
   const [products, setProducts] = useState();
   const [selectedCategory, setSelectedCategory] = useState();
-  const { getProductByCategoryId } = useProductStore();
+  const { getProductByCategoryId, getNewProducts } = useProductStore();
   const { getAllCategories } = useCategoryStore();
+  const [newProducts, setNewProducts] = useState([]);
+
+  const fetchNewProducts = async () => {
+    const data = await getNewProducts();
+    console.log(data)
+    setNewProducts(data);
+  };
+  const fetchCategories = async () => {
+    try {
+      const fetchedCategories = await getAllCategories();
+      setCategories(fetchedCategories);
+      setSelectedCategory(fetchedCategories[0]._id);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchData = async () => {
+    await Promise.allSettled([fetchNewProducts()]);
+  };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const fetchedCategories = await getAllCategories();
-        setCategories(fetchedCategories);
-        setSelectedCategory(fetchedCategories[0]._id);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchCategories();
+    fetchData()
   }, []);
 
   useEffect(() => {
@@ -75,7 +86,7 @@ const Home = () => {
             <div className="pb-5">
               <LazyComponentWrapper
                 importFunc={() => import("../components/ProductSlider")}
-                products={products}
+                products={newProducts}
               />
             </div>
           </div>

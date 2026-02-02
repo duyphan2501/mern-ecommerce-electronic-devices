@@ -12,6 +12,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.2.0",
     "@mui/x-date-pickers": "^8.7.0",
     "@tailwindcss/vite": "^4.1.11",
@@ -24,6 +25,7 @@
     "@tiptap/pm": "^3.0.7",
     "@tiptap/react": "^3.0.7",
     "@tiptap/starter-kit": "^3.0.7",
+    "antd": "^6.2.2",
     "axios": "^1.11.0",
     "dayjs": "^1.11.13",
     "flowbite": "^3.1.2",

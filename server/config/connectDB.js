@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { watchReservationTTLRelease } from "../stream/reservationStream.js";
 dotenv.config({ quiet: true });
 
 async function connectDB() {
@@ -10,16 +9,7 @@ async function connectDB() {
 
     await mongoose.connect(mongoURI)
     console.log("Connect to DB successfully");
-    watchReservationTTLRelease(mongoose); 
-    // Bật pre-image cho collection "reservations"
-    await mongoose.connection.db.command({
-      collMod: "reservations",
-      changeStreamPreAndPostImages: { enabled: true },
-    });
 
-    console.log("Pre-images enabled for 'reservations' collection");
-
-    // Optional: log events để debug connection
     mongoose.connection.on("error", (err) => {
       console.error("Mongoose connection error:", err);
     });

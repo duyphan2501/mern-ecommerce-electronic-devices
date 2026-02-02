@@ -2,19 +2,12 @@ import { FormControlLabel, Switch } from "@mui/material";
 import PriceInput from "../Pricing/PriceInput";
 import AttributeSelect from "./AttributeSelect";
 import { useState } from "react";
+import TreeCategorySelect from "../TreeCategorySelect";
+import useCategoryStore from "../../store/categoryStore";
+import { useEffect } from "react";
 
 const Attribute = ({ product, handleChangeValue }) => {
-  const categories = [
-    { _id: "660ef98c8b0f2e23d8ccfe71", name: "Color" },
-    { _id: "660ef98c8b0f2e23d8ccfe72", name: "Size" },
-    { _id: "660ef98c8b0f2e23d8ccfe73", name: "Material" },
-    { _id: "660ef98c8b0f2e23d8ccfe74", name: "Brand" },
-    { _id: "660ef98c8b0f2e23d8ccfe75", name: "Style" },
-    { _id: "660ef98c8b0f2e23d8ccfe76", name: "Pattern" },
-    { _id: "660ef98c8b0f2e23d8ccfe77", name: "Fit" },
-    { _id: "660ef98c8b0f2e23d8ccfe78", name: "Occasion" },
-    { _id: "660ef98c8b0f2e23d8ccfe79", name: "Season" },
-  ];
+  const [categories, setCategories] = useState([]);
 
   const brands = [
     { _id: "660ef98c8b0f2e23d8ccfe71", name: "Nike" },
@@ -35,8 +28,19 @@ const Attribute = ({ product, handleChangeValue }) => {
   };
 
   const [isFreeShipping, setIsFreeShipping] = useState(
-    product?.shippingCost === 0 ? true : false
+    product?.shippingCost === 0 ? true : false,
   );
+
+  const { getAllCategories } = useCategoryStore();
+
+  const fetchAllCategories = async () => {
+    const data = await getAllCategories();
+    setCategories(data);
+  };
+
+  useEffect(() => {
+    fetchAllCategories()
+  }, []) 
 
   return (
     <div>
@@ -45,10 +49,10 @@ const Attribute = ({ product, handleChangeValue }) => {
         <div className="">
           <p className="font-semibold">Category</p>
           <div className="mt-1">
-            <AttributeSelect
-              selectItems={categories}
-              onChange={(val) => handleChangeValue("categoryId", val)}
-              selectedItemId={product?.categoryId}
+            <TreeCategorySelect
+              allCategories={categories} // Data từ API trả về (mảng phẳng)
+              selectedIds={product?.categoryIds || []}
+              onChange={(val) => handleChangeValue("categoryIds", val)}
             />
           </div>
         </div>

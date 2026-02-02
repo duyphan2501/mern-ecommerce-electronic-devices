@@ -45,11 +45,25 @@ const useProductStore = create((set) => {
     }
   };
 
+  const getNewProducts = async () => {
+    set({ isLoading: true });
+    try {
+      const url = `${API_URL}/api/product/new`;
+      const res = await axios.get(url);
+      return res.data?.products;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Get product error");
+    } finally {
+      set({ isLoading: false });
+    }
+  };
+
   return {
     isLoading: false,
     getAllProducts,
     getProductBySlug,
     getProductByCategoryId,
+    getNewProducts,
   };
 });
 

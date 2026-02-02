@@ -1,5 +1,6 @@
 import ProductModel from "../model/product.model.js";
 import ModelsModel from "../model/productModel.model.js";
+import BrandModel from "../model/brand.model.js";
 import uploadFiles from "../helper/upload.js";
 import mongoose from "mongoose";
 
@@ -85,7 +86,7 @@ const createProduct = async (req, res) => {
       description,
       models,
       images,
-      categoryId,
+      categoryIds,
       brandId,
       shippingCost,
       pageTitle,
@@ -100,7 +101,7 @@ const createProduct = async (req, res) => {
       !productName ||
       !brandId ||
       !description ||
-      !categoryId ||
+      !categoryIds ||
       !models ||
       models.length < 1 ||
       shippingCost === undefined ||
@@ -116,17 +117,19 @@ const createProduct = async (req, res) => {
     }
 
     // Parse ObjectId
-    const parsedCategoryId = mongoose.Types.ObjectId.isValid(categoryId)
-      ? new mongoose.Types.ObjectId(`${categoryId}`)
-      : null;
+    const parsedCategoryIds = categoryIds.map((cateId) =>
+      mongoose.Types.ObjectId.isValid(cateId)
+        ? new mongoose.Types.ObjectId(`${cateId}`)
+        : null,
+    );
     const parsedBrandId = mongoose.Types.ObjectId.isValid(brandId)
       ? new mongoose.Types.ObjectId(`${brandId}`)
       : null;
 
-    if (!parsedCategoryId || !parsedBrandId) {
+    if (!parsedCategoryIds || parsedCategoryIds.length <= 0 || !parsedBrandId) {
       return res
         .status(400)
-        .json({ message: "Invalid categoryId or brandId", success: false });
+        .json({ message: "Invalid categoryIds or brandId", success: false });
     }
 
     // Validate status
@@ -143,7 +146,7 @@ const createProduct = async (req, res) => {
         {
           productName,
           description,
-          categoryId: parsedCategoryId,
+          categoryIds: parsedCategoryIds,
           brandId: parsedBrandId,
           shippingCost,
           pageTitle,
@@ -155,7 +158,7 @@ const createProduct = async (req, res) => {
           modelsId: [],
         },
       ],
-      { session }
+      { session },
     );
 
     // Create models linked to productId
@@ -164,7 +167,7 @@ const createProduct = async (req, res) => {
         ...model,
         productId: newProduct._id,
       })),
-      { session }
+      { session },
     );
 
     // Update product.modelsId
@@ -189,17 +192,39 @@ const createProduct = async (req, res) => {
   }
 };
 
-// const deleteProduct = async (req, res) => {
-//   try {
-//     const productId = req.params.id
+const getNewProducts = async (req, res, next) => {
+  try {
+    // 1. Lấy số lượng giới hạn từ query (ví dụ: ?limit=10), mặc định là 10
+    const limit = parseInt(req.query.limit) || 10;
 
-//     const deletedModels = ModelsModel.findAndDeleteById()
+    const products = await ProductModel.find()
+      .sort({ create_at: -1 }) // Sắp xếp mới nhất lên đầu
+      .limit(limit)
+      .populate("brandId", "name") // Lấy tên Brand
+      .populate("categoryIds", "name parentId") // Lấy thông tin danh mục
+      .populate({
+        path: "modelsId",
+        select: "salePrice costPrice discount modelName specifications", // Chỉ lấy các field cần thiết của Model
+      });
 
-//   } catch (error) {
-//     res.status(500).json({ message: error.message || error, success: false });
+    // 2. Kiểm tra nếu không có sản phẩm
+    if (!products || products.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No products found",
+      });
+    }
 
-//   }
-// }
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 const getProductBySlug = async (req, res) => {
   try {
@@ -212,7 +237,7 @@ const getProductBySlug = async (req, res) => {
       });
 
     const foundProduct = await ProductModel.findOne({ productUrl }).populate(
-      "modelsId"
+      "modelsId",
     );
 
     if (!foundProduct)
@@ -240,7 +265,7 @@ const getProductByCategoryId = async (req, res) => {
       });
 
     const foundProducts = await ProductModel.find({ categoryId }).populate(
-      "modelsId"
+      "modelsId",
     );
 
     if (!foundProducts)
@@ -252,7 +277,7 @@ const getProductByCategoryId = async (req, res) => {
     return res.status(200).json({
       products: foundProducts,
       success: true,
-    })
+    });
   } catch (error) {
     res.status(500).json({ message: error.message || error, success: false });
   }
@@ -265,4 +290,5 @@ export {
   uploadDocument,
   getProductBySlug,
   getProductByCategoryId,
+  getNewProducts,
 };
