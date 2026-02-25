@@ -93,7 +93,7 @@ const ProductPage = () => {
             <div className="rounded bg-gray-100 flex justify-between items-center p-2">
               <div className="flex items-center">
                 <span className="ml-2 text-[15px]">
-                  Có {products?.length} sản phẩm
+                  Có {isLoading ? "0" : products?.length} sản phẩm
                 </span>
               </div>
               <div className="flex items-center gap-1">

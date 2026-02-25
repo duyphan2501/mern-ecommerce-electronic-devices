@@ -50,11 +50,12 @@ const Sidebar = ({ filter, handleChangeFilter }) => {
 
   useEffect(() => {
     const setLoading = useProductStore.getState().setLoading;
-    setLoading(true);
     if (categorySlug) {
+      setLoading(true);
       const cateId = categories.find((cate) => cate.slug === categorySlug)?._id;
       if (cateId) handleChangeFilter("categoryIds", [cateId]);
     } else if (brandSlug) {
+      setLoading(true);
       const brandId = brands.find((brand) => brand.slug === brandSlug)?._id;
       if (brandId) handleChangeFilter("brandIds", [brandId]);
     }
@@ -77,7 +78,7 @@ const Sidebar = ({ filter, handleChangeFilter }) => {
                 handleChange={handleCheckBoxChange}
                 listChecked={filter.categoryIds || []}
               />
-            ))} 
+            ))}
           </FormGroup>
         </CollapseButton>
         <CollapseButton title={"Thương hiệu"}>
