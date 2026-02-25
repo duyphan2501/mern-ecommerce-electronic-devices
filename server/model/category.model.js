@@ -8,6 +8,7 @@ const categorySchema = new mongoose.Schema({
   },
   parentId: String,
   image: String,
+  slug: String,
 });
 
 const CategoryModel = mongoose.model("categories", categorySchema);

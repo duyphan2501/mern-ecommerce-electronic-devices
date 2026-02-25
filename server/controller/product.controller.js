@@ -3,6 +3,7 @@ import ModelsModel from "../model/productModel.model.js";
 import BrandModel from "../model/brand.model.js";
 import uploadFiles from "../helper/upload.js";
 import mongoose from "mongoose";
+import { filterProducts } from "../service/product.service.js";
 
 const productFolder = "products";
 const documentFolder = "documents";
@@ -200,11 +201,11 @@ const getNewProducts = async (req, res, next) => {
     const products = await ProductModel.find()
       .sort({ create_at: -1 }) // Sắp xếp mới nhất lên đầu
       .limit(limit)
-      .populate("brandId", "name") // Lấy tên Brand
-      .populate("categoryIds", "name parentId") // Lấy thông tin danh mục
+      .populate("brandId", "name slug")
+      .populate("categoryIds", "name parentId slug")
       .populate({
         path: "modelsId",
-        select: "salePrice costPrice discount modelName specifications", // Chỉ lấy các field cần thiết của Model
+        select: "salePrice costPrice discount modelName specifications",
       });
 
     // 2. Kiểm tra nếu không có sản phẩm
@@ -225,6 +226,44 @@ const getNewProducts = async (req, res, next) => {
   }
 };
 
+const fetchProducts = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const sortOption = req.query.sort || "createdAt_desc";
+
+    // Xử lý searchTerm: Lọc bỏ các khoảng trắng hoặc chuỗi rỗng
+    const term = req.query.term || "";
+    const searchTerm = term.split(/[+ ]/).filter((t) => t.trim() !== "");
+
+    // Ép kiểu Array cho IDs (Dùng .flat() hoặc concat để code gọn hơn)
+    const categoryIds = [].concat(req.query.categoryIds || []);
+    const brandIds = [].concat(req.query.brandIds || []);
+
+    const filterParams = {
+      categoryIds,
+      brandIds,
+      minPrice: req.query.minPrice,
+      maxPrice: req.query.maxPrice,
+    };
+
+    // Gọi hàm filter đã tối ưu ở trên
+    const result = await filterProducts(
+      page,
+      limit,
+      sortOption,
+      filterParams,
+      searchTerm,
+    );
+
+    return res.status(200).json({
+      success: true,
+      ...result, // Trả về totalPages, totalProducts, products
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const getProductBySlug = async (req, res) => {
   try {
@@ -236,9 +275,10 @@ const getProductBySlug = async (req, res) => {
         success: false,
       });
 
-    const foundProduct = await ProductModel.findOne({ productUrl }).populate(
-      "modelsId",
-    );
+    const foundProduct = await ProductModel.findOne({ productUrl })
+      .populate("brandId", "name slug")
+      .populate("categoryIds", "name parentId slug")
+      .populate("modelsId");
 
     if (!foundProduct)
       return res.status(404).json({
@@ -291,4 +331,5 @@ export {
   getProductBySlug,
   getProductByCategoryId,
   getNewProducts,
+  fetchProducts,
 };

@@ -100,7 +100,6 @@ const createNewOrder = async ({
     };
   });
 
-  // 4. Tạo Order và Xóa giỏ hàng DB
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const orderId = await generateOrderId();
   const orderCode = Number(

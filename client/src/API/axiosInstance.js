@@ -8,4 +8,9 @@ const axiosPrivate = axios.create({
   withCredentials: true,
 });
 
-export default axiosPrivate;
+const API = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+}); 
+
+export {API, axiosPrivate} ;

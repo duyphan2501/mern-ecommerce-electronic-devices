@@ -4,13 +4,8 @@ import {
   removeCartItem,
   syncRedisCartToMongo,
 } from "../service/cart.service.js";
-import {
-  cancelStockReservation,
-  reserveStock,
-} from "../service/reservation.service.js";
 import { StockService } from "../service/stock.service.js";
 import redisClient from "../config/init.redis.js";
-import CartModel from "../model/cart.model.js";
 import { CART_TTL_MS } from "../config/constants.js";
 
 const addToCart = async (req, res) => {
@@ -47,7 +42,7 @@ const addToCart = async (req, res) => {
 
     const isFullSuccess = status === 0;
     const message = isFullSuccess
-      ? "Cập nhật thành công"
+      ? "Thêm thành công"
       : status === 2
         ? `Chỉ còn ${finalQty} sản phẩm`
         : "Hết hàng";
@@ -166,7 +161,6 @@ const removeFromCart = async (req, res) => {
     }
 
     await removeCartItem(userId, cartId, modelId);
-    await cancelStockReservation(userId, cartId, modelId);
     return res.status(200).json({
       message: "Item removed from cart successfully",
       success: true,

@@ -212,17 +212,8 @@ const Header = () => {
       </div>
       <nav>
         <div className="container">
-          <div className="flex items-center gap-7">
-            <div className="col1 w-[20%]">
-              <CategoryDrawer isOpenDrawer={open} setOpenDrawer={setOpen} />
-            </div>
-            <div className="col2 xl:w-[50%]">
-              <NavLinkHeader />
-            </div>
-            <div className="col3 xl:flex items-center gap-2 hidden text-content">
-              <MdOutlineRocketLaunch size={20} />
-              Free Ship đơn hàng từ 500.000đ
-            </div>
+          <div className="flex justify-center">
+            <NavLinkHeader />
           </div>
         </div>
       </nav>

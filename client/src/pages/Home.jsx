@@ -13,7 +13,6 @@ const Home = () => {
 
   const fetchNewProducts = async () => {
     const data = await getNewProducts();
-    console.log(data)
     setNewProducts(data);
   };
   const fetchCategories = async () => {

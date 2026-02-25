@@ -14,6 +14,7 @@ import useCartStore from "../store/cartStore";
 import useAuthStore from "../store/authStore";
 
 const ProductCard = ({ product }) => {
+  console.log("ProductCard ~ product:", product);
   const [selectedModelIndex, setSelectedModelIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -72,11 +73,13 @@ const ProductCard = ({ product }) => {
     await addToCart(cartData);
   };
 
+  if (!product) return null;
+
   return (
     <div className="productCard border-1 border-gray-200 rounded-md p-2 flex flex-col h-full shadow">
       <div className="relative group h-[200px] overflow-hidden">
         <Link
-          to={`/san-pham/chi-tiet/${product.productUrl}`}
+          to={`/product/detail/${product.productUrl}`}
           onClick={setProductDetail}
         >
           <img

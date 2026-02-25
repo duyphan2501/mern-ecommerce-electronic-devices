@@ -45,7 +45,6 @@ function App() {
     }
   }
 
-
   useEffect(() => {
     getCart();
   }, [user, loadCart]);
@@ -68,7 +67,7 @@ function App() {
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="fixed bottom-1/4 right-3 z-20 hidden lg:block">
+      <div className="fixed bottom-5 right-3 z-20 hidden lg:block">
         <div className="relative">
           <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center shadow-md animate-bounce cursor-pointer ">
             <FaFacebookMessenger size={27} className="text-white" />
@@ -94,9 +93,11 @@ function App() {
 
             <Route element={<PersistentLogin />}>
               <Route path="/" element={<Home />} />
-              <Route path="/san-pham" element={<ProductPage />} />
+              <Route path="/product" element={<ProductPage />} />
+              <Route path="/product/category/:categorySlug" element={<ProductPage />} />
+              <Route path="/product/brand/:brandSlug" element={<ProductPage />} />
               <Route
-                path="/san-pham/chi-tiet/:slug"
+                path="/product/detail/:slug"
                 element={<ProductDetail />}
               />
               <Route path="/cart" element={<Cart />} />

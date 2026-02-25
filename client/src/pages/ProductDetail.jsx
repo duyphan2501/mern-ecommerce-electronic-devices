@@ -28,6 +28,8 @@ const ProductDetail = () => {
     getProduct();
   }, [slug, getProductBySlug]);
 
+  if (!product) return null;
+
   return (
     <>  
       {product && (

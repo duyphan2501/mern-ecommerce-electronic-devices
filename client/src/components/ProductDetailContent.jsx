@@ -1,5 +1,4 @@
 import { Rating, Stack } from "@mui/material";
-import { Link } from "react-router-dom";
 import QuantityButton from "./QuantityButton";
 import AddToCartBtn from "./AddToCartBtn";
 import { useState } from "react";
@@ -28,9 +27,9 @@ const ProductDetailContent = ({ product }) => {
           </h4>
           <h6 className="text-sm">
             Thương hiệu:{" "}
-            <Link className="font-bold text-gray-800 hover:underline">
-              {product.brandId}
-            </Link>
+            <a className="font-bold text-gray-800 hover:underline" href={`/product/brand/${product.brand?.slug}`}>
+              {product.brand?.name}
+            </a>
           </h6>
           <p className="w-[95%]">{model.specifications}</p>
           <div className="flex items-center gap-4">

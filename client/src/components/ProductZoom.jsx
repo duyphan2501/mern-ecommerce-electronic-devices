@@ -14,6 +14,8 @@ const ProductZoom = ({ imageAddress }) => {
     largeSlideRef.current.swiper.slideTo(index);
   };
 
+  if (!imageAddress || imageAddress.length === 0 ) return null;
+
   return (
     <div>
       <div className="p-2">

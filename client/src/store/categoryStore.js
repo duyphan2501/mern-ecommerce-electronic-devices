@@ -1,22 +1,20 @@
 import { create } from "zustand";
-import toast from "react-hot-toast";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+import {API} from "../API/axiosInstance";
 
 const useCategoryStore = create((set) => {
-  const getAllCategories = async () => {
+  const getListOfCategories = async () => {
     try {
-      const url = `${API_URL}/api/category/list`;
-      const res = await axios.get(url);
-      return res.data.categories;
+      const url = `/api/category/list`;
+      const res = await API.get(url);
+      return res.data.categories || [];
     } catch (error) {
-      toast.error(error.response.data.message);
+      console.error("Failed to fetch categories:", error);
+      return [];
     }
   };
 
   return {
-    getAllCategories,
+    getListOfCategories,
   };
 });
 

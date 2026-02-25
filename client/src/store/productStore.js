@@ -1,16 +1,28 @@
 import { create } from "zustand";
-import axios from "axios";
 import toast from "react-hot-toast";
-
-const API_URL = import.meta.env.VITE_BACKEND_URL;
-axios.defaults.withCredentials = true;
+import { API } from "../API/axiosInstance";
+const cleanParams = (params) => {
+  const cleaned = {};
+  for (const key in params) {
+    // Chỉ thêm vào nếu giá trị không rỗng, không phải null, không phải 0 mặc định (nếu 0 là default min price)
+    if (
+      params[key] !== "" &&
+      params[key] !== null &&
+      params[key] !== undefined
+    ) {
+      cleaned[key] = params[key];
+    }
+  }
+  return cleaned;
+};
 
 const useProductStore = create((set) => {
+  const setLoading = (isLoading) => set({ isLoading });
   const getAllProducts = async () => {
     set({ isLoading: true });
     try {
-      const url = `${API_URL}/api/product/all`;
-      const res = await axios.get(url);
+      const url = `/api/product/all`;
+      const res = await API.get(url);
       return res.data?.products || [];
     } catch (error) {
       toast.error(error.response?.data?.message || "Get all product error");
@@ -22,8 +34,8 @@ const useProductStore = create((set) => {
   const getProductBySlug = async (slug) => {
     set({ isLoading: true });
     try {
-      const url = `${API_URL}/api/product/get/${slug}`;
-      const res = await axios.get(url);
+      const url = `/api/product/get/${slug}`;
+      const res = await API.get(url);
       return res.data?.product;
     } catch (error) {
       toast.error(error.response?.data?.message || "Get product error");
@@ -32,11 +44,56 @@ const useProductStore = create((set) => {
     }
   };
 
-  const getProductByCategoryId = async (categoryId) => {
+  const fetchProducts = async (
+    page,
+    itemsPerPage,
+    sortOption,
+    filterParams,
+  ) => {
     set({ isLoading: true });
     try {
-      const url = `${API_URL}/api/product/category/${categoryId}`;
-      const res = await axios.get(url);
+      const params = new URLSearchParams(
+        cleanParams({
+          page: page,
+          limit: itemsPerPage,
+          sort: sortOption,
+        }), 
+      );
+      if (filterParams.categoryIds && filterParams.categoryIds.length > 0) {
+        filterParams.categoryIds.forEach((id) => {
+          params.append("categoryIds", id);
+        });
+      }
+      if (filterParams.brandIds && filterParams.brandIds.length > 0) {
+        filterParams.brandIds.forEach((brandName) => {
+          params.append("brandIds", brandName);
+        });
+      }
+      params.append("minPrice", filterParams.minPrice);
+      params.append("maxPrice", filterParams.maxPrice);
+
+      // Gọi API với đầy đủ tham số
+      const res = await API.get(`/api/product/fetch?${params.toString()}`);
+
+      return {
+        products: res.data?.products,
+        totalProducts: res.data?.totalProducts,
+        totalPages: res.data?.totalPages,
+      };
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Get product error");
+      return { products: [], totalPages: 0 };
+    } finally {
+      set({ isLoading: false });
+    }
+  };
+
+  const getProductByCategoryId = async (categoryIds) => {
+    set({ isLoading: true });
+    try {
+      const url = `/api/product/category/${categoryIds}`;
+      const res = await API.get(url);
       return res.data?.products;
     } catch (error) {
       toast.error(error.response?.data?.message || "Get product error");
@@ -48,8 +105,8 @@ const useProductStore = create((set) => {
   const getNewProducts = async () => {
     set({ isLoading: true });
     try {
-      const url = `${API_URL}/api/product/new`;
-      const res = await axios.get(url);
+      const url = `/api/product/new`;
+      const res = await API.get(url);
       return res.data?.products;
     } catch (error) {
       toast.error(error.response?.data?.message || "Get product error");
@@ -60,10 +117,12 @@ const useProductStore = create((set) => {
 
   return {
     isLoading: false,
+    setLoading,
     getAllProducts,
     getProductBySlug,
     getProductByCategoryId,
     getNewProducts,
+    fetchProducts,
   };
 });
 

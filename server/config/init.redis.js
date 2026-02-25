@@ -1,9 +1,6 @@
 import { createClient } from "redis";
 import dotenv from "dotenv";
 import { sendOrderConfirmEmail } from "../mail/emails.js";
-import { cancelStockReservation } from "../service/reservation.service.js";
-import { removeCartItem } from "../service/cart.service.js";
-import CartModel from "../model/cart.model.js";
 dotenv.config({ quiet: true });
 
 const REDIS_CHANNEL = "order_events";
@@ -41,12 +38,6 @@ async function subscribeToOrderEvents() {
     try {
       const orderData = JSON.parse(message);
       console.log(`Received order event: ${orderData.orderId}`);
-      const userId = orderData.userId;
-      for (const item of orderData.items) {
-        await cancelStockReservation(userId, null, item.modelId, true);
-        await removeCartItem(userId, null, item.modelId);
-      }
-      await CartModel.deleteOne({ userId });
       await sendOrderConfirmEmail(orderData);
       console.log("Post-processing order is complete.", orderData.orderId);
     } catch (error) {

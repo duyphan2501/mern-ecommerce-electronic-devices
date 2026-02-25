@@ -5,9 +5,6 @@ import CartModel from "../model/cart.model.js";
 import { MERGE_CART_LUA, REMOVE_ITEM_LUA } from "../scripts/cart.lua.js";
 import { StockService } from "./stock.service.js";
 
-const USER_CART_TTL = 60 * 60 * 24 * 7; // 7 ngày
-const GUEST_CART_TTL = 60 * 60 * 24 * 2; // 2 ngày
-
 const syncRedisCartToMongo = async (userId, modelId, finalQty) => {
   if (!userId || !modelId) return;
   (async () => {
