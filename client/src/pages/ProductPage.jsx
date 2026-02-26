@@ -3,7 +3,7 @@ import ProductGridView from "../components/ProductGridView";
 import Sidebar from "../components/Sidebar";
 import { Button, Pagination, Stack } from "@mui/material";
 import useProductStore from "../store/productStore";
-import useDebounce from "../hooks/useDebouce";
+import useDebounce from "../hooks/useDebounce";
 const sortOptions = [
   { value: "createdAt_desc", label: "Mới nhất" },
   { value: "name_asc", label: "Tên, A-Z" },
@@ -76,10 +76,6 @@ const ProductPage = () => {
 
   const handleOpenSort = () => {
     setOpenSort((prev) => !prev);
-  };
-
-  const handleChangeView = (newView) => {
-    setView(newView);
   };
 
   return (

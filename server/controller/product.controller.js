@@ -323,6 +323,43 @@ const getProductByCategoryId = async (req, res) => {
   }
 };
 
+const escapeRegex = (text) =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const searchProducts = async (req, res) => {
+  try {
+    const searchTerm = (req.query.q || "").trim();
+    const limit = Math.min(Number(req.query.limit) || 10, 50);
+
+    if (!searchTerm) {
+      return res.status(200).json({
+        products: [],
+        success: true,
+      });
+    }
+
+    const safeTerm = escapeRegex(searchTerm);
+
+    const products = await ProductModel.find({
+      productName: { $regex: safeTerm, $options: "i" },
+    })
+      .select("_id productName productUrl images")
+      .populate("modelsId", "salePrice discount")
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      products,
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Server error",
+      success: false,
+    });
+  }
+};
+
 export {
   getAllProducts,
   uploadImages,
@@ -332,4 +369,5 @@ export {
   getProductByCategoryId,
   getNewProducts,
   fetchProducts,
+  searchProducts,
 };

@@ -14,10 +14,9 @@ import useCartStore from "../store/cartStore";
 import useAuthStore from "../store/authStore";
 
 const ProductCard = ({ product }) => {
-  console.log("ProductCard ~ product:", product);
   const [selectedModelIndex, setSelectedModelIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-
+  
   const selectedModel = product.modelsId[selectedModelIndex];
   const { openModal, setSelectedProduct } = useContext(MyContext);
   const { addToCart } = useCartStore();

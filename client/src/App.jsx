@@ -18,6 +18,7 @@ import useAxiosPrivate from "./hooks/useAxiosPrivate";
 import useAddressStore from "./store/addressStore";
 import OrderSuccess from "./pages/OrderSuccess";
 import OrderTracking from "./pages/OrderTracking";
+import useCategoryStore from "./store/categoryStore";
 
 // Lazy load cho các page
 const Home = lazy(() => import("./pages/Home"));
@@ -37,19 +38,22 @@ function App() {
   const user = useAuthStore((state) => state.user);
   const loadCart = useCartStore((state) => state.loadCart);
 
-  const getCart = async() => {
+  const getCart = async () => {
     try {
       await loadCart(user?._id);
     } catch (error) {
       console.error("Failed to load cart:", error);
     }
-  }
+  };
 
   useEffect(() => {
     getCart();
   }, [user, loadCart]);
 
   const getAllAddresses = useAddressStore((state) => state.getAllAddresses);
+  const getListCategories = useCategoryStore(
+    (state) => state.getListOfCategories,
+  );
   const axiosPrivate = useAxiosPrivate();
 
   useEffect(() => {
@@ -63,6 +67,13 @@ function App() {
     };
     fetchAddresses();
   }, [user]);
+
+  useEffect(() => {
+    const fetchListCategories = async () => {
+     await getListCategories();
+    };
+    fetchListCategories();
+  }, []);
 
   return (
     <>
@@ -94,18 +105,21 @@ function App() {
             <Route element={<PersistentLogin />}>
               <Route path="/" element={<Home />} />
               <Route path="/product" element={<ProductPage />} />
-              <Route path="/product/category/:categorySlug" element={<ProductPage />} />
-              <Route path="/product/brand/:brandSlug" element={<ProductPage />} />
               <Route
-                path="/product/detail/:slug"
-                element={<ProductDetail />}
+                path="/product/category/:categorySlug"
+                element={<ProductPage />}
               />
+              <Route
+                path="/product/brand/:brandSlug"
+                element={<ProductPage />}
+              />
+              <Route path="/product/detail/:slug" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/my-account/:tab" element={<MyAccount />} />
-              <Route path="/payment/success" element={<PaymentSuccess/>} />
-              <Route path="/order-success" element={<OrderSuccess/>} />
-              <Route path="/order/:orderId" element={<OrderTracking/>} />
+              <Route path="/payment/success" element={<PaymentSuccess />} />
+              <Route path="/order-success" element={<OrderSuccess />} />
+              <Route path="/order/:orderId" element={<OrderTracking />} />
             </Route>
           </Routes>
         </Suspense>
@@ -113,7 +127,6 @@ function App() {
         <CartDrawer />
         {isOpenModal && <ViewMoreDialog />}
         {isOpenAddrFrm && <AddressForm />}
-
       </BrowserRouter>
       <Footer />
     </>

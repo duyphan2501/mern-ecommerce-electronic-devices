@@ -7,7 +7,6 @@ import { Link, useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { useContext, useState } from "react";
-import CategoryDrawer from "./CategoryDrawer";
 import MyContext from "../Context/MyContext";
 import NavLinkHeader from "./NavLinkHeader";
 import { Menu, MenuItem } from "@mui/material";
@@ -16,6 +15,7 @@ import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
 import useAxiosPrivate from "../hooks/useAxiosPrivate.js";
 import useCartStore from "../store/cartStore.js";
+import Search from "./Search.jsx";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -55,6 +55,7 @@ const Header = () => {
       console.log(error);
     }
   };
+  const [isFocused, setIsFocused] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 !bg-white shadow-sm h-32">
@@ -71,22 +72,7 @@ const Header = () => {
             </a>
           </div>
           <div className="col2 w-[60%] flex items-center">
-            <div className="border-[1px] border-gray-300 rounded-xl h-[80%] w-full flex items-center px-3 overflow-hidden">
-              <IoSearch size={25} className="text-gray-400" />
-              <input
-                type="text"
-                name=""
-                id=""
-                className="ms-2 search-input w-full border-r-[1px] border-r-gray-300 text-gray-500"
-                placeholder="Tìm kiếm sản phẩm"
-              />
-              <Button
-                variant="text"
-                className="h-full !mr-[-13px] !ml-[-1px] !px-5 text-nowrap !rounded-[0]"
-              >
-                Tìm kiếm
-              </Button>
-            </div>
+            <Search />
           </div>
           <div className="col3 w-[25%] flex items-center justify-end">
             <ul className="flex items-center justify-end lg:gap-5 w-full">

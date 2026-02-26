@@ -16,7 +16,7 @@ const cleanParams = (params) => {
   return cleaned;
 };
 
-const useProductStore = create((set) => {
+const useProductStore = create((get, set) => {
   const setLoading = (isLoading) => set({ isLoading });
   const getAllProducts = async () => {
     set({ isLoading: true });
@@ -25,7 +25,7 @@ const useProductStore = create((set) => {
       const res = await API.get(url);
       return res.data?.products || [];
     } catch (error) {
-      toast.error(error.response?.data?.message || "Get all product error");
+      console.error(error.response?.data?.message || "Get all product error");
     } finally {
       set({ isLoading: false });
     }
@@ -38,7 +38,7 @@ const useProductStore = create((set) => {
       const res = await API.get(url);
       return res.data?.product;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Get product error");
+      console.error(error.response?.data?.message || "Get product error");
     } finally {
       set({ isLoading: false });
     }
@@ -57,7 +57,7 @@ const useProductStore = create((set) => {
           page: page,
           limit: itemsPerPage,
           sort: sortOption,
-        }), 
+        }),
       );
       if (filterParams.categoryIds && filterParams.categoryIds.length > 0) {
         filterParams.categoryIds.forEach((id) => {
@@ -81,8 +81,7 @@ const useProductStore = create((set) => {
         totalPages: res.data?.totalPages,
       };
     } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message || "Get product error");
+      console.error(error.response?.data?.message || "Get product error");
       return { products: [], totalPages: 0 };
     } finally {
       set({ isLoading: false });
@@ -96,7 +95,7 @@ const useProductStore = create((set) => {
       const res = await API.get(url);
       return res.data?.products;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Get product error");
+      console.error(error.response?.data?.message || "Get product error");
     } finally {
       set({ isLoading: false });
     }
@@ -107,22 +106,35 @@ const useProductStore = create((set) => {
     try {
       const url = `/api/product/new`;
       const res = await API.get(url);
+      set({ newProducts: res.data?.products });
       return res.data?.products;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Get product error");
+      console.error(error.response?.data?.message || "Get product error");
     } finally {
       set({ isLoading: false });
     }
   };
+    const searchProducts = async (searchTerm) => {
+      try {
+        const url = `/api/product/search?q=${encodeURIComponent(searchTerm)}`;
+        const res = await API.get(url);
+        return res.data?.products || [];
+      } catch (error) {
+        console.error(error.response?.data?.message || "Search product error");
+        return [];
+      }
+    };
 
   return {
     isLoading: false,
+    newProducts: [],
     setLoading,
     getAllProducts,
     getProductBySlug,
     getProductByCategoryId,
     getNewProducts,
     fetchProducts,
+    searchProducts,
   };
 });
 

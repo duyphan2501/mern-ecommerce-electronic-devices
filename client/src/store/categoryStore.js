@@ -6,6 +6,7 @@ const useCategoryStore = create((set) => {
     try {
       const url = `/api/category/list`;
       const res = await API.get(url);
+      set({ categoryList: res.data.categories || [] });
       return res.data.categories || [];
     } catch (error) {
       console.error("Failed to fetch categories:", error);
@@ -14,6 +15,7 @@ const useCategoryStore = create((set) => {
   };
 
   return {
+    categoryList: [],
     getListOfCategories,
   };
 });
