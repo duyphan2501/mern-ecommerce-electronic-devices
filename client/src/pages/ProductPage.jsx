@@ -25,7 +25,6 @@ const ProductPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState(sortOptions[0]);
-  const [category, setCategory] = useState("");
 
   const handleChangeFilter = (field, value) => {
     setFilter((prev) => ({ ...prev, [field]: value }));

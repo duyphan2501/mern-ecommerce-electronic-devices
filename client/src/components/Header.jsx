@@ -1,5 +1,4 @@
-import { IoSearch, IoBagCheckOutline, IoCartOutline } from "react-icons/io5";
-import { MdOutlineRocketLaunch } from "react-icons/md";
+import { IoBagCheckOutline, IoCartOutline } from "react-icons/io5";
 import Badge from "@mui/material/Badge";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
@@ -28,19 +27,13 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [open, setOpen] = useState(false);
   const navigator = useNavigate();
 
   const openProfile = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
 
   const cart = useCartStore((state) => state.cart);
-
   const { openCart } = useContext(MyContext);
   const { user, logout } = useAuthStore();
   const axiosPrivate = useAxiosPrivate();
@@ -52,155 +45,98 @@ const Header = () => {
       navigator("/");
     } catch (error) {
       toast.error(useAuthStore.getState().message);
-      console.log(error);
     }
   };
-  const [isFocused, setIsFocused] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 !bg-white shadow-sm h-32">
-      <div className="!py-2 border-b-[1px] border-[#e5e7eb]">
-        <div className="container flex justify-between gap-3 ">
-          <div className="col1 w-[15%]">
-            <a className="logo" href="/">
+    <header className="sticky top-0 z-50 bg-white shadow-sm">
+
+      {/* ===== TOP HEADER ===== */}
+      <div className="border-b border-gray-200">
+        <div className="container flex items-center justify-between gap-3 flex-wrap py-2">
+
+          {/* LOGO */}
+          <div className="w-auto">
+            <Link to="/" className="logo">
               <img
                 src="/image/logo.jpg"
                 alt="Logo"
-                loading="lazy"
-                className="w-[130px] h-auto"
+                className="w-[110px] md:w-[130px]"
               />
-            </a>
+            </Link>
           </div>
-          <div className="col2 w-[60%] flex items-center">
+
+          {/* ICONS */}
+          <div className="flex items-center gap-2 order-2 md:order-3">
+
+            {user ? (
+              <>
+                <Button
+                  className="!bg-gray-100 hover:!bg-gray-300 !text-gray-600 !normal-case !gap-1"
+                  onClick={handleClick}
+                >
+                  <FaRegSmileWink size={20} />
+                  <span className="sm:inline">Tài khoản</span>
+                </Button>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  open={openProfile}
+                  onClose={handleClose}
+                  transformOrigin={{ horizontal: "right", vertical: "top" }}
+                  anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                >
+                  <MenuItem component={Link} to="/my-account/profile" className="!text-sm">
+                    Hồ sơ cá nhân
+                  </MenuItem>
+                  <MenuItem component={Link} to="/my-account/address" className="!text-sm">
+                    Sổ địa chỉ
+                  </MenuItem>
+                  <MenuItem component={Link} to="/my-account/orders" className="!text-sm">
+                    Đơn hàng của tôi
+                  </MenuItem>
+                  <MenuItem className="!text-sm" onClick={handleLogout}>Đăng xuất</MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <div className="text-sm">
+                <Link className="text-gray-500" to="/login">Đăng nhập</Link>
+                <span className="mx-2 text-gray-300">|</span>
+                <Link className="text-gray-500" to="/register">Đăng ký</Link>
+              </div>
+            )}
+
+            {/* <Tooltip title="Đơn hàng">
+              <IconButton component={Link} to="/my-account/orders">
+                <IoBagCheckOutline className="text-[#0d68f3]" />
+              </IconButton>
+            </Tooltip> */}
+
+            <Tooltip title="Giỏ hàng">
+              <IconButton onClick={openCart}>
+                <StyledBadge
+                  badgeContent={cart?.items?.length || 0}
+                  color="secondary"
+                >
+                  <IoCartOutline className="text-[#0d68f3]" />
+                </StyledBadge>
+              </IconButton>
+            </Tooltip>
+
+          </div>
+
+          {/* SEARCH */}
+          <div className="w-full md:flex-1 md:order-2 order-3 min-w-[220px] md:mx-10">
             <Search />
           </div>
-          <div className="col3 w-[25%] flex items-center justify-end">
-            <ul className="flex items-center justify-end lg:gap-5 w-full">
-              {user ? (
-                <li className="size-10 flex justify-end items-center flex-1">
-                  <Button
-                    className="!bg-gray-100 hover:!bg-gray-300 !items-center !normal-case !text-gray-500 !gap-1 text-nowrap"
-                    aria-controls={openProfile ? "basic-menu" : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={openProfile ? "true" : undefined}
-                    onClick={handleClick}
-                  >
-                    <FaRegSmileWink size={25} />
-                    Tài khoản
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    id="account-menu"
-                    open={openProfile}
-                    onClose={handleClose}
-                    onClick={handleClose}
-                    slotProps={{
-                      paper: {
-                        elevation: 0,
-                        sx: {
-                          overflow: "visible",
-                          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                          mt: 1.5,
-                          "& .MuiAvatar-root": {
-                            width: 32,
-                            height: 32,
-                            ml: -0.5,
-                            mr: 1,
-                          },
-                          "&::before": {
-                            content: '""',
-                            display: "block",
-                            position: "absolute",
-                            top: 0,
-                            right: 14,
-                            width: 10,
-                            height: 10,
-                            bgcolor: "background.paper",
-                            transform: "translateY(-50%) rotate(45deg)",
-                            zIndex: 0,
-                          },
-                        },
-                      },
-                    }}
-                    transformOrigin={{ horizontal: "right", vertical: "top" }}
-                    anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-                  >
-                    <MenuItem
-                      component={Link}
-                      to={"/my-account/profile"}
-                      onClick={handleClose}
-                    >
-                      Hồ sơ cá nhân
-                    </MenuItem>
-                    <MenuItem
-                      component={Link}
-                      to={"/my-account/address"}
-                      onClick={handleClose}
-                    >
-                      Sổ địa chỉ
-                    </MenuItem>
-                    <MenuItem
-                      component={Link}
-                      to={"/my-account/orders"}
-                      onClick={handleClose}
-                    >
-                      Đơn hàng của tôi
-                    </MenuItem>
-                    <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
-                  </Menu>
-                </li>
-              ) : (
-                <li>
-                  <Link
-                    className="text-gray-500 text-[15px] link"
-                    to={"/login"}
-                  >
-                    Đăng nhập
-                  </Link>
-                  <span className="text-gray-300 mx-2">|</span>
-                  <Link
-                    className="text-gray-500 text-[15px] link"
-                    to={"/register"}
-                  >
-                    Đăng ký
-                  </Link>
-                </li>
-              )}
 
-              <li>
-                {/* <Link to={"/wishlist"}> */}
-                <Tooltip title="Đơn hàng" arrow>
-                  <IconButton
-                    aria-label="orders"
-                    component={Link}
-                    to={"/my-account/orders"}
-                  >
-                    <IoBagCheckOutline className="text-[#0d68f3]" />
-                  </IconButton>
-                </Tooltip>
-                {/* </Link> */}
-              </li>
-              <li>
-                <Tooltip title="Giỏ hàng" arrow>
-                  <IconButton aria-label="cart" onClick={openCart}>
-                    <StyledBadge
-                      badgeContent={cart?.items.length || 0}
-                      color="secondary"
-                    >
-                      <IoCartOutline className="text-[#0d68f3]" />
-                    </StyledBadge>
-                  </IconButton>
-                </Tooltip>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
-      <nav>
+
+      {/* ===== NAVIGATION ===== */}
+      <nav className="">
         <div className="container">
-          <div className="flex justify-center">
-            <NavLinkHeader />
-          </div>
+          <NavLinkHeader />
         </div>
       </nav>
     </header>

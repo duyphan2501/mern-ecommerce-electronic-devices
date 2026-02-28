@@ -3,18 +3,13 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
 import { Link } from "react-router-dom";
-
-const productList = Array.from({ length: 10 }, (_, i) => ({
-  id: i + 1,
-  name: `Sản phẩm ${i + 1}`,
-  link: `/san-pham/${i + 1}`,
-  image:
-    i % 2 === 0
-      ? "https://salt.tikicdn.com/ts/upload/72/8d/23/a810d76829d245ddd87459150cb6bc77.png"
-      : "https://salt.tikicdn.com/ts/upload/a2/cf/84/dab5e2a933efdbdb13962282999af39d.png",
-}));
+import useCategoryStore from "../store/categoryStore";
 
 const HomeCardSlider = () => {
+  const categoryList = useCategoryStore((state) => state.categoryList);
+  if (!categoryList || categoryList.length === 0) {
+    return null; // hoặc hiển thị một thông báo nào đó
+  }
   return (
     <div className="container">
       <div className="">
@@ -32,22 +27,17 @@ const HomeCardSlider = () => {
           modules={[Navigation]}
           className="HomeCardSlider"
         >
-          {productList.map((product) => (
-            <SwiperSlide key={product.id} className="group">
-              <Link
-                to={product.link}
-                className=""
-              >
+          {categoryList.map((cate) => (
+            <SwiperSlide key={cate._id} className="group">
+              <Link to={`/product/category/${cate.slug}`} className="">
                 <div className="bg-white flex flex-col items-center p-2 rounded-md border border-gray-200">
                   <img
-                    src={product.image}
-                    alt={product.name}
+                    src={cate.image}
+                    alt={cate.name}
                     loading="lazy"
                     className="w-[100px] h-[100px] object-contain rounded-md group-hover:shadow-md group-hover:scale-105 transition-transform duration-200"
                   />
-                  <p className="text-center text-gray-700 mt-2">
-                    {product.name}
-                  </p>
+                  <p className="text-center text-gray-700 mt-2">{cate.name}</p>
                 </div>
               </Link>
             </SwiperSlide>

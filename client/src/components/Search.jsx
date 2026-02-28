@@ -41,6 +41,22 @@ const Search = () => {
     setLoading(false);
   };
 
+  const filterCategoriesByName = (categories, keyword) => {
+    const result = [];
+
+    for (const cate of categories) {
+      const isMatch = cate.name.toLowerCase().includes(keyword.toLowerCase());
+
+      if (isMatch) result.push(cate);
+
+      if (cate.children?.length) {
+        result.push(...filterCategoriesByName(cate.children, keyword));
+      }
+    }
+
+    return result;
+  };
+
   useEffect(() => {
     const run = async () => {
       if (debouncedSearch.trim() === "") {
@@ -58,11 +74,14 @@ const Search = () => {
 
       const res = await searchProducts(debouncedSearch);
 
-      const matchedCategories = (categoryList || []).filter((c) =>
-        c.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+      const matchedCategories = filterCategoriesByName(
+        categoryList || [],
+        debouncedSearch,
       );
 
-      setCategories(matchedCategories.length > 0 ? matchedCategories : categoryList);
+      setCategories(
+        matchedCategories.length > 0 ? matchedCategories : categoryList,
+      );
       setProducts(res || []);
       setLoading(false);
     };
@@ -94,7 +113,7 @@ const Search = () => {
 
       {isFocused && (
         <div className="absolute top-[110%] left-0 w-full bg-white shadow-xl rounded-b-xl p-5 z-50 flex">
-          <div className="w-2/6">
+          <div className="w-2/6 hidden lg:block">
             <h4 className="font-semibold mb-2">Gợi ý tìm kiếm</h4>
             <ul className="text-sm text-gray-600">
               {loading
@@ -115,7 +134,7 @@ const Search = () => {
             </ul>
           </div>
 
-          <div className="w-4/6">
+          <div className="lg:w-4/6 w-full">
             <h4 className="font-semibold mb-2">Sản phẩm</h4>
             <ul className="text-sm text-gray-600">
               {loading

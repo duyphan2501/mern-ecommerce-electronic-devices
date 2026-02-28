@@ -1,7 +1,7 @@
 const TopStrip = () => {
   return (
     <div>
-      <div className="top-strip py-2 border-b-[1px] border-[#e5e7eb]">
+      <div className="top-strip py-2 border-b-[1px] border-[#e5e7eb] hidden md:block">
         <div className="container">
           <div className="flex items-center justify-between">
             <p className="font-[400] text-[14px] text-gray-500">

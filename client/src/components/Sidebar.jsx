@@ -47,12 +47,23 @@ const Sidebar = ({ filter, handleChangeFilter }) => {
   };
 
   const { categorySlug, brandSlug } = useParams();
+  const findCategoryIdBySlug = (categories, slug) => {
+    for (const cate of categories) {
+      if (cate.slug === slug) return cate._id;
+
+      if (cate.children?.length) {
+        const found = findCategoryIdBySlug(cate.children, slug);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
 
   useEffect(() => {
     const setLoading = useProductStore.getState().setLoading;
     if (categorySlug) {
       setLoading(true);
-      const cateId = categories.find((cate) => cate.slug === categorySlug)?._id;
+      const cateId = findCategoryIdBySlug(categories, categorySlug);
       if (cateId) handleChangeFilter("categoryIds", [cateId]);
     } else if (brandSlug) {
       setLoading(true);
