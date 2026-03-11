@@ -1,20 +1,22 @@
 import PayOS from "@payos/node";
 import dotenv from "dotenv";
 import ngrok from "ngrok";
-dotenv.config({quiet: true});
+dotenv.config({ quiet: true });
 
 const PORT = process.env.PORT || 3000;
 
 const payOS = new PayOS(
   process.env.PAYOS_CLIENT_ID,
   process.env.PAYOS_API_KEY,
-  process.env.PAYOS_CHECKSUM_KEY
+  process.env.PAYOS_CHECKSUM_KEY,
 );
 
 const startNgrokAndConfirmWebhook = async () => {
   try {
     // Khởi tạo ngrok và lấy URL runtime
-    const url = await ngrok.connect(PORT);
+    let url;
+    if (process.env.NODE_ENV === "development") url = await ngrok.connect(PORT);
+    else url = process.env.BACKEND_URL;
     const webhookUrl = `${url}/api/payment/webhook/payos`;
 
     // Confirm webhook với PayOS
@@ -25,4 +27,4 @@ const startNgrokAndConfirmWebhook = async () => {
   }
 };
 
-export {payOS, startNgrokAndConfirmWebhook};
+export { payOS, startNgrokAndConfirmWebhook };
