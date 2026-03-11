@@ -34,7 +34,6 @@ const ServiceSlider = () => {
         <Swiper
           slidesPerView={6}
           spaceBetween={20}
-          lazy={true}
           breakpoints={{
             320: { slidesPerView: 1.2 },
             640: { slidesPerView: 2 },

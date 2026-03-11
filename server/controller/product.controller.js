@@ -306,9 +306,13 @@ const getProductByCategoryId = async (req, res) => {
         success: false,
       });
 
-    const foundProducts = await ProductModel.find({ categoryId }).populate(
-      "modelsId",
-    );
+    const foundProducts = await ProductModel.find({
+      categoryIds: categoryId,
+    })
+      .populate("brandId", "name slug")
+      .populate("categoryIds", "name parentId slug")
+      .populate("modelsId")
+      .lean();
 
     if (!foundProducts)
       return res.status(404).json({

@@ -126,11 +126,12 @@ nav ul li:hover .submenu {
   background-color: #fff;
 }
 
-.swiper-button-prev::after,
-.swiper-button-next::after {
-  font-size: 25px !important;
-  font-weight: 700 !important;
+.swiper-button-next svg, 
+.swiper-button-prev svg {
+  width: 30px !important;
+  height: 30px !important;
 }
+
 
 .swiper-button-prev:hover,
 .swiper-button-next:hover {
@@ -147,9 +148,10 @@ nav ul li:hover .submenu {
   display: none !important;
 }
 
-.HomeCardSlider .swiper-button-prev::after,
-.HomeCardSlider .swiper-button-next::after {
-  font-size: 15px !important;
+.HomeCardSlider .swiper-button-prev svg,
+.HomeCardSlider .swiper-button-next svg {
+  width: 20x !important;
+  height: 20px !important;
 }
 
 .HomeCardSlider:hover .swiper-button-prev,

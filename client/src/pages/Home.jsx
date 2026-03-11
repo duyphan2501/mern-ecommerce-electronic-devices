@@ -1,41 +1,10 @@
-import { useEffect, useState } from "react";
 import LazyComponentWrapper from "../components/LazyComponentWrapper";
 import useCategoryStore from "../store/categoryStore";
 import useProductStore from "../store/productStore";
 
 const Home = () => {
-  const [categories, setCategories] = useState();
-  const [products, setProducts] = useState();
-  const [selectedCategory, setSelectedCategory] = useState();
   const { getProductByCategoryId, getNewProducts } = useProductStore();
-  const { getAllCategories } = useCategoryStore();
-  const [newProducts, setNewProducts] = useState([]);
-
-  const fetchNewProducts = async () => {
-    const data = await getNewProducts();
-    setNewProducts(data);
-  };
-
-  const fetchData = async () => {
-    await Promise.allSettled([fetchNewProducts()]);
-  };
-
-  useEffect(() => {
-    fetchData()
-  }, []);
-
-  useEffect(() => {
-    if (!selectedCategory) return;
-    const getProducts = async () => {
-      try {
-        const fetchedProducts = await getProductByCategoryId(selectedCategory);
-        setProducts(fetchedProducts);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getProducts();
-  }, [selectedCategory]);
+  const categoryList = useCategoryStore((s) => s.categoryList);
 
   return (
     <div>
@@ -56,28 +25,25 @@ const Home = () => {
         {/*  */}
         <section>
           <div className="bg-white">
-            <div className="md:flex justify-between items-center container md:py-5 py-3 px-4 md:px-0">
-              <div className="md:w-1/3">
+            <div className="container md:py-5 py-3 px-4 md:px-0">
+              <div className="md:flex justify-between items-center">
                 <h2 className="text-2xl font-bold font-sans">
                   Sản phẩm phổ biến
                 </h2>
-                <p className="hidden lg:block line-clamp-1">
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                </p>
-              </div>
-              <div className="md:w-2/3 px-4">
-                <LazyComponentWrapper
-                  importFunc={() => import("../components/ProductTabbar")}
-                  categories={categories}
-                  setSelectedCategory={setSelectedCategory}
-                />
+                <div className="text-right md:mt-0 mt-2">
+                  <LazyComponentWrapper
+                    importFunc={() => import("../components/BrowseButton")}
+                    link={"/products"}
+                  />
+                </div>
               </div>
             </div>
             <div className="pb-5">
               <LazyComponentWrapper
                 importFunc={() => import("../components/ProductSlider")}
-                products={newProducts}
+                fetchProducts={getNewProducts}
               />
+              a
             </div>
           </div>
         </section>
@@ -98,6 +64,7 @@ const Home = () => {
             <div className="">
               <LazyComponentWrapper
                 importFunc={() => import("../components/ProductSlider")}
+                fetchProducts={getNewProducts}
               />
             </div>
           </div>
@@ -128,26 +95,30 @@ const Home = () => {
         </section>
         {/* Section: Brand Grid */}
         <section className="bg-white py-5">
-          <div className="container p-4 rounded-md bg-gradient-to-b from-blue-100 from-25% to-white to-50%">
-            <div className="md:flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold font-sans">
-                  Thương hiệu nổi bật
-                </h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+          {categoryList.length > 0 &&
+            categoryList.map((cate) => (
+              <div className="bg-white ">
+                <div className="container md:py-5 py-3 px-4 md:px-0">
+                  <div className="md:flex justify-between items-center">
+                    <h2 className="text-2xl font-bold font-sans">
+                      {cate.name}
+                    </h2>
+                    <div className="text-right md:mt-0 mt-2">
+                      <LazyComponentWrapper
+                        importFunc={() => import("../components/BrowseButton")}
+                        link={`/products/_${cate.slug}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="">
+                  <LazyComponentWrapper
+                    importFunc={() => import("../components/ProductSlider")}
+                    fetchProducts={() => getProductByCategoryId(cate._id)}
+                  />
+                </div>
               </div>
-              <div className="text-right md:mt-0 mt-2">
-                <LazyComponentWrapper
-                  importFunc={() => import("../components/BrowseButton")}
-                />
-              </div>
-            </div>
-            <div className="pt-5">
-              <LazyComponentWrapper
-                importFunc={() => import("../components/BrandGrid")}
-              />
-            </div>
-          </div>
+            ))}
         </section>
         {/* blog */}
         <section>

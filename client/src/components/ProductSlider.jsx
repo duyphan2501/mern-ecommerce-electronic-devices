@@ -3,8 +3,18 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
 import ProductCard from "./ProductCard";
+import { useEffect } from "react";
+import { useState } from "react";
 
-const ProductSlider = ({products}) => {
+const ProductSlider = ({ fetchProducts }) => {
+  const [products, setProducts] = useState([]);
+  const fetchData = async () => {
+    const resData = await fetchProducts();
+    setProducts(resData);
+  };
+  useEffect(() => {
+    fetchData();
+  }, [fetchProducts]);
   return (
     <div>
       <div className="container bg-white">

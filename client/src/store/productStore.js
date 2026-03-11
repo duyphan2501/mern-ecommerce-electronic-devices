@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import toast from "react-hot-toast";
 import { API } from "../API/axiosInstance";
 const cleanParams = (params) => {
   const cleaned = {};
@@ -88,10 +87,10 @@ const useProductStore = create((get, set) => {
     }
   };
 
-  const getProductByCategoryId = async (categoryIds) => {
+  const getProductByCategoryId = async (cateId) => {
     set({ isLoading: true });
     try {
-      const url = `/api/product/category/${categoryIds}`;
+      const url = `/api/product/category/${cateId}`;
       const res = await API.get(url);
       return res.data?.products;
     } catch (error) {
