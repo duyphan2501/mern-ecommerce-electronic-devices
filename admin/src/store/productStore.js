@@ -16,10 +16,12 @@ const useProductStore = create((set) => {
       const res = await axiosPrivate.post(
         `${API_URL}/api/product/upload-images`,
         formData,
-        { cancelToken: cancelSource?.token }
+        { cancelToken: cancelSource?.token },
       );
       toast.success(res.data?.message);
-      return res.data?.uploadedImages || [];
+      const uploadedImages = res.data?.uploadedImages || [];
+      const data = uploadedImages.map((item) => item.url);
+      return data || [];
     } catch (err) {
       if (axios.isCancel(err)) {
         console.log("Upload images canceled");
@@ -36,13 +38,15 @@ const useProductStore = create((set) => {
       if (!newModels[i].documents?.length) continue;
 
       const formData = new FormData();
-      newModels[i].documents.forEach((doc) => formData.append("documents", doc));
+      newModels[i].documents.forEach((doc) =>
+        formData.append("documents", doc),
+      );
 
       try {
         const res = await axiosPrivate.post(
           `${API_URL}/api/product/upload-documents`,
           formData,
-          { cancelToken: cancelSource?.token }
+          { cancelToken: cancelSource?.token },
         );
         toast.success(res.data?.message);
         newModels[i].documents = res.data?.uploadedDocuments || [];
@@ -64,7 +68,10 @@ const useProductStore = create((set) => {
 
     try {
       const uploadedImages = await uploadImages(product.images, axiosPrivate);
-      const newModels = await uploadDocumentsForModels(product.models, axiosPrivate);
+      const newModels = await uploadDocumentsForModels(
+        product.models,
+        axiosPrivate,
+      );
 
       const payload = {
         ...product,
@@ -84,7 +91,9 @@ const useProductStore = create((set) => {
       if (axios.isCancel(error)) {
         toast.error("Save product progress canceled");
       } else {
-        toast.error(error.response?.data?.message || error.message || "Đã có lỗi xảy ra.");
+        toast.error(
+          error.response?.data?.message || error.message || "Đã có lỗi xảy ra.",
+        );
       }
     } finally {
       set({ isLoading: false });
@@ -102,8 +111,10 @@ const useProductStore = create((set) => {
 
   return {
     isLoading: false,
-    createProduct: (product, axiosPrivate) => saveProduct(product, axiosPrivate, false),
-    updateProduct: (product, axiosPrivate) => saveProduct(product, axiosPrivate, true),
+    createProduct: (product, axiosPrivate) =>
+      saveProduct(product, axiosPrivate, false),
+    updateProduct: (product, axiosPrivate) =>
+      saveProduct(product, axiosPrivate, true),
     cancelSaveProduct,
   };
 });

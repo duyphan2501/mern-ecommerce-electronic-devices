@@ -19,7 +19,7 @@ const useCartStore = create((set, get) => ({
   /* =======================
       LOCAL HELPER
   ======================== */
-  updateCartStore: (modelId, finalQty) => {
+  updateCartStore: (modelId, finalQty, userId = null) => {
     const cart = get().cart;
 
     if (!cart || !cart.items) return;
@@ -31,12 +31,9 @@ const useCartStore = create((set, get) => ({
 
     // ✅ thêm mới
     if (!existItem && finalQty > 0) {
-      set((state) => ({
-        cart: {
-          ...state.cart,
-          items: [...state.cart.items, { modelId, quantity: finalQty }],
-        },
-      }));
+      get()
+        .loadCart(userId)
+        .then((cart) => set({ cart }));
       return;
     }
 
@@ -66,8 +63,7 @@ const useCartStore = create((set, get) => ({
         set({ cart });
         return;
       }
-      get().updateCartStore(cartData.modelId, finalQty);
-
+      get().updateCartStore(cartData.modelId, finalQty, cartData.userId);
     } catch (error) {
       const data = error.response?.data;
 

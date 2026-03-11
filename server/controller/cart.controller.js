@@ -128,7 +128,6 @@ const getCart = async (req, res) => {
       });
     }
     const cart = await loadCart(userId, cartId);
-
     return res
       .status(200)
       .json({ cart, message: "Cart loaded", success: true });
@@ -162,7 +161,7 @@ const removeFromCart = async (req, res) => {
 
     await removeCartItem(userId, cartId, modelId);
     return res.status(200).json({
-      message: "Item removed from cart successfully",
+      message: "Đã xoá sản phẩm khỏi giỏ hàng",
       success: true,
     });
   } catch (error) {

@@ -1,80 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Slider from "@mui/material/Slider";
-import CollapseButton from "./CollapseButton";
 import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
-import { useEffect } from "react";
 import useCategoryStore from "../store/categoryStore";
 import useBrandStore from "../store/brandStore";
 import CategoryItem from "./CategoryItem";
+import CollapseButton from "./CollapseButton";
 import formatMoney from "../utils/MoneyFormat";
-import { useParams } from "react-router-dom";
-import useProductStore from "../store/productStore";
 
 const Sidebar = ({ filter, handleChangeFilter }) => {
-  const { getAllBrands } = useBrandStore();
-  const { getListOfCategories } = useCategoryStore();
-  const [brands, setBrands] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const { brandList, getAllBrands } = useBrandStore();
+  const { categoryList, getListOfCategories } = useCategoryStore();
 
-  const [value, setValue] = useState([filter.minPrice, filter.maxPrice]);
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+  // Local state cho Slider để kéo mượt hơn (chỉ submit khi dừng - dùng debounce ở cha)
+  const [priceRange, setPriceRange] = useState([
+    filter.minPrice,
+    filter.maxPrice,
+  ]);
+
+  useEffect(() => {
+    if (categoryList.length === 0) getListOfCategories();
+    if (brandList.length === 0) getAllBrands();
+  }, []);
+
+  // Đồng bộ slider khi filter từ URL thay đổi
+  useEffect(() => {
+    setPriceRange([filter.minPrice, filter.maxPrice]);
+  }, [filter.minPrice, filter.maxPrice]);
+
+  const handleSliderChange = (event, newValue) => {
+    setPriceRange(newValue);
     handleChangeFilter("minPrice", newValue[0]);
     handleChangeFilter("maxPrice", newValue[1]);
   };
 
-  const handleCheckBoxChange = (event, field, value) => {
-    const isChecked = event.target.checked;
-    const current = filter[field] || [];
-
-    let updated;
-    if (isChecked) {
-      updated = [...current, value];
-    } else {
-      updated = current.filter((id) => id !== value);
-    }
-
-    handleChangeFilter(field, updated);
+  const handleCheckbox = (event, field, id) => {
+    const currentIds = filter[field] || [];
+    const updatedIds = event.target.checked
+      ? [...currentIds, id]
+      : currentIds.filter((i) => i !== id);
+    handleChangeFilter(field, updatedIds);
   };
-
-  const fetchData = async () => {
-    const [categoriesList, brands] = await Promise.allSettled([
-      getListOfCategories(),
-      getAllBrands(),
-    ]);
-    setCategories(categoriesList.value);
-    setBrands(brands.value);
-  };
-
-  const { categorySlug, brandSlug } = useParams();
-  const findCategoryIdBySlug = (categories, slug) => {
-    for (const cate of categories) {
-      if (cate.slug === slug) return cate._id;
-
-      if (cate.children?.length) {
-        const found = findCategoryIdBySlug(cate.children, slug);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-
-  useEffect(() => {
-    const setLoading = useProductStore.getState().setLoading;
-    if (categorySlug) {
-      setLoading(true);
-      const cateId = findCategoryIdBySlug(categories, categorySlug);
-      if (cateId) handleChangeFilter("categoryIds", [cateId]);
-    } else if (brandSlug) {
-      setLoading(true);
-      const brandId = brands.find((brand) => brand.slug === brandSlug)?._id;
-      if (brandId) handleChangeFilter("brandIds", [brandId]);
-    }
-  }, [categorySlug, brandSlug, categories, brands]);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   return (
     <div className="">
@@ -82,11 +47,11 @@ const Sidebar = ({ filter, handleChangeFilter }) => {
         <CollapseButton title={"Danh mục"}>
           <FormGroup>
             {/* Duyệt qua các danh mục cấp cha (parent level) */}
-            {categories?.map((category) => (
+            {categoryList?.map((category) => (
               <CategoryItem
                 key={category._id}
                 category={category}
-                handleChange={handleCheckBoxChange}
+                handleChange={handleCheckbox}
                 listChecked={filter.categoryIds || []}
               />
             ))}
@@ -94,15 +59,13 @@ const Sidebar = ({ filter, handleChangeFilter }) => {
         </CollapseButton>
         <CollapseButton title={"Thương hiệu"}>
           <FormGroup>
-            {brands.map((item) => {
+            {brandList.map((item) => {
               return (
                 <FormControlLabel
                   key={item._id}
                   control={
                     <Checkbox
-                      onChange={(e) =>
-                        handleCheckBoxChange(e, "brandIds", item._id)
-                      }
+                      onChange={(e) => handleCheckbox(e, "brandIds", item._id)}
                       checked={filter.brandIds?.includes(item._id) || false}
                     />
                   }
@@ -119,8 +82,8 @@ const Sidebar = ({ filter, handleChangeFilter }) => {
         </h4>
         <div className="px-3">
           <Slider
-            value={value}
-            onChange={handleChange}
+            value={priceRange}
+            onChange={handleSliderChange}
             min={0}
             max={10000000}
             step={10000}
@@ -130,14 +93,14 @@ const Sidebar = ({ filter, handleChangeFilter }) => {
               Từ
               <span className="text-black font-semibold money">
                 {" "}
-                {formatMoney(value[0])}
+                {formatMoney(priceRange[0])}
               </span>
             </div>
             <div className="text-sm ml-auto">
               Đến
               <span className="text-black font-semibold money">
                 {" "}
-                {formatMoney(value[1])}
+                {formatMoney(priceRange[1])}
               </span>
             </div>
           </div>

@@ -11,7 +11,7 @@ const NavLinkHeader = () => {
     <ul className="items-center xl:gap-x-3 lg:gap-x-2 gap-x-1 justify-center hidden md:flex border-t border-gray-100">
       {listOfCategories.map((cate) => (
         <li key={cate._id} className="relative">
-          <Link to={`product/category/${cate.slug}`}>
+          <Link to={`products/_${cate.slug}`}>
             <Button            
               className="link !py-2"
             >
@@ -22,7 +22,7 @@ const NavLinkHeader = () => {
             <ul className="submenu absolute top-[100%] left-0 bg-white shadow-sm z-10">
               {cate.children.map((child) => ( 
                 <li key={child._id}>
-                  <Link to={`product/category/${child.slug}`}>
+                  <Link to={`products/_${child.slug}`}>
                     <Button
                       className="link"
                     >

@@ -124,7 +124,7 @@ const Search = () => {
                   ))
                 : categories.map((c) => (
                     <li key={c._id}>
-                      <a href={`/product/category/${c.slug}`}>
+                      <a href={`/products/_${c.slug}`}>
                         <div className="p-2 hover:bg-gray-100 cursor-pointer">
                           {c.name}
                         </div>

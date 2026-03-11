@@ -104,16 +104,9 @@ function App() {
 
             <Route element={<PersistentLogin />}>
               <Route path="/" element={<Home />} />
-              <Route path="/product" element={<ProductPage />} />
-              <Route
-                path="/product/category/:categorySlug"
-                element={<ProductPage />}
-              />
-              <Route
-                path="/product/brand/:brandSlug"
-                element={<ProductPage />}
-              />
-              <Route path="/product/detail/:slug" element={<ProductDetail />} />
+              <Route path="/products/:slug" element={<ProductPage />} />
+              <Route path="/products" element={<ProductPage />} />
+              <Route path="/product/:slug" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/my-account/:tab" element={<MyAccount />} />

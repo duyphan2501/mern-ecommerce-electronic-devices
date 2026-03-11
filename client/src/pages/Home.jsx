@@ -15,15 +15,6 @@ const Home = () => {
     const data = await getNewProducts();
     setNewProducts(data);
   };
-  const fetchCategories = async () => {
-    try {
-      const fetchedCategories = await getAllCategories();
-      setCategories(fetchedCategories);
-      setSelectedCategory(fetchedCategories[0]._id);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const fetchData = async () => {
     await Promise.allSettled([fetchNewProducts()]);

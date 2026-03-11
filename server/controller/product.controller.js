@@ -22,7 +22,8 @@ const uploadDocument = async (req, res) => {
       use_filename: true,
       unique_filename: false,
       overwrite: true,
-      resource_type: "raw",
+      resource_type: "auto",
+      flags: "attachment",
     };
 
     // upload new documents to cloudinary
@@ -95,6 +96,7 @@ const createProduct = async (req, res) => {
       metaDescription,
       productUrl,
       status,
+      hasModels,
     } = req.body;
 
     // Validate required fields
@@ -156,6 +158,7 @@ const createProduct = async (req, res) => {
           productUrl,
           images,
           status,
+          hasModels,
           modelsId: [],
         },
       ],
@@ -199,14 +202,12 @@ const getNewProducts = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
 
     const products = await ProductModel.find()
-      .sort({ create_at: -1 }) // Sắp xếp mới nhất lên đầu
+      .sort({ create_at: -1 })
       .limit(limit)
-      .populate("brandId", "name slug")
+      .populate("brand", "name slug") // Populate vào field ảo "brand"
       .populate("categoryIds", "name parentId slug")
-      .populate({
-        path: "modelsId",
-        select: "salePrice costPrice discount modelName specifications",
-      });
+      .populate("modelsId")
+      .lean();
 
     // 2. Kiểm tra nếu không có sản phẩm
     if (!products || products.length === 0) {
@@ -278,7 +279,8 @@ const getProductBySlug = async (req, res) => {
     const foundProduct = await ProductModel.findOne({ productUrl })
       .populate("brandId", "name slug")
       .populate("categoryIds", "name parentId slug")
-      .populate("modelsId");
+      .populate("modelsId")
+      .lean();
 
     if (!foundProduct)
       return res.status(404).json({
@@ -323,8 +325,7 @@ const getProductByCategoryId = async (req, res) => {
   }
 };
 
-const escapeRegex = (text) =>
-  text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const searchProducts = async (req, res) => {
   try {
@@ -346,7 +347,8 @@ const searchProducts = async (req, res) => {
       .select("_id productName productUrl images")
       .populate("modelsId", "salePrice discount")
       .limit(limit)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     return res.status(200).json({
       products,

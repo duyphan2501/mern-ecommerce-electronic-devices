@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ProductGridView from "../components/ProductGridView";
 import Sidebar from "../components/Sidebar";
 import { Button, Pagination, Stack } from "@mui/material";
 import useProductStore from "../store/productStore";
 import useDebounce from "../hooks/useDebounce";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import useCategoryStore from "../store/categoryStore";
+import useBrandStore from "../store/brandStore";
 const sortOptions = [
   { value: "createdAt_desc", label: "Mới nhất" },
   { value: "name_asc", label: "Tên, A-Z" },
@@ -12,69 +15,122 @@ const sortOptions = [
   { value: "price_desc", label: "Giá, cao đến thấp" },
 ];
 const ProductPage = () => {
-  const [filter, setFilter] = useState({
-    categoryIds: [],
-    brandIds: [],
-    minPrice: 0,
-    maxPrice: 20000000,
-  });
-  const [openSort, setOpenSort] = useState(false);
-  const [totalPages, setTotalPages] = useState(10);
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { fetchProducts, isLoading, setLoading } = useProductStore();
+  const { categoryList } = useCategoryStore();
+  const { brandList } = useBrandStore();
+
   const [products, setProducts] = useState([]);
-  const [limit, setLimit] = useState(8);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState(sortOptions[0]);
-
-  const handleChangeFilter = (field, value) => {
-    setFilter((prev) => ({ ...prev, [field]: value }));
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
-
-  const handleSetSortBy = (option) => {
-    setSortBy(option);
-    setOpenSort(false);
-  };
-
+  const [totalPages, setTotalPages] = useState(1);
+  const [openSort, setOpenSort] = useState(false);
   const sortRef = useRef(null);
-  const { fetchProducts, isLoading } = useProductStore();
 
+  // 1. Lấy params từ URL
+  const currentPage = Number(searchParams.get("page")) || 1;
+  const minPrice = Number(searchParams.get("minPrice")) || 0;
+  const maxPrice = Number(searchParams.get("maxPrice")) || 20000000;
+  const sortValue = searchParams.get("sort") || "createdAt_desc";
+  const sortBy =
+    sortOptions.find((opt) => opt.value === sortValue) || sortOptions[0];
+
+  // 2. Parse Slug thành ID (Dùng useMemo để tối ưu hiệu năng)
+  const filter = useMemo(() => {
+    if (!slug) return { categoryIds: [], brandIds: [], minPrice, maxPrice };
+
+    const decoded = decodeURIComponent(slug);
+    const [brandSlug, categoryPart] = decoded.split("_");
+    const categorySlugs = categoryPart ? categoryPart.split("|") : [];
+
+    const brandId = brandList.find((b) => b.slug === brandSlug)?._id;
+
+    const findIds = (list, targetSlugs, result = []) => {
+      list.forEach((item) => {
+        if (targetSlugs.includes(item.slug)) result.push(item._id);
+        if (item.children) findIds(item.children, targetSlugs, result);
+      });
+      return result;
+    };
+
+    return {
+      categoryIds: findIds(categoryList, categorySlugs),
+      brandIds: brandId ? [brandId] : [],
+      minPrice,
+      maxPrice,
+    };
+  }, [slug, categoryList, brandList, minPrice, maxPrice]);
+
+  const debouncedFilter = useDebounce(filter, 400);
+
+  // 3. Fetch Data
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (sortRef.current && !sortRef.current.contains(event.target)) {
-        setOpenSort(false);
+    const fetchAPI = async () => {
+      setLoading(true);
+      const res = await fetchProducts(
+        currentPage,
+        8,
+        sortBy.value,
+        debouncedFilter,
+      );
+      if (res) {
+        setProducts(res.products);
+        setTotalPages(res.totalPages);
       }
+      setLoading(false);
     };
+    if (categoryList.length > 0) fetchAPI();
+  }, [currentPage, sortBy.value, debouncedFilter, categoryList]);
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  // 4. Xử lý thay đổi filter từ Sidebar (Chuyển thành thay đổi URL)
+  const handleChangeFilter = (field, value) => {
+    if (field === "minPrice" || field === "maxPrice") {
+      const params = new URLSearchParams(searchParams);
+      params.set(field, value);
+      params.set("page", "1");
+      setSearchParams(params);
+      return;
+    }
 
-  const debouncedFilter = useDebounce(filter, 500);
+    let brandSlug = "";
+    let categorySlugs = [];
 
-  const fetchProductsAPI = async (page, limit, sortOption, filterParams) => {
-    const { products, totalPages } = await fetchProducts(
-      page,
-      limit,
-      sortOption,
-      filterParams,
-    );
-    setProducts(products);
-    setTotalPages(totalPages);
+    // BRAND
+    if (field === "brandIds") {
+      brandSlug = brandList.find((b) => b._id === value[0])?.slug || "";
+      categorySlugs = categoryList
+        .flatMap((c) => [c, ...(c.children || [])])
+        .filter((c) => filter.categoryIds.includes(c._id))
+        .map((c) => c.slug);
+    }
+
+    // CATEGORY
+    if (field === "categoryIds") {
+      categorySlugs = categoryList
+        .flatMap((c) => [c, ...(c.children || [])])
+        .filter((c) => value.includes(c._id))
+        .map((c) => c.slug);
+
+      brandSlug =
+        brandList.find((b) => filter.brandIds?.includes(b._id))?.slug || "";
+    }
+
+    const categoryPart = categorySlugs.join("|");
+
+    navigate(`/products/${brandSlug}_${categoryPart}`);
   };
 
-  useEffect(() => {
-    fetchProductsAPI(currentPage, limit, sortBy.value, debouncedFilter);
-  }, [currentPage, sortBy, limit, debouncedFilter]);
+  const handlePageChange = (_, v) => {
+    const p = new URLSearchParams(searchParams);
+    p.set("page", v);
+    setSearchParams(p);
+  };
 
-  const handleOpenSort = () => {
-    setOpenSort((prev) => !prev);
+  const handleSetSortBy = (opt) => {
+    const p = new URLSearchParams(searchParams);
+    p.set("sort", opt.value);
+    setSearchParams(p);
+    setOpenSort(false);
   };
 
   return (
@@ -96,7 +152,7 @@ const ProductPage = () => {
                 <div className="relative " ref={sortRef}>
                   <Button
                     className="!capitalize !text-black !font-semibold !bg-white !text-sm !font-sans"
-                    onClick={handleOpenSort}
+                    onClick={() => setOpenSort(!openSort)}
                   >
                     {sortBy.label}
                   </Button>

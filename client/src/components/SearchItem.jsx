@@ -7,7 +7,7 @@ const SearchItem = ({product}) => {
   const finalPrice = price - (price * discount) / 100;
 
   return (
-    <a href={`/product/detail/${product.productUrl}`} className="block">
+    <a href={`/product/${product.productUrl}`} className="block">
     <div className="p-2 hover:bg-gray-100 cursor-pointer">
       <div className="flex items-center">
         <img src={product.images[0]} alt={product.productName} className="w-12 h-12 object-cover rounded-md" />

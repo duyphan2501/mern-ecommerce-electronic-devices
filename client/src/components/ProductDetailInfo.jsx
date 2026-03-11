@@ -12,7 +12,6 @@ const comment = {
 
 const ProductDetailInfo = ({ product }) => {
   const [activeTab, setActive] = useState(0);
-
   return (
     <div className="">
       <div className="flex gap-10">
@@ -29,13 +28,18 @@ const ProductDetailInfo = ({ product }) => {
             activeTab === 1 && "text-blue-500 border-b-3"
           }`}
           onClick={() => setActive(1)}
-        >
+        > 
           Bình luận ({4})
         </p>
       </div>
       <div className="py-5">
         {activeTab === 0 ? (
-          <p className="">{product.description}</p>
+          <>
+            <p
+              className=""
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            />
+          </>
         ) : (
           <div className="shadow rounded px-5 py-2">
             <div className="">
@@ -47,20 +51,28 @@ const ProductDetailInfo = ({ product }) => {
               </div>
             </div>
             <div className="p-3 shadow rounded bg-gray-100 my-5">
-               <h4 className="text-lg font-bold mb-3">Bình luận</h4> 
-                <TextField id="outlined-basic" label="Viết gì đó..." variant="outlined" className="bg-white w-full mt-3" multiline={true} rows={4} />
-                <div className="my-3">
-                  <Stack spacing={1}>
-                    <Rating
-                      size="medium"
-                      name="half-rating"
-                      precision={0.5}
-                      defaultValue={5}
-                    />
-                  </Stack>
-                </div>
-                <Button className="!bg-blue-500 !text-white !font-sans !font-semibold hover:!bg-black">Gửi bình luận</Button>
-                
+              <h4 className="text-lg font-bold mb-3">Bình luận</h4>
+              <TextField
+                id="outlined-basic"
+                label="Viết gì đó..."
+                variant="outlined"
+                className="bg-white w-full mt-3"
+                multiline={true}
+                rows={4}
+              />
+              <div className="my-3">
+                <Stack spacing={1}>
+                  <Rating
+                    size="medium"
+                    name="half-rating"
+                    precision={0.5}
+                    defaultValue={5}
+                  />
+                </Stack>
+              </div>
+              <Button className="!bg-blue-500 !text-white !font-sans !font-semibold hover:!bg-black">
+                Gửi bình luận
+              </Button>
             </div>
           </div>
         )}

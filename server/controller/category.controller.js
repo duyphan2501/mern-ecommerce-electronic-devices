@@ -2,6 +2,7 @@ import cloudinary from "../config/cloudinary.config.js";
 import CategoryModel from "../model/category.model.js";
 import extractPublicId from "../helper/extractPuclicId.js";
 import uploadFiles from "../helper/upload.js";
+import slugify from "../helper/slugify.js";
 
 const categoryFolder = "categories";
 
@@ -54,10 +55,13 @@ const createCategory = async (req, res) => {
         success: false,
       });
 
+    const slug = slugify(name);
+
     const newCategory = await CategoryModel.create({
       name,
       parentId: parentId || null,
       image: image || null,
+      slug,
     });
 
     if (!newCategory)
@@ -177,8 +181,12 @@ const updateCategory = async (req, res) => {
       });
 
     // update category
-    if (name !== updateCategory.name) updateCategory.name = name;
-    if (parentId !== updateCategory.parentId) updateCategory.parentId = parentId;
+    if (name !== updateCategory.name) {
+      updateCategory.name = name;
+      updateCategory.slug = slugify(name);
+    }
+    if (parentId !== updateCategory.parentId)
+      updateCategory.parentId = parentId;
 
     // delete old image in cloudinary
     if (image && image !== updateCategory.image) {

@@ -31,7 +31,7 @@ const filterProducts = async (page, limit, sortOption, filterParams, terms) => {
         pipeline: [{ $project: { name: 1, slug: 1 } }],
         as: "categories",
       },
-    },
+    },  
     {
       $lookup: {
         from: "brands",
@@ -56,6 +56,7 @@ const filterProducts = async (page, limit, sortOption, filterParams, terms) => {
               stockQuantity: 1,
               soldQuantity: 1,
               salePrice: 1,
+              documents: 1,
               specifications: 1,
             },
           },
@@ -123,6 +124,7 @@ const filterProducts = async (page, limit, sortOption, filterParams, terms) => {
               _id: 1,
               productName: 1,
               productUrl: 1,
+              hasModels: 1,
               images: 1,
               status: 1,
               categories: 1,

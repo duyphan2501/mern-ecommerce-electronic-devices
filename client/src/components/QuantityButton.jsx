@@ -2,7 +2,7 @@ import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import { IoMdArrowDropup } from "react-icons/io";
 
-const QuantityButton = () => {
+const QuantityButton = ({ setNumberValue }) => {
   const [quantity, setQuantity] = useState("1");
 
   const handleChangeQuantity = (event) => {
@@ -10,9 +10,13 @@ const QuantityButton = () => {
   };
 
   useEffect(() => {
-    if (isNaN(parseInt(quantity)))
-        setQuantity("1")
-  }, [quantity])
+    if (isNaN(parseInt(quantity))) {
+      setQuantity("1");
+      setNumberValue(1);
+    } else {
+      setNumberValue(Number(quantity));
+    }
+  }, [quantity]);
 
   const handleKeyPress = (event) => {
     // Cho phép các phím điều khiển
@@ -22,7 +26,7 @@ const QuantityButton = () => {
       event.preventDefault();
     }
   };
-  
+
   const increaseQuantity = () => {
     let newQuan = parseInt(quantity) + 1 || 0;
     setQuantity(newQuan.toString());
@@ -30,9 +34,9 @@ const QuantityButton = () => {
 
   const descreaseQuantity = () => {
     let newQuan = (parseInt(quantity) || 0) - 1;
-    if (newQuan < 1) newQuan=1
+    if (newQuan < 1) newQuan = 1;
     setQuantity(newQuan.toString());
-  }; 
+  };
 
   return (
     <div className="flex border-2 rounded-md w-20 h-10 overflow-hidden">

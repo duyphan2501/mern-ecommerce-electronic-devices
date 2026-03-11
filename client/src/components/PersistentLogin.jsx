@@ -21,7 +21,6 @@ const PersistentLogin = () => {
         await refreshToken();
       } catch (error) {
         if (isMounted) {
-          console.log(error);
           if (
             location.pathname === "/cart" ||
             location.pathname === "/checkout" ||

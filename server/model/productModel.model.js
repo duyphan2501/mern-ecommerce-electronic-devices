@@ -12,7 +12,13 @@ const modelSchema = new mongoose.Schema(
     minimumQuantity: { type: Number, required: true },
     costPrice: { type: Number, required: true },
     specifications: { type: String, required: true },
-    documents: [{ type: String }],
+    documents: [
+      {
+        url: String,
+        name: String,
+        public_id: String,
+      },
+    ],
     productId: {
       type: mongoose.Types.ObjectId,
       ref: "products",

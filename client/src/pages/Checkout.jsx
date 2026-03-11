@@ -79,6 +79,14 @@ const Checkout = () => {
                 {formatMoney(totalCost)}
               </p>
             </div>
+            
+            <Button
+              className="!w-full !mb-3 !bg-teal-400 !text-white !font-bold hover:!bg-black"
+              onClick={handleCreateOrder}
+            >
+              Thanh toán khi nhận hàng (COD) {isLoading && fiLoader}
+            </Button>
+
             <Button
               className="!w-full !bg-blue-500 !text-white !font-bold hover:!bg-black"
               onClick={() =>
@@ -87,12 +95,7 @@ const Checkout = () => {
             >
               Thanh toán ngay {isPaymentLoading && fiLoader}
             </Button>
-            <Button
-              className="!w-full !mt-3 !bg-teal-400 !text-white !font-bold hover:!bg-black"
-              onClick={handleCreateOrder}
-            >
-              Thanh toán khi nhận hàng (COD) {isLoading && fiLoader}
-            </Button>
+
           </div>
         </div>
       </div>

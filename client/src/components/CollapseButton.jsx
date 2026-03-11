@@ -3,7 +3,7 @@ import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 
 const CollapseButton = ({ title, children }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const handleClickCollapse = () => {
     setOpen((prev) => !prev);

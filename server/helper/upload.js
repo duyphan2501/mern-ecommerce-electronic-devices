@@ -7,23 +7,24 @@ async function uploadFiles(files, options) {
     const fileArray = Array.isArray(files) ? files : [files];
 
     const uploadPromises = fileArray.map(async (file) => {
-      const result = await cloudinary.uploader.upload(file.path, options);
+      const result = await cloudinary.uploader.upload(file.path, ...options);
 
       // Xóa file local sau khi upload thành công
       fs.unlink(file.path, (err) => {
         if (err) console.error("Error deleting file:", err);
       });
 
-      return result.secure_url;
+      return {
+        url: result.secure_url,
+        name: file.originalname,
+        public_id: result.public_id,
+      };
     });
 
     return await Promise.all(uploadPromises);
-
   } catch (error) {
     throw error;
   }
 }
-
-
 
 export default uploadFiles;

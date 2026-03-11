@@ -14,11 +14,13 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  categoryIds: [{
-    type: mongoose.Schema.ObjectId,
-    ref: "categories",
-    required: true,
-  }],
+  categoryIds: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "categories",
+      required: true,
+    },
+  ],
   status: {
     type: String,
     enum: ["draft", "active", "archived"],
@@ -30,14 +32,27 @@ const productSchema = new mongoose.Schema({
   metaKeywords: String,
   metaDescription: String,
   productUrl: String,
+  hasModels: { type: Boolean, default: false },
   modelsId: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "models",
     },
   ],
-  create_at: {type: Date, default: Date.now()}
+  create_at: { type: Date, default: Date.now() },
 });
+
+// 1. Tạo field ảo "brand" trỏ tới collection "brands" thông qua "brandId"
+productSchema.virtual("brand", {
+  ref: "brands", // Tên model tham chiếu
+  localField: "brandId", // Field chứa ID trong Product
+  foreignField: "_id", // Field ID trong Brand
+  justOne: true, // Trả về 1 object thay vì mảng
+});
+
+// 2. Cấu hình để field ảo này xuất hiện khi trả về API
+productSchema.set("toJSON", { virtuals: true });
+productSchema.set("toObject", { virtuals: true });
 
 const ProductModel = mongoose.model("products", productSchema);
 

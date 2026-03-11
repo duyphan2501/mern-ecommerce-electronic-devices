@@ -78,7 +78,7 @@ const ProductCard = ({ product }) => {
     <div className="productCard border-1 border-gray-200 rounded-md p-2 flex flex-col h-full shadow">
       <div className="relative group h-[200px] overflow-hidden">
         <Link
-          to={`/product/detail/${product.productUrl}`}
+          to={`/product/${product.productUrl}`}
           onClick={setProductDetail}
         >
           <img

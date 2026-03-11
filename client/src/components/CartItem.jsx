@@ -33,7 +33,7 @@ const CartItem = ({ product, userId }) => {
 
   return (
     <div className="flex gap-3 border-b-1 border-gray-300 w-full">
-      <Link to={`/san-pham/chi-tiet/${product.slug}`} onClick={closeCart}>
+      <Link to={`/product/${product.slug}`} onClick={closeCart}>
         <div className="size-25 rounded-md overflow-hidden">
           <img
             src={product?.images?.[0]}
