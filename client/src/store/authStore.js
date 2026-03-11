@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
+import { API } from "../API/axiosInstance";
+import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -13,7 +15,6 @@ const initialState = {
   isLoading: false,
   accessToken: null,
 };
-
 
 const useAuthStore = create((set) => ({
   ...initialState,
@@ -74,7 +75,7 @@ const useAuthStore = create((set) => ({
         `${API_URL}/api/user/send-verification-email`,
         {
           email,
-        }
+        },
       );
       set({
         message: res.data?.message || "Sent successfully",
@@ -152,7 +153,7 @@ const useAuthStore = create((set) => ({
         {
           password: newPassword,
           confirmPassword,
-        }
+        },
       );
       set({ user: res.data.user, isLoading: false, message: res.data.message });
     } catch (error) {
@@ -200,6 +201,17 @@ const useAuthStore = create((set) => ({
           "Token is expired, you have login again!",
         isLoading: false,
       });
+      throw error;
+    }
+  },
+  googleLogin: async (token) => {
+    try {
+      const res = await API.post("/api/user/google", { token });
+      set({
+        user: res.data.user,
+        accessToken: res.data.accessToken,
+      });
+    } catch (error) {
       throw error;
     }
   },

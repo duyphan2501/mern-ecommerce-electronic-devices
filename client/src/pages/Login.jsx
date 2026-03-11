@@ -17,6 +17,7 @@ import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
 import { FiLoader } from "react-icons/fi";
 import MyContext from "../Context/MyContext";
+import GoogleButton from "../components/GoogleButton";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -153,9 +154,9 @@ const Login = () => {
                 Đăng ký
               </Link>
             </div>
-            <Button className="!py-2 !bg-gray-100 gap-2 !items-center !font-sans !font-semibold !text-black">
-              <FcGoogle size={20} /> Đăng nhập với Google
-            </Button>
+            <div className="flex justify-center items-center">
+              <GoogleButton />
+            </div>
           </FormControl>
         </form>
       </div>

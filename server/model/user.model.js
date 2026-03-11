@@ -47,15 +47,18 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "user"],
       default: "user",
     },
+    changePwdNeeded: {
+      type: Boolean,
+      default: false,
+    },
     refreshToken: String,
-    refreshTokenExpireAt: Date
+    refreshTokenExpireAt: Date,
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const UserModel = mongoose.model("users", userSchema);
-
 
 export default UserModel;

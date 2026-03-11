@@ -15,6 +15,7 @@ import fs from "fs";
 import extractPublicId from "../helper/extractPuclicId.js";
 import { sanitizeUser } from "../helper/filterFieldOject.js";
 import { mergeCart } from "../service/cart.service.js";
+import { handlePostLogin, verifyToken } from "../helper/auth.helper.js";
 
 const sendVerificationEmailAgain = async (req, res) => {
   try {
@@ -36,7 +37,7 @@ const sendVerificationEmailAgain = async (req, res) => {
       });
 
     const verificationToken = Math.floor(
-      100000 + Math.random() * 900000
+      100000 + Math.random() * 900000,
     ).toString();
 
     await sendVerificationEmail(email, verificationToken);
@@ -81,7 +82,7 @@ const register = async (req, res) => {
 
     // generate verified account token
     const verificationToken = Math.floor(
-      100000 + Math.random() * 900000
+      100000 + Math.random() * 900000,
     ).toString();
     //send verified email
     await sendVerificationEmail(email, verificationToken);
@@ -118,10 +119,18 @@ const login = async (req, res) => {
         success: false,
       });
     // check user exist
-    const user = await UserModel.findOne({ email, status: "active" });
+    const user = await UserModel.findOne({
+      email,
+      status: "active",
+    });
     if (!user)
       return res.status(404).json({
         message: "User does not exist",
+        success: false,
+      });
+    if (user.changePwdNeeded)
+      return res.status(400).json({
+        message: "Please login by Google and change password first!",
         success: false,
       });
 
@@ -140,26 +149,7 @@ const login = async (req, res) => {
         success: false,
       });
 
-    // generate token and set cookie
-    const accessToken = await generateAccessTokenAndSetCookie(res, {
-      userId: user._id,
-      email: user.email,
-    });
-    const refreshToken = await generateRefreshTokenAndSetCookie(res, {
-      userId: user._id,
-      email: user.email,
-    });
-
-    // save token in db
-    user.refreshToken = refreshToken;
-    const expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    user.refreshTokenExpireAt = expireDate;
-    user.lastLogin = Date.now();
-    await user.save();
-
-    // merge to use cart
-    const guestCartId = req.cookies.cartId;
-    await mergeCart(guestCartId, user._id);
+    const accessToken = await handlePostLogin(req, res, user);
 
     return res.status(200).json({
       user: sanitizeUser(user),
@@ -528,7 +518,7 @@ const updateUserDetails = async (req, res) => {
     if (email !== user.email) {
       // generate verified account token
       verificationToken = Math.floor(
-        100000 + Math.random() * 900000
+        100000 + Math.random() * 900000,
       ).toString();
 
       //send verified email
@@ -591,7 +581,7 @@ const changePassword = async (req, res) => {
 
     const isCorrectPassword = await bcryptjs.compare(
       currentPassword,
-      user.password
+      user.password,
     );
 
     if (!isCorrectPassword)
@@ -618,6 +608,41 @@ const changePassword = async (req, res) => {
   }
 };
 
+const googleLogin = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+    const payload = await verifyToken(token);
+
+    const user = {
+      email: payload.email,
+      name: payload.name,
+      password: "g",
+      resetPwdNeeded: true,
+    };
+
+    let foundUser = await UserModel.findOne({
+      email: user.email,
+      status: "active",
+    });
+
+    if (!foundUser) {
+      foundUser = await UserModel.create(user);
+    }
+
+    const accessToken = await handlePostLogin(req, res, foundUser);
+
+    return res.status(200).json({
+      message: "Đăng nhập thành công!",
+      success: true,
+      user: sanitizeUser(foundUser),
+      accessToken,
+    });
+  } catch (error) {
+    console.error("Google login error:", error);
+    next(error);
+  }
+};
+
 export {
   register,
   login,
@@ -630,4 +655,5 @@ export {
   sendVerificationEmailAgain,
   updateUserDetails,
   changePassword,
+  googleLogin,
 };
