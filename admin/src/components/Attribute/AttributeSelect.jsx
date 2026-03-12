@@ -1,17 +1,8 @@
 import { MenuItem, Select } from "@mui/material";
-import { useState } from "react";
 
-const AttributeSelect = ({
-  selectItems,
-  onChange,
-  selectedItemId = "",
-}) => {
-
-  const selectedItem = selectedItemId && selectItems.find(item => item._id === selectedItemId)
-  const [value, setValue] = useState(selectedItem?._id || "");
+const AttributeSelect = ({ selectItems, onChange, selectedItemId, allowedNone=false }) => {
   const handleChange = (e) => {
     const selectedValue = e.target.value;
-    setValue(selectedValue);
     onChange(selectedValue);
   };
 
@@ -20,7 +11,8 @@ const AttributeSelect = ({
       size="small"
       onChange={handleChange}
       className="!rounded-lg !bg-gray-100 !w-full"
-      value={value}
+      value={selectedItemId}
+      displayEmpty
       sx={{
         fontFamily: "Outfit, sans-serif",
         ".MuiOutlinedInput-notchedOutline": {
@@ -39,6 +31,9 @@ const AttributeSelect = ({
         minHeight: "unset",
       }}
     >
+      {allowedNone && <MenuItem value={""} key={""} sx={{ fontFamily: "Outfit, sans-serif" }}>
+        <em>None</em>
+      </MenuItem>}
       {selectItems.map((item) => (
         <MenuItem
           value={item._id}

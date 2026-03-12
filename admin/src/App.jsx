@@ -1,7 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Dashboard from "./Pages/Dashboard";
-import { useContext } from "react";
-import MyContext from "./Context/MyContext";
 import Login from "./Pages/Login";
 import ListProduct from "./Pages/Products/ListProduct";
 import CreateProduct from "./Pages/Products/CreateProduct";
@@ -10,9 +8,7 @@ import PersistentLogin from "./components/PersistentLogin";
 import Layout from "./components/Layout";
 import ListCategory from "./Pages/Category/ListCategory";
 import Orders from "./Pages/Orders";
-
 function App() {
-  const { hasModels } = useContext(MyContext);
   return (
     <>
       <BrowserRouter>
@@ -27,7 +23,7 @@ function App() {
               <Route path="/orders" element={<Orders />}></Route>
               <Route
                 path="/products/create"
-                element={<CreateProduct hasModels={hasModels} />}
+                element={<CreateProduct />}
               ></Route>
             </Route>
           </Route>

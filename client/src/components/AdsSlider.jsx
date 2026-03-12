@@ -7,41 +7,27 @@ import { Link } from "react-router-dom";
 import { Button } from "@mui/material";
 import "swiper/css/effect-fade";
 
-const slideCaptions = [
-  [
-    <h3 className="text-2xl" key="line1">
-      Lorem ipsum dolor sit.
-    </h3>,
-    <p key="line2">Lorem ipsum dolor sit amet consectetur.</p>,
-    <p key="line2">Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>,
-    <Button
-      key="line3"
-      component={Link}
-      to="/windows-11"
-      variant="contained"
-      color="primary"
-      className="!font-semibold !font-sans"
-    >
-      Liên hệ ngay
-    </Button>,
-  ],
-  [
-    <p className="text-2xl" key="line1">
-      Lorem ipsum dolor sit.
-    </p>,
-    <p key="line2">Lorem ipsum dolor sit amet consectetur.</p>,
-    <p key="line2">Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>,
-    <Button
-      key="line3"
-      component={Link}
-      to="/windows-11"
-      variant="contained"
-      color="primary"
-      className="!font-semibold !font-sans"
-    >
-      Liên hệ ngay
-    </Button>,
-  ],
+const advertisements = [
+  {
+    _id: 1,
+    image:
+      "https://img.pikbest.com/templates/20240726/clean-solar-energy-social-media-post_10683100.jpg!bwr800",
+    title: "Big saving days sale",
+    content: "Inverter dye hydrid 3kw 1 pha - SUN - 3k-SFBDH-SDFNND",
+    footer: "Hỗ trợ kỹ thuật",
+    link: "/contact",
+    linkContent: "Liên hệ ngay",
+  },
+  {
+    _id: 2,
+    image:
+      "https://img.pikbest.com/origin/08/96/92/20JpIkbEsTXEx.jpg!bwr800",
+    title: "Big saving days sale",
+    content: "Inverter dye hydrid 3kw 1 pha - SUN - 3k-SFBDH-SDFNND",
+    footer: "Hỗ trợ kỹ thuật",
+    link: "/contact",
+    linkContent: "Liên hệ ngay",
+  },
 ];
 
 const AdsSlider = () => {
@@ -52,7 +38,7 @@ const AdsSlider = () => {
         <Swiper
           loop={true}
           spaceBetween={30}
-          effect={'fade'}
+          effect={"fade"}
           navigation={true}
           pagination={{
             clickable: true,
@@ -65,34 +51,40 @@ const AdsSlider = () => {
           modules={[Navigation, EffectFade, Autoplay]}
           className="AdsSlider h-full"
         >
-          {slideCaptions.map((caption, index) => (
+          {advertisements.map((adv, index) => (
             <SwiperSlide key={index}>
-              <div className="h-full relative">
+              <div
+                className="h-full relative text-blue-900/100"
+                style={{
+                  textShadow:
+                    "-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff",
+                }}
+              >
                 <img
-                  src="https://serviceapi.spicezgold.com/download/1750316856852_windows-11-3840x2160-microsoft-4k-24745.jpg"
+                  src={adv.image}
                   loading="lazy"
-                  className="rounded-xl w-full h-full object-cover"
+                  className="rounded-xl w-full h-full object-center"
                 />
                 {/* Caption chữ chạy ra */}
-                <div className="absolute z-10 w-1/2 h-full top-0 flex flex-col justify-center font-sans text-white text-shadow-black space-y-5 info pr-8 -right-1/2 opacity-0 transition-all duration-1000">
-                  <h4 className="text-lg font-medium relative opacity-0 -right-1/2">
-                    Big saving days sale
+                <div className="absolute z-10 w-1/2 h-full top-0 flex flex-col justify-center font-sans space-y-5 info pr-8 -right-1/2 opacity-0 transition-all duration-1000">
+                  <h4 className="text-lg font-bold relative opacity-0 -right-1/2">
+                    {adv.title}
                   </h4>
                   <h3 className="text-4xl font-[700] opacity-0 -right-1/2 relative">
-                    Inverter dye hydrid 3kw 1 pha - SUN - 3k-SFBDH-SDFNND
+                    {adv.content}
                   </h3>
                   <p className="font-medium text-lg opacity-0 -right-1/2 relative">
-                    Hỗ trợ kỹ thuật
+                    {adv.footer}
                   </p>
                   <div className="opacity-0 -right-1/2 relative">
                     <Button
                       component={Link}
-                      to="/windows-11"
+                      to={adv.link}
                       variant="contained"
                       color="primary"
-                      className="!font-semibold !font-sans "
+                      className="!font-semibold !font-sans text-shadow-2xs"
                     >
-                      Liên hệ ngay
+                      {adv.linkContent}
                     </Button>
                   </div>
                 </div>
@@ -105,14 +97,14 @@ const AdsSlider = () => {
       {/* 2 ảnh bên phải */}
       <div className="md:w-1/3 h-[500px] flex flex-col gap-4 md:mt-0 mt-4">
         <img
-          src="https://powertech.vn/thumbs/370x230x1/upload/photo/z65433762441366166af20604aa4c2646af39ca585e141-4763.jpg"
+          src="https://img.pikbest.com/origin/09/42/89/82upIkbEsTdi9.jpg!bwr800"
           alt=""
-          className="w-full h-full object-cover rounded-md overflow-hidden"
+          className="w-full h-full object-center rounded-md overflow-hidden"
         />
         <img
-          src="https://powertech.vn/thumbs/370x230x1/upload/photo/z65433762441366166af20604aa4c2646af39ca585e141-4763.jpg"
+          src="https://img.pikbest.com/origin/10/00/76/70kpIkbEsTU7R.jpg!bwr800"
           alt=""
-          className="w-full h-full object-cover rounded-md overflow-hidden"
+          className="w-full h-full object-center rounded-md overflow-hidden"
         />
       </div>
     </div>

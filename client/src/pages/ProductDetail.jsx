@@ -11,7 +11,8 @@ import MyContext from "../Context/MyContext";
 const ProductDetail = () => {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
-  const { getProductBySlug } = useProductStore();
+  const { getProductBySlug, isLoading, getProductsByCategoryIds } =
+    useProductStore();
   const { selectedProduct } = useContext(MyContext);
 
   useEffect(() => {
@@ -28,10 +29,15 @@ const ProductDetail = () => {
     getProduct();
   }, [slug, getProductBySlug]);
 
-  if (!product) return null;
+  if (!product || !product._id)
+    return (
+      <div className="flex items-center  justify-center h-100">
+        <p>{isLoading ? "Đang tải..." : "Sản phẩm không tồn tại"}</p>
+      </div>
+    );
 
   return (
-    <>  
+    <>
       {product && (
         <div className="bg-white">
           <div className="container">
@@ -50,11 +56,16 @@ const ProductDetail = () => {
               Sản phẩm tương tự
             </h2>
           </div>
-          {/* <div className="pt-5 pb-10">
+          <div className="pt-5 pb-10">
             <LazyComponentWrapper
               importFunc={() => import("../components/ProductSlider")}
+              fetchProducts={async () => {
+                const cateIds = product.categoryIds.map((cate) => cate._id);
+                const res = await getProductsByCategoryIds(cateIds);
+                return res;
+              }}
             />
-          </div> */}
+          </div>
         </div>
       )}
     </>

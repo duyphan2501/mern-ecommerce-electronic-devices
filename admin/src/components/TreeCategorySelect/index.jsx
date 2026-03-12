@@ -55,7 +55,7 @@ const TreeCategorySelect = ({ allCategories, selectedIds, onChange }) => {
       showSearch
       style={{ width: "100%" }}
       value={selectedIds} // Mảng các ID đã chọn
-      placeholder="Hãy chọn danh mục"
+      placeholder="Select categories"
       styles={{
         popup: {
           root: { maxHeight: 400, overflow: "auto" },
@@ -65,7 +65,7 @@ const TreeCategorySelect = ({ allCategories, selectedIds, onChange }) => {
       multiple
       treeData={treeData}
       onChange={handleSelect}
-      className="!p-2 !rounded-xl"
+      className="!p-2 !rounded-xl bg-gray-300"
     />  
   );
 };

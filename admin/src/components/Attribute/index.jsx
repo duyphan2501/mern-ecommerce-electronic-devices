@@ -5,16 +5,12 @@ import { useState } from "react";
 import TreeCategorySelect from "../TreeCategorySelect";
 import useCategoryStore from "../../store/categoryStore";
 import { useEffect } from "react";
+import useBrandStore from "../../store/brandStore";
 
 const Attribute = ({ product, handleChangeValue }) => {
   const [categories, setCategories] = useState([]);
-
-  const brands = [
-    { _id: "660ef98c8b0f2e23d8ccfe71", name: "Nike" },
-    { _id: "660ef98c8b0f2e23d8ccfe72", name: "Adidas" },
-    { _id: "660ef98c8b0f2e23d8ccfe73", name: "Puma" },
-    { _id: "660ef98c8b0f2e23d8ccfe74", name: "Reebok" },
-  ];
+  const { getAllBrands } = useBrandStore();
+  const brands = useBrandStore(s => s.brandList)
 
   const status = [
     { _id: "draft", name: "Draft" },
@@ -33,14 +29,16 @@ const Attribute = ({ product, handleChangeValue }) => {
 
   const { getAllCategories } = useCategoryStore();
 
-  const fetchAllCategories = async () => {
+  const fetchCatesAndBrands = async () => {
     const data = await getAllCategories();
     setCategories(data);
+    if (brands.length === 0)
+      await getAllBrands()
   };
 
   useEffect(() => {
-    fetchAllCategories()
-  }, []) 
+    fetchCatesAndBrands();
+  }, []);
 
   return (
     <div>
@@ -63,6 +61,7 @@ const Attribute = ({ product, handleChangeValue }) => {
               selectItems={brands}
               onChange={(val) => handleChangeValue("brandId", val)}
               selectedItemId={product?.brandId}
+              allowedNone={true}
             />
           </div>
         </div>

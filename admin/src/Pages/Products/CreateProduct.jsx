@@ -14,7 +14,6 @@ import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import useProductStore from "../../store/productStore";
 import { useNavigate } from "react-router";
 
-
 const defaultModel = {
   modelName: "",
   salePrice: 12323,
@@ -29,24 +28,23 @@ const defaultModel = {
   specifications: "",
 };
 
-const CreateProduct = ({ hasModels }) => {
-  const defaultProduct = {
-  productName: "",
-  description: "",
-  models: [defaultModel],
-  images: [],
-  categoryIds: [],
-  brandId: "",
-  shippingCost: 0,
-  pageTitle: "",
-  metaKeywords: "",
-  metaDescription: "",
-  productUrl: "",
-  hasModels,
-  status: "draft",
-};
-  const { isOpenQuesBox, setIsOpenQuesBox } = useContext(MyContext);
+const CreateProduct = () => {
+  const { isOpenQuesBox, setIsOpenQuesBox, hasModels } = useContext(MyContext);
 
+  const defaultProduct = {
+    productName: "",
+    description: "",
+    models: [defaultModel],
+    images: [],
+    categoryIds: [],
+    brandId: "",
+    shippingCost: 0,
+    pageTitle: "",
+    metaKeywords: "",
+    metaDescription: "",
+    productUrl: "",
+    status: "draft",
+  };
   useEffect(() => {
     setIsOpenQuesBox(true);
   }, []);
@@ -56,7 +54,7 @@ const CreateProduct = ({ hasModels }) => {
 
   const { createProduct, isLoading } = useProductStore();
   const axiosPrivate = useAxiosPrivate();
-  const navigator = useNavigate()
+  const navigator = useNavigate();
 
   const handleChangeModel = (field, index, value) => {
     setProduct((prev) => {
@@ -73,8 +71,9 @@ const CreateProduct = ({ hasModels }) => {
   const handleSubmit = async () => {
     if (isLoading) return;
     try {
-      await createProduct(product, axiosPrivate);
-      navigator("/products/list")
+      const productData = {...product, hasModels}
+      await createProduct(productData, axiosPrivate);
+      navigator("/products/list");
     } catch (error) {
       console.log(error);
     }

@@ -179,6 +179,18 @@ const useAuthStore = create((set) => ({
       throw error;
     }
   },
+
+  googleLogin: async (token) => {
+    try {
+      const res = await axios.post(`${API_URL}/api/user/google`, { token });
+      set({
+        user: res.data.user,
+        accessToken: res.data.accessToken,
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
   
 }));
 

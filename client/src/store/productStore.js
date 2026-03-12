@@ -100,6 +100,23 @@ const useProductStore = create((get, set) => {
     }
   };
 
+  const getProductsByCategoryIds = async (cateIds) => {
+    set({ isLoading: true });
+    try {
+      const url = `/api/product/categoryIds`;
+      const res = await API.get(url, {
+        params: {
+          categoryIds: cateIds.join(","),
+        },
+      });
+      return res.data?.products;
+    } catch (error) {
+      console.error(error.response?.data?.message || "Get product error");
+    } finally {
+      set({ isLoading: false });
+    }
+  };
+
   const getNewProducts = async () => {
     set({ isLoading: true });
     try {
@@ -113,16 +130,16 @@ const useProductStore = create((get, set) => {
       set({ isLoading: false });
     }
   };
-    const searchProducts = async (searchTerm) => {
-      try {
-        const url = `/api/product/search?q=${encodeURIComponent(searchTerm)}`;
-        const res = await API.get(url);
-        return res.data?.products || [];
-      } catch (error) {
-        console.error(error.response?.data?.message || "Search product error");
-        return [];
-      }
-    };
+  const searchProducts = async (searchTerm) => {
+    try {
+      const url = `/api/product/search?q=${encodeURIComponent(searchTerm)}`;
+      const res = await API.get(url);
+      return res.data?.products || [];
+    } catch (error) {
+      console.error(error.response?.data?.message || "Search product error");
+      return [];
+    }
+  };
 
   return {
     isLoading: false,
@@ -134,6 +151,7 @@ const useProductStore = create((get, set) => {
     getNewProducts,
     fetchProducts,
     searchProducts,
+    getProductsByCategoryIds,
   };
 });
 

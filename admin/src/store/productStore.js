@@ -95,6 +95,7 @@ const useProductStore = create((set) => {
           error.response?.data?.message || error.message || "Đã có lỗi xảy ra.",
         );
       }
+      throw error
     } finally {
       set({ isLoading: false });
       cancelSource = null;

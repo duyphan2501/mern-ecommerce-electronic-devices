@@ -96,11 +96,11 @@ const Cart = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="">Vận chuyển: </div>
-                  <div className="">Free</div>
+                  <div className="italic">Free</div>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="">Thuế: </div>
-                  <div className="">...</div>
+                  <div className="italic">Included</div>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="font-bold">Thành tiền: </div>

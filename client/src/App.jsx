@@ -19,6 +19,7 @@ import useAddressStore from "./store/addressStore";
 import OrderSuccess from "./pages/OrderSuccess";
 import OrderTracking from "./pages/OrderTracking";
 import useCategoryStore from "./store/categoryStore";
+import useBrandStore from "./store/brandStore";
 
 // Lazy load cho các page
 const Home = lazy(() => import("./pages/Home"));
@@ -54,6 +55,7 @@ function App() {
   const getListCategories = useCategoryStore(
     (state) => state.getListOfCategories,
   );
+  const getAllBrands = useBrandStore((state) => state.getAllBrands);
   const axiosPrivate = useAxiosPrivate();
 
   useEffect(() => {
@@ -69,10 +71,11 @@ function App() {
   }, [user]);
 
   useEffect(() => {
-    const fetchListCategories = async () => {
-     await getListCategories();
+    const fetchData = async () => {
+      await getListCategories();
+      await getAllBrands();
     };
-    fetchListCategories();
+    fetchData();
   }, []);
 
   return (

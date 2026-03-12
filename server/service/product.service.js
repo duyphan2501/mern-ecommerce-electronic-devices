@@ -13,7 +13,7 @@ const filterProducts = async (page, limit, sortOption, filterParams, terms) => {
     };
   }
   if (filterParams.brandIds?.length > 0) {
-    matchCriteria.brandIds = {
+    matchCriteria.brandId = {
       $in: filterParams.brandIds.map((id) => new mongoose.Types.ObjectId(`${id}`)),
     };
   }
@@ -131,7 +131,7 @@ const filterProducts = async (page, limit, sortOption, filterParams, terms) => {
               brand: 1,
               modelsId: 1,
               computedPrice: 1,
-              createdAt: 1,
+              created_at: 1,
             },
           },
         ],

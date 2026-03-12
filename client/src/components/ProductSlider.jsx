@@ -10,6 +10,7 @@ const ProductSlider = ({ fetchProducts }) => {
   const [products, setProducts] = useState([]);
   const fetchData = async () => {
     const resData = await fetchProducts();
+    if (!resData || resData.length === 0) return;
     setProducts(resData);
   };
   useEffect(() => {
@@ -31,12 +32,17 @@ const ProductSlider = ({ fetchProducts }) => {
           modules={[Navigation]}
           className="ProductSlider"
         >
-          {products &&
-            products.map((product) => (
-              <SwiperSlide key={product._id}>
+          {products.length > 0 ? (
+            products.map((product, index) => (
+              <SwiperSlide key={product._id + "idx" + index}>
                 <ProductCard product={product} />
               </SwiperSlide>
-            ))}
+            ))
+          ) : (
+            <div className="flex items-center justify-center h-60 ">
+              không có sản phẩm nào
+            </div>
+          )}
         </Swiper>
       </div>
     </div>

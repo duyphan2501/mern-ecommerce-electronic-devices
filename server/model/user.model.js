@@ -54,9 +54,7 @@ const userSchema = new mongoose.Schema(
     refreshToken: String,
     refreshTokenExpireAt: Date,
   },
-  {
-    timestamps: true,
-  },
+ 
 );
 
 const UserModel = mongoose.model("users", userSchema);

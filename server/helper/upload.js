@@ -7,7 +7,7 @@ async function uploadFiles(files, options) {
     const fileArray = Array.isArray(files) ? files : [files];
 
     const uploadPromises = fileArray.map(async (file) => {
-      const result = await cloudinary.uploader.upload(file.path, ...options);
+      const result = await cloudinary.uploader.upload(file.path, options);
 
       // Xóa file local sau khi upload thành công
       fs.unlink(file.path, (err) => {

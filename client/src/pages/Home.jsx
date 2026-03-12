@@ -4,8 +4,8 @@ import useProductStore from "../store/productStore";
 
 const Home = () => {
   const { getProductByCategoryId, getNewProducts } = useProductStore();
-  const categoryList = useCategoryStore((s) => s.categoryList);
-
+  const categoryListStore = useCategoryStore((s) => s.categoryList);
+  const categoryList = categoryListStore?.slice(0, 5) || []
   return (
     <div>
       <section className="py-5 mb-4">
@@ -43,7 +43,6 @@ const Home = () => {
                 importFunc={() => import("../components/ProductSlider")}
                 fetchProducts={getNewProducts}
               />
-              a
             </div>
           </div>
         </section>
@@ -97,10 +96,10 @@ const Home = () => {
         <section className="bg-white py-5">
           {categoryList.length > 0 &&
             categoryList.map((cate) => (
-              <div className="bg-white ">
+              <div className="bg-white py-2" key={cate._id}>
                 <div className="container md:py-5 py-3 px-4 md:px-0">
                   <div className="md:flex justify-between items-center">
-                    <h2 className="text-2xl font-bold font-sans">
+                    <h2 className="text-2xl font-bold font-sans uppercase">
                       {cate.name}
                     </h2>
                     <div className="text-right md:mt-0 mt-2">

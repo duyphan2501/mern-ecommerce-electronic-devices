@@ -3,12 +3,12 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
 import { Link } from "react-router-dom";
-import useCategoryStore from "../store/categoryStore";
+import useBrandStore from "../store/brandStore";
 
 const HomeCardSlider = () => {
-  const categoryList = useCategoryStore((state) => state.categoryList);
-  if (!categoryList || categoryList.length === 0) {
-    return null; // hoặc hiển thị một thông báo nào đó
+  const brandList = useBrandStore((s) => s.brandList);
+  if (!brandList || brandList.length === 0) {
+    return null;
   }
   return (
     <div className="container">
@@ -27,17 +27,17 @@ const HomeCardSlider = () => {
           modules={[Navigation]}
           className="HomeCardSlider"
         >
-          {categoryList.map((cate) => (
-            <SwiperSlide key={cate._id} className="group">
-              <Link to={`/product/category/${cate.slug}`} className="">
+          {brandList.map((brand) => (
+            <SwiperSlide key={brand._id} className="group">
+              <Link to={`/products/${brand.slug}`} className="">
                 <div className="bg-white flex flex-col items-center p-2 rounded-md border border-gray-200">
                   <img
-                    src={cate.image}
-                    alt={cate.name}
+                    src={brand.image}
+                    alt={brand.name}
                     loading="lazy"
                     className="w-[100px] h-[100px] object-contain rounded-md group-hover:shadow-md group-hover:scale-105 transition-transform duration-200"
                   />
-                  <p className="text-center text-gray-700 mt-2">{cate.name}</p>
+                  <p className="text-center text-gray-700 mt-2">{brand.name}</p>
                 </div>
               </Link>
             </SwiperSlide>

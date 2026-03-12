@@ -67,11 +67,11 @@ const Checkout = () => {
             </div>
             <div className="flex justify-between items-center">
               <div className="">Vận chuyển: </div>
-              <div className="">Free</div>
+              <p className="italic">Free</p>
             </div>
             <div className="flex justify-between items-center">
               <div className="">Thuế: </div>
-              <div className="">...</div>
+              <p className="italic">Included</p>
             </div>
             <div className="flex justify-between items-center py-2">
               <p className="font-semibold">Tiền cần thanh toán:</p>

@@ -2,13 +2,12 @@ import { MenuItem, Select } from "@mui/material";
 import { useEffect, useState } from "react";
 
 const HeadingSelect = ({ selectItems, editor }) => {
-
   const getCurrentLevel = () => {
     if (!editor) return 0;
     for (let i = 1; i <= 6; i++) {
       if (editor.isActive("heading", { level: i })) return i;
     }
-    return 0; 
+    return 0;
   };
 
   const [value, setValue] = useState(getCurrentLevel());
@@ -27,8 +26,7 @@ const HeadingSelect = ({ selectItems, editor }) => {
     };
   }, [editor]);
 
-  const handleChange = (e) => {
-    const level = parseInt(e.target.value);
+  const handleItemClick = (level) => {
     if (level === 0) {
       editor.chain().focus().setParagraph().run();
     } else {
@@ -39,7 +37,6 @@ const HeadingSelect = ({ selectItems, editor }) => {
   return (
     <Select
       size="small"
-      onChange={handleChange}
       className="!rounded !bg-gray-100"
       value={value}
       sx={{
@@ -66,6 +63,7 @@ const HeadingSelect = ({ selectItems, editor }) => {
           value={item.value}
           key={item.value}
           sx={{ fontFamily: "Outfit, sans-serif" }}
+          onClick={() => handleItemClick(item.value)}
         >
           {item.key}
         </MenuItem>

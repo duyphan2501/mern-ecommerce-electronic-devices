@@ -17,12 +17,12 @@ import useCartStore from "../store/cartStore";
 import useAuthStore from "../store/authStore";
 
 const ProductDetailContent = ({ product }) => {
-  if (!product) return null;
+  if (!product || !product._id) return null;
+
   const [selectedModelIndex, setSelectedModelIndex] = useState(
     product.selectedModelIndex || 0,
   );
-  const model = product.modelsId[selectedModelIndex];
-
+  const model = product?.modelsId?.[selectedModelIndex];
   const discountPrice =
     model.salePrice - model.salePrice * (model.discount / 100);
 
@@ -66,15 +66,17 @@ const ProductDetailContent = ({ product }) => {
             {product.productName}
             {product.hasModels && " - " + model.modelName}
           </h4>
-          <h6 className="text-sm">
-            Thương hiệu:{" "}
-            <a
-              className="font-bold text-gray-800 hover:underline"
-              href={`/products/${product.brand?.slug}`}
-            >
-              {product.brand?.name}
-            </a>
-          </h6>
+          {product.brand && (
+            <h6 className="text-sm">
+              Thương hiệu:{" "}
+              <a
+                className="font-bold text-gray-800 hover:underline"
+                href={`/products/${product.brand?.slug}`}
+              >
+                {product.brand?.name}
+              </a>
+            </h6>
+          )}
           <p
             className="w-[95%]"
             dangerouslySetInnerHTML={{ __html: model.specifications }}

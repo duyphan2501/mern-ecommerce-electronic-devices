@@ -6,7 +6,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { Link } from "react-router-dom";
 import AddToCartBtn from "./AddToCartBtn";
 import MyContext from "../Context/MyContext";
-import { useContext, useState, useMemo, useCallback } from "react";
+import React, { useContext, useState, useMemo, useCallback } from "react";
 import formatMoney from "../utils/MoneyFormat";
 import ProductModel from "./ProductModel";
 import { IoMdArrowDropdown } from "react-icons/io";
@@ -148,7 +148,7 @@ const ProductCard = ({ product }) => {
 
             {/* ✅ Dropdown chỉ render khi mở */}
             {product?.modelsId?.length > 1 && (
-              <div>
+              <div className="">
                 <Tooltip title="Model khác" placement="bottom" arrow>
                   <IconButton
                     className="!bg-gray-100 !p-1 hover:!bg-gray-200 relative"
@@ -161,7 +161,7 @@ const ProductCard = ({ product }) => {
                       } transition-transform`}
                     />
                     {isOpen && (
-                      <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto absolute w-max bg-white p-3 border border-gray-200 shadow rounded-lg  bottom-[115%]">
+                      <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto absolute w-max bg-white p-3 border border-gray-200 shadow rounded-lg right-0 bottom-[115%]">
                         {product.modelsId.map((model, index) => (
                           <ProductModel
                             key={model._id}
@@ -185,4 +185,4 @@ const ProductCard = ({ product }) => {
   );
 };
 
-export default ProductCard;
+export default React.memo(ProductCard);

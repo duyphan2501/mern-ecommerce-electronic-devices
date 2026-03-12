@@ -1,7 +1,7 @@
 import express from 'express'
 import checkAuth from '../middleware/auth.middleware.js'
 import { uploadDoc, uploadImg} from '../middleware/cloudinary.middleware.js'
-import { createProduct, fetchProducts, getAllProducts, getNewProducts, getProductByCategoryId, getProductBySlug, searchProducts, uploadDocument, uploadImages } from '../controller/product.controller.js'
+import { createProduct, fetchProducts, getAllProducts, getNewProducts, getProductByCategoryId, getProductBySlug, getProductsByCategoryIds, searchProducts, uploadDocument, uploadImages } from '../controller/product.controller.js'
 
 const productRouter = express.Router()
 
@@ -14,5 +14,6 @@ productRouter.get("/all", getAllProducts);
 productRouter.get("/get/:slug", getProductBySlug);
 productRouter.get("/category/:categoryId", getProductByCategoryId);
 productRouter.get("/search", searchProducts);
+productRouter.get("/categoryIds", getProductsByCategoryIds);
     
 export default productRouter;

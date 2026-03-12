@@ -3,15 +3,16 @@ export default function slugify(text) {
     .toString()
     .toLowerCase()
     .trim()
-    // Split an accented letter in the base letter and the accent
+    // Chuyển đ -> d trước khi xử lý các dấu khác
+    .replace(/đ/g, 'd') 
+    // Tách các ký tự có dấu (ví dụ: á -> a + ´)
     .normalize('NFD') 
-    // Remove all previously split accents
+    // Xóa các dấu đã tách ra
     .replace(/[\u0300-\u036f]/g, '') 
-    // Replace invalid chars with spaces
+    // Thay thế ký tự không hợp lệ bằng khoảng trắng
     .replace(/[^a-z0-9\s-]/g, ' ') 
-    // Replace multiple spaces or hyphens with a single hyphen
+    // Thay khoảng trắng/gạch ngang liên tiếp bằng 1 gạch ngang
     .replace(/[\s-]+/g, '-') 
-    // Trim leading and trailing hyphens
+    // Xóa gạch ngang ở đầu và cuối
     .replace(/^-+|-+$/g, '');
 }
-

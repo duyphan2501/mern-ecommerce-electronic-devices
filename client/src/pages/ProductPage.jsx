@@ -40,10 +40,14 @@ const ProductPage = () => {
     if (!slug) return { categoryIds: [], brandIds: [], minPrice, maxPrice };
 
     const decoded = decodeURIComponent(slug);
-    const [brandSlug, categoryPart] = decoded.split("_");
+    const [brandPart, categoryPart] = decoded.split("_");
+
+    const brandSlugs = brandPart ? brandPart.split("|") : [];
     const categorySlugs = categoryPart ? categoryPart.split("|") : [];
 
-    const brandId = brandList.find((b) => b.slug === brandSlug)?._id;
+    const brandIds = brandList
+      .filter((b) => brandSlugs.includes(b.slug))
+      .map((b) => b._id);
 
     const findIds = (list, targetSlugs, result = []) => {
       list.forEach((item) => {
@@ -55,7 +59,7 @@ const ProductPage = () => {
 
     return {
       categoryIds: findIds(categoryList, categorySlugs),
-      brandIds: brandId ? [brandId] : [],
+      brandIds,
       minPrice,
       maxPrice,
     };
@@ -92,12 +96,15 @@ const ProductPage = () => {
       return;
     }
 
-    let brandSlug = "";
+    let brandSlugs = [];
     let categorySlugs = [];
 
     // BRAND
     if (field === "brandIds") {
-      brandSlug = brandList.find((b) => b._id === value[0])?.slug || "";
+      brandSlugs = brandList
+        .filter((b) => value.includes(b._id))
+        .map((b) => b.slug);
+
       categorySlugs = categoryList
         .flatMap((c) => [c, ...(c.children || [])])
         .filter((c) => filter.categoryIds.includes(c._id))
@@ -111,13 +118,16 @@ const ProductPage = () => {
         .filter((c) => value.includes(c._id))
         .map((c) => c.slug);
 
-      brandSlug =
-        brandList.find((b) => filter.brandIds?.includes(b._id))?.slug || "";
+      brandSlugs = brandList
+        .filter((b) => filter.brandIds.includes(b._id))
+        .map((b) => b.slug);
     }
 
+    const brandPart = brandSlugs.join("|");
     const categoryPart = categorySlugs.join("|");
+    console.log(filter)
 
-    navigate(`/products/${brandSlug}_${categoryPart}`);
+    navigate(`/products/${brandPart}_${categoryPart}`);
   };
 
   const handlePageChange = (_, v) => {

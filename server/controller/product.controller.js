@@ -1,6 +1,5 @@
 import ProductModel from "../model/product.model.js";
 import ModelsModel from "../model/productModel.model.js";
-import BrandModel from "../model/brand.model.js";
 import uploadFiles from "../helper/upload.js";
 import mongoose from "mongoose";
 import { filterProducts } from "../service/product.service.js";
@@ -8,7 +7,7 @@ import { filterProducts } from "../service/product.service.js";
 const productFolder = "products";
 const documentFolder = "documents";
 
-const uploadDocument = async (req, res) => {
+const uploadDocument = async (req, res, next) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res
@@ -35,14 +34,11 @@ const uploadDocument = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message || error,
-      success: false,
-    });
+    next(error);
   }
 };
 
-const uploadImages = async (req, res) => {
+const uploadImages = async (req, res, next) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res
@@ -66,7 +62,7 @@ const uploadImages = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
@@ -102,7 +98,6 @@ const createProduct = async (req, res) => {
     // Validate required fields
     if (
       !productName ||
-      !brandId ||
       !description ||
       !categoryIds ||
       !models ||
@@ -129,10 +124,10 @@ const createProduct = async (req, res) => {
       ? new mongoose.Types.ObjectId(`${brandId}`)
       : null;
 
-    if (!parsedCategoryIds || parsedCategoryIds.length <= 0 || !parsedBrandId) {
+    if (!parsedCategoryIds || parsedCategoryIds.length <= 0) {
       return res
         .status(400)
-        .json({ message: "Invalid categoryIds or brandId", success: false });
+        .json({ message: "Invalid categoryIds", success: false });
     }
 
     // Validate status
@@ -276,7 +271,10 @@ const getProductBySlug = async (req, res) => {
         success: false,
       });
 
-    const foundProduct = await ProductModel.findOne({ productUrl })
+    const foundProduct = await ProductModel.findOne({
+      productUrl,
+      status: "active",
+    })
       .populate("brandId", "name slug")
       .populate("categoryIds", "name parentId slug")
       .populate("modelsId")
@@ -297,7 +295,65 @@ const getProductBySlug = async (req, res) => {
   }
 };
 
-const getProductByCategoryId = async (req, res) => {
+const getPopularProducts = async (req, res, next) => {
+  try {
+    // Lấy top 8 sản phẩm phổ biến nhất
+    const limit = parseInt(req.query.limit) || 8;
+
+    const popularProducts = await ProductModel.find({ status: "active" })
+      .sort({ 
+        "views": -1,       // Ưu tiên lượt xem cao nhất (nếu bạn có field này)
+        "rating": -1,      // Hoặc đánh giá cao nhất
+        "createdAt": -1    // Sau đó là mới nhất
+      })
+      .limit(limit)
+      .populate("brandId", "name slug")
+      .populate("categoryIds", "name slug")
+      .populate("modelsId")
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      products: popularProducts,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+const getProductsByCategoryIds = async (req, res, next) => {
+  try {
+    let categoryIds = req.query.categoryIds;
+
+    if (!categoryIds) {
+      return res.status(400).json({
+        message: "Category ids are missing",
+        success: false,
+      });
+    }
+
+    categoryIds = categoryIds.split(",");
+    const ids = categoryIds.map((id) => new mongoose.Types.ObjectId(`${id}`));
+
+    const foundProducts = await ProductModel.find({
+      categoryIds: { $in: ids },
+      status: "active",
+    })
+      .populate("brandId", "name slug")
+      .populate("categoryIds", "name parentId slug")
+      .populate("modelsId")
+      .lean();
+    return res.status(200).json({
+      success: true,
+      products: foundProducts,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getProductByCategoryId = async (req, res, next) => {
   try {
     const categoryId = req.params.categoryId;
     if (!categoryId)
@@ -308,24 +364,19 @@ const getProductByCategoryId = async (req, res) => {
 
     const foundProducts = await ProductModel.find({
       categoryIds: categoryId,
+      status: "active",
     })
       .populate("brandId", "name slug")
       .populate("categoryIds", "name parentId slug")
       .populate("modelsId")
       .lean();
 
-    if (!foundProducts)
-      return res.status(404).json({
-        message: "There is no any products with this category",
-        success: false,
-      });
-
     return res.status(200).json({
-      products: foundProducts,
+      products: foundProducts || [],
       success: true,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message || error, success: false });
+    next(error);
   }
 };
 
@@ -376,4 +427,6 @@ export {
   getNewProducts,
   fetchProducts,
   searchProducts,
+  getProductsByCategoryIds,
+  getPopularProducts
 };

@@ -19,8 +19,8 @@ const ProductZoom = ({ imageAddress }) => {
   return (
     <div>
       <div className="p-2">
-        <div className="flex gap-3">
-          <div className="">
+        <div className="flex md:flex-row flex-col gap-3">
+          <div className="order-2 md:order-1">
             <Swiper className="" slidesPerView={4} direction={"vertical"}>
               {imageAddress.map((image, index) => {
                 return (
@@ -40,7 +40,7 @@ const ProductZoom = ({ imageAddress }) => {
               })}
             </Swiper>
           </div>
-          <div className="">
+          <div className="order-1">
             <Swiper className="w-[350px]" slidesPerView={1} ref={largeSlideRef}>
               {imageAddress.map((image, index) => {
                 return (

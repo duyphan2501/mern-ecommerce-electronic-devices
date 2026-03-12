@@ -12,7 +12,7 @@ const CartPageItem = ({ item, onUpdate, onDelete }) => {
       <div className="rounded-md p-2 flex items-center font-bold border-b border-gray-200 select-none">
         <div className="w-4/9">
           <div className="flex gap-3">
-            <Link to={"/san-pham/chi-tiet"}>
+            <Link to={`/product/${item.slug}`}>
               <div className="h-22 w-20 rounded-md overflow-hidden">
                 <img
                   src={item.images[0]}

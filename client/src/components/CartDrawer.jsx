@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useMemo } from "react";
 import MyContext from "../Context/MyContext";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -14,17 +14,14 @@ const CartDrawer = () => {
   const { isOpenCart, closeCart } = useContext(MyContext);
   const cart = useCartStore((state) => state.cart);
 
-  const totalCost = cart?.items && calculateTotalCost();
-
-  function calculateTotalCost() {
-    let sum = 0;
-    cart?.items.forEach((product) => {
-      sum +=
-        product.quantity *
-        (product.price - (product.price * product.discount) / 100);
-    });
-    return sum;
-  }
+  const totalCost = useMemo(() => {
+    if (!cart?.items) return 0;
+    return cart.items.reduce((sum, product) => {
+      const finalPrice =
+        product.price - (product.price * product.discount) / 100;
+      return sum + product.quantity * finalPrice;
+    }, 0);
+  }, [cart?.items]);
 
   const DrawerList = (
     <Box sx={{ width: 400 }} role="presentation">
@@ -93,7 +90,31 @@ const CartDrawer = () => {
 
   return (
     <div>
-      <Drawer open={isOpenCart} onClose={closeCart} anchor={"right"}>
+      <Drawer
+        open={isOpenCart}
+        onClose={closeCart}
+        anchor={"right"}
+        disableScrollLock
+        ModalProps={{
+          keepMounted: true,
+        }}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backgroundColor: "rgba(0, 0, 0, 0.2)", // Giảm độ đậm/blur nếu backdrop làm lag GPU
+              backdropFilter: "none", // Tắt filter blur nếu trang quá nặng
+            },
+          },
+          paper: {
+            sx: {
+              width: 400,
+              willChange: "transform", // 2. Ép trình duyệt sử dụng GPU cho animation trượt
+              transition:
+                "transform 225ms cubic-bezier(0, 0, 0.2, 1) !important", // 3. Làm mượt gia tốc
+            },
+          },
+        }}
+      >
         <h3 className="flex items-center justify-between p-3 font-semibold text-content">
           Giỏ hàng ({cart?.items?.length || 0})
           <div className="hover:bg-gray-200 p-1 rounded-full cursor-pointer transition">

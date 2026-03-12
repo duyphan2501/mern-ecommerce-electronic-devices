@@ -5,10 +5,10 @@ import { Button } from "@mui/material";
 import { FaX } from "react-icons/fa6";
 const TypeProductQuesBox = () => {
   const { setHasModels, setIsOpenQuesBox } = useContext(MyContext);
-    const handleClick = (value) => {
+  const handleClick = (value) => {
     setHasModels(value);
     setIsOpenQuesBox(false);
-    }
+  };
   return (
     <div>
       <div className="fixed inset-0 bg-black opacity-40 z-100"></div>

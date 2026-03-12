@@ -19,7 +19,6 @@ const Search = () => {
 
   // product store
   const { searchProducts, getNewProducts, newProducts } = useProductStore();
-
   // category store
   const { categoryList, getListOfCategories } = useCategoryStore();
 
@@ -31,13 +30,14 @@ const Search = () => {
       getListOfCategories();
       return;
     }
-    setCategories(categoryList);
+    const displayCategories = categoryList?.slice(0, 8) || [];
+    setCategories(displayCategories);
   }, [categoryList, getListOfCategories]);
 
   const fetchNewProducts = async () => {
     setLoading(true);
     const data = await getNewProducts();
-    setProducts(data || []);
+    setProducts(data?.slice(0, 5) || []);
     setLoading(false);
   };
 
@@ -60,12 +60,13 @@ const Search = () => {
   useEffect(() => {
     const run = async () => {
       if (debouncedSearch.trim() === "") {
-        setCategories(categoryList || []);
+        setCategories(categoryList?.slice(0, 8) || []);
 
         if (!newProducts || newProducts.length === 0) {
           await fetchNewProducts();
         } else {
-          setProducts(newProducts);
+          const displayProducts = displayProducts?.slice(0, 5) || [];
+          setProducts(displayProducts);
         }
         return;
       }
@@ -73,16 +74,17 @@ const Search = () => {
       setLoading(true);
 
       const res = await searchProducts(debouncedSearch);
-
       const matchedCategories = filterCategoriesByName(
         categoryList || [],
         debouncedSearch,
       );
 
       setCategories(
-        matchedCategories.length > 0 ? matchedCategories : categoryList,
+        matchedCategories.length > 0
+          ? matchedCategories?.slice(0, 8) || []
+          : categoryList?.slice(0, 8) || [],
       );
-      setProducts(res || []);
+      setProducts(res?.slice(0, 6) || []);
       setLoading(false);
     };
 
@@ -119,7 +121,7 @@ const Search = () => {
               {loading
                 ? Array.from({ length: 4 }).map((_, i) => (
                     <li key={i}>
-                      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse m-2"></div>
                     </li>
                   ))
                 : categories.map((c) => (

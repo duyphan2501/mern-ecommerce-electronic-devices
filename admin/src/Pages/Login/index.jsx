@@ -16,6 +16,7 @@ import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/authStore";
 import toast from "react-hot-toast"
 import MyContext from "../../Context/MyContext";
+import GoogleButton from "../../components/GoogleButton";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -138,9 +139,9 @@ const Login = () => {
             <p>Or, Continue with Google</p>
             <div className="h-[0.5px] bg-gray-400 w-20"></div>
           </div>
-          <Button className="!normal-case !text-gray-600 gap-1 !py-1 !border !px-5 !text-[17px]">
-            Signin with Google <FcGoogle />
-          </Button>
+          <div className="flex justify-center items-center">
+            <GoogleButton />
+          </div>
         </div>
       </div>
     </div>
