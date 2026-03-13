@@ -34,6 +34,9 @@ const addToCart = async (req, res) => {
       res.cookie("cartId", ownerId, {
         httpOnly: true,
         maxAge: CART_TTL_MS.GUEST,
+        secure: true,
+        sameSite: "none",
+        partitioned: true,
       });
     }
 
@@ -79,7 +82,7 @@ const updateCart = async (req, res) => {
     const targetQty = parseInt(quantity);
 
     // 2. Thực thi qua Lua (Check kho + Trừ kho + Giữ chỗ)
-    const [finalQty, status ] = await StockService.reserve(
+    const [finalQty, status] = await StockService.reserve(
       ownerId,
       modelId,
       targetQty,
@@ -91,12 +94,15 @@ const updateCart = async (req, res) => {
       res.cookie("cartId", ownerId, {
         httpOnly: true,
         maxAge: CART_TTL_MS.GUEST,
+        secure: true,
+        sameSite: "none",
+        partitioned: true,
       });
     }
 
     // 4. Nếu là User, đồng bộ vào MongoDB (Background task - không đợi)
     await syncRedisCartToMongo(userId, modelId, finalQty);
-    const isFullSuccess = status === 0
+    const isFullSuccess = status === 0;
     const message = isFullSuccess
       ? "Cập nhật thành công"
       : status === 2
