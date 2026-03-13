@@ -27,6 +27,9 @@ app.use(
     credentials: true, // Cho phép gửi cookie
   }),
 );
+app.get("/ping", (req, res) => {
+  res.status(200).send("ok");
+});
 
 app.use("/api/user", userRouter);
 app.use("/api/category", categoryRouter);
