@@ -7,6 +7,7 @@ import {
 import { StockService } from "../service/stock.service.js";
 import redisClient from "../config/init.redis.js";
 import { CART_TTL_MS } from "../config/constants.js";
+import { cookieOptions } from "../helper/auth.helper.js";
 
 const addToCart = async (req, res) => {
   try {
@@ -32,11 +33,8 @@ const addToCart = async (req, res) => {
     // 3. Set cookie nếu là khách mới
     if (!userId && !cartId) {
       res.cookie("cartId", ownerId, {
-        httpOnly: true,
         maxAge: CART_TTL_MS.GUEST,
-        secure: true,
-        sameSite: "none",
-        partitioned: true,
+        ...cookieOptions
       });
     }
 
@@ -92,11 +90,8 @@ const updateCart = async (req, res) => {
     // 3. Set cookie nếu là khách mới
     if (!userId && !cartId) {
       res.cookie("cartId", ownerId, {
-        httpOnly: true,
         maxAge: CART_TTL_MS.GUEST,
-        secure: true,
-        sameSite: "none",
-        partitioned: true,
+        ...cookieOptions
       });
     }
 
