@@ -20,6 +20,7 @@ import OrderSuccess from "./pages/OrderSuccess";
 import OrderTracking from "./pages/OrderTracking";
 import useCategoryStore from "./store/categoryStore";
 import useBrandStore from "./store/brandStore";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Lazy load cho các page
 const Home = lazy(() => import("./pages/Home"));
@@ -111,11 +112,13 @@ function App() {
               <Route path="/products" element={<ProductPage />} />
               <Route path="/product/:slug" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/my-account/:tab" element={<MyAccount />} />
-              <Route path="/payment/success" element={<PaymentSuccess />} />
-              <Route path="/order-success" element={<OrderSuccess />} />
-              <Route path="/order/:orderId" element={<OrderTracking />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/my-account/:tab" element={<MyAccount />} />
+                <Route path="/payment/success" element={<PaymentSuccess />} />
+                <Route path="/order-success" element={<OrderSuccess />} />
+                <Route path="/order/:orderId" element={<OrderTracking />} />
+              </Route>
             </Route>
           </Routes>
         </Suspense>

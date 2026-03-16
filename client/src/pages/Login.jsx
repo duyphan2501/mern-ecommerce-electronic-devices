@@ -12,7 +12,7 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { FcGoogle } from "react-icons/fc";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
 import { FiLoader } from "react-icons/fi";
@@ -24,9 +24,12 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const { login, isLoading, forgotPassword } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
-  const {persist, setPersist} = useContext(MyContext)
-
+  const { persist, setPersist } = useContext(MyContext);
   const navigator = useNavigate();
+  const location = useLocation();
+
+  // Lấy trang trước đó từ state, mặc định về "/"
+  const from = location.state?.from?.pathname || "/";
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -44,17 +47,14 @@ const Login = () => {
     try {
       await login(email, password);
       toast.success(useAuthStore.getState().message);
-      console.log(useAuthStore.getState().user);
-      navigator("/");
+      navigator(from, { replace: true }); 
     } catch (error) {
-      // Nếu tài khoản chưa xác thực thì chuyển sang trang xác thực
       const { isVerified } = useAuthStore.getState();
       if (isVerified === false) {
         navigator("/verify-email");
       } else {
         toast.error(useAuthStore.getState().message);
       }
-      console.log(error);
     }
   };
 
@@ -70,12 +70,12 @@ const Login = () => {
   };
 
   const handleTogglePersist = () => {
-    setPersist(prev => !prev)
-  }
+    setPersist((prev) => !prev);
+  };
 
   useEffect(() => {
-    localStorage.setItem('persist', persist)
-  }, [persist])
+    localStorage.setItem("persist", persist);
+  }, [persist]);
 
   return (
     <div className="flex justify-center items-center py-15 ">

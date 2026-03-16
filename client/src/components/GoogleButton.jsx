@@ -1,11 +1,13 @@
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import useAuthStore from "../store/authStore";
 
 const GoogleButton = () => {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
   const { googleLogin } = useAuthStore();
 
   if (!clientId) {
@@ -17,7 +19,7 @@ const GoogleButton = () => {
     try {
       await googleLogin(token);
       toast.success("Đăng nhập thành công!");
-      navigate("/");
+      navigator(from, { replace: true });
     } catch (error) {
       console.error(error);
     }
