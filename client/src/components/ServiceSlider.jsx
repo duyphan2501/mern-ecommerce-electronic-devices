@@ -3,8 +3,8 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
 import ServiceCard from "./ServiceCard";
-import serviceImage1 from "../../public/image/8b67d689-58c9-4ae3-b09f-be392f9a9bb7.jpg"
-import serviceImage2 from "../../public/image/88c0fb88-77e5-4b51-871b-e130769da504.jpg"
+import serviceImage1 from "/image/8b67d689-58c9-4ae3-b09f-be392f9a9bb7.jpg"
+import serviceImage2 from "/image/88c0fb88-77e5-4b51-871b-e130769da504.jpg"
 
 const services = [
   {

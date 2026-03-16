@@ -7,6 +7,7 @@ import useProductStore from "../store/productStore";
 import { useParams } from "react-router-dom";
 import { useContext } from "react";
 import MyContext from "../Context/MyContext";
+import { Helmet } from "react-helmet-async";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -23,7 +24,7 @@ const ProductDetail = () => {
         fetchProduct = { ...fetchProduct, selectedModelIndex };
         setProduct(fetchProduct);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
     getProduct();
@@ -36,37 +37,71 @@ const ProductDetail = () => {
       </div>
     );
 
+  const jsonLd = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: product.productName,
+    image: product.images,
+    description: product.metaDescription,
+    sku: product._id,
+    mpn: product._id,
+    brand: {
+      "@type": "Brand",
+      name: product.brand?.brandName || "SolarTech",
+    },
+    offers: {
+      "@type": "Offer",
+      url: window.location.href, 
+      priceCurrency: "VND",
+      price: product.basePrice || 0,
+      priceValidUntil: "2026-12-31",
+      itemCondition: "https://schema.org/NewCondition",
+      availability: "https://schema.org/InStock",
+    },
+  };
+
   return (
     <>
       {product && (
-        <div className="bg-white">
-          <div className="container">
-            <section className="lg:flex gap-5 py-10">
-              <div className="">
-                <ProductZoom imageAddress={product.images} />
-              </div>
-              <section>
-                <ProductDetailContent product={product} />
+        <>
+          <Helmet>
+            <title>{product.pageTitle || product.productName}</title>
+            <meta name="description" content={product.metaDescription} />
+            <meta name="keywords" content={product.metaKeywords} />
+            <meta property="og:title" content={product.productName} />
+            <meta property="og:image" content={product.images[0]} />
+            <meta property="og:type" content="product" />
+            <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+          </Helmet>
+          <div className="bg-white">
+            <div className="container">
+              <section className="lg:flex gap-5 py-10">
+                <div className="">
+                  <ProductZoom imageAddress={product.images} />
+                </div>
+                <section>
+                  <ProductDetailContent product={product} />
+                </section>
               </section>
-            </section>
-            <section className="">
-              <ProductDetailInfo product={product} />
-            </section>
-            <h2 className="text-2xl font-bold font-sans mt-2">
-              Sản phẩm tương tự
-            </h2>
+              <section className="">
+                <ProductDetailInfo product={product} />
+              </section>
+              <h2 className="text-2xl font-bold font-sans mt-2">
+                Sản phẩm tương tự
+              </h2>
+            </div>
+            <div className="pt-5 pb-10">
+              <LazyComponentWrapper
+                importFunc={() => import("../components/ProductSlider")}
+                fetchProducts={async () => {
+                  const cateIds = product.categoryIds.map((cate) => cate._id);
+                  const res = await getProductsByCategoryIds(cateIds);
+                  return res;
+                }}
+              />
+            </div>
           </div>
-          <div className="pt-5 pb-10">
-            <LazyComponentWrapper
-              importFunc={() => import("../components/ProductSlider")}
-              fetchProducts={async () => {
-                const cateIds = product.categoryIds.map((cate) => cate._id);
-                const res = await getProductsByCategoryIds(cateIds);
-                return res;
-              }}
-            />
-          </div>
-        </div>
+        </>
       )}
     </>
   );

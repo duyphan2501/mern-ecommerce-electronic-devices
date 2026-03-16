@@ -17,7 +17,7 @@ const Cart = () => {
       if (isLoading) return;
       await updateCartItem(user?._id, modelId, newQuantity);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

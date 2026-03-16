@@ -1,48 +1,46 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import useAuthStore from "../store/authStore";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import MyContext from "../Context/MyContext";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 const PersistentLogin = () => {
   const { refreshToken, isLoading } = useAuthStore();
   const { persist } = useContext(MyContext);
-  const navigator = useNavigate();
-  const location = useLocation();
   const user = useAuthStore((state) => state.user);
+  
+  const [didCheck, setDidCheck] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
-    const refresh = async () => {
+    const verifyRefreshToken = async () => {
       try {
-        if (user || !persist) return;
-        await refreshToken();
-      } catch (error) {
-        if (isMounted) {
-          
+        if (!user && persist) {
+          await refreshToken();
         }
+      } catch (error) {
+        console.error("Session expired, please login again.");
+      } finally {
+        if (isMounted) setDidCheck(true);
       }
     };
-    refresh();
+
+    !user && persist ? verifyRefreshToken() : setDidCheck(true);
 
     return () => {
       isMounted = false;
     };
-  }, [location.pathname]);
+  }, []); 
+
+  if (!persist) return <Outlet />;
 
   return (
     <>
-      {isLoading ? (
-        <>
-          <div className="fixed inset-0 z-50 bg-black opacity-30"></div>
-          <div className="fixed inset-0 z-60 flex items-center justify-center">
-            <AiOutlineLoading3Quarters
-              className="animate-spin text-white"
-              size={50}
-            />
-          </div>
-        </>
+      {!didCheck || isLoading ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <AiOutlineLoading3Quarters className="animate-spin text-white" size={50} />
+        </div>
       ) : (
         <Outlet />
       )}

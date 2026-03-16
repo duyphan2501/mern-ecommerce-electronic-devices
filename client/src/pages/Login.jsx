@@ -65,7 +65,7 @@ const Login = () => {
       toast.success(useAuthStore.getState().message);
     } catch (error) {
       toast.error(useAuthStore.getState().message);
-      console.log(error);
+      console.error(error);
     }
   };
 

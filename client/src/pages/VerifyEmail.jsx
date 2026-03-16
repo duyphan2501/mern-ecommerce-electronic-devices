@@ -23,7 +23,7 @@ const VerifyEmail = () => {
       navigator("/login");
     } catch (error) {
       toast.error(useAuthStore.getState().message);
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -36,7 +36,7 @@ const VerifyEmail = () => {
     } catch (error) {
       setIsSendingEmail(false);
       toast.error(useAuthStore.getState().message);
-      console.log(error);
+      console.error(error);
     }
   };
 

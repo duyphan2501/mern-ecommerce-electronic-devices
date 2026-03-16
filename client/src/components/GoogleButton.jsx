@@ -11,7 +11,7 @@ const GoogleButton = () => {
   const { googleLogin } = useAuthStore();
 
   if (!clientId) {
-    console.log("clientId is not existed");
+    console.error("clientId is not existed");
   }
 
   const handleSuccess = async (credentialResponse) => {
@@ -31,7 +31,7 @@ const GoogleButton = () => {
         size="large"
         width="100%"
         onSuccess={handleSuccess}
-        onError={() => console.log("Login Failed")}
+        onError={() => console.error("Login Failed")}
         theme="outline"
       />
     </GoogleOAuthProvider>

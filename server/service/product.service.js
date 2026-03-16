@@ -14,7 +14,9 @@ const filterProducts = async (page, limit, sortOption, filterParams, terms) => {
   }
   if (filterParams.brandIds?.length > 0) {
     matchCriteria.brandId = {
-      $in: filterParams.brandIds.map((id) => new mongoose.Types.ObjectId(`${id}`)),
+      $in: filterParams.brandIds.map(
+        (id) => new mongoose.Types.ObjectId(`${id}`),
+      ),
     };
   }
   if (terms?.length > 0) {
@@ -31,7 +33,7 @@ const filterProducts = async (page, limit, sortOption, filterParams, terms) => {
         pipeline: [{ $project: { name: 1, slug: 1 } }],
         as: "categories",
       },
-    },  
+    },
     {
       $lookup: {
         from: "brands",
@@ -109,11 +111,18 @@ const filterProducts = async (page, limit, sortOption, filterParams, terms) => {
         data: [
           {
             $sort: {
-              ...(sortOption === "price_asc"
-                ? { computedPrice: 1 }
-                : sortOption === "price_desc"
-                  ? { computedPrice: -1 }
-                  : { createdAt: -1 }),
+              ...(sortOption === "price_asc" ? { computedPrice: 1 } : {}),
+              ...(sortOption === "price_desc" ? { computedPrice: -1 } : {}),
+              ...(sortOption === "name_asc" ? { productName: 1 } : {}),
+              ...(sortOption === "name_desc" ? { productName: -1 } : {}),
+              ...(![
+                "price_asc",
+                "price_desc",
+                "name_asc",
+                "name_desc",
+              ].includes(sortOption)
+                ? { createdAt: -1 }
+                : {}),
               _id: 1,
             },
           },

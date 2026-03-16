@@ -24,14 +24,21 @@ const Sidebar = ({ filter, handleChangeFilter }) => {
 
   // Đồng bộ slider khi filter từ URL thay đổi
   useEffect(() => {
-    setPriceRange([filter.minPrice, filter.maxPrice]);
+    if (
+      filter.minPrice !== priceRange[0] ||
+      filter.maxPrice !== priceRange[1]
+    ) {
+      setPriceRange([filter.minPrice, filter.maxPrice]);
+    }
   }, [filter.minPrice, filter.maxPrice]);
 
-  const handleSliderChange = (event, newValue) => {
+  const handleSliderChangeLocal = (event, newValue) => {
     setPriceRange(newValue);
-    handleChangeFilter("minPrice", newValue[0]);
-    handleChangeFilter("maxPrice", newValue[1]);
   };
+
+  const handleSliderChangeCommitted = (event, newValue) => {
+  handleChangeFilter("priceRange", { min: newValue[0], max: newValue[1] });
+};
 
   const handleCheckbox = (event, field, id) => {
     const currentIds = filter[field] || [];
@@ -83,7 +90,8 @@ const Sidebar = ({ filter, handleChangeFilter }) => {
         <div className="px-3">
           <Slider
             value={priceRange}
-            onChange={handleSliderChange}
+            onChange={handleSliderChangeLocal}
+            onChangeCommitted={handleSliderChangeCommitted}
             min={0}
             max={10000000}
             step={10000}

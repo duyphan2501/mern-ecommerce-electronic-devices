@@ -11,7 +11,6 @@ const usePaymentStore = create((set) => {
     }
     set({ isPaymentLoading: true });
     try {
-      console.log(cartItems);
       const res = await axiosPrivate.post(`${API_URL}/api/payment/create`, {
         cartItems,
         address,
@@ -21,8 +20,8 @@ const usePaymentStore = create((set) => {
       const checkoutUrl = res.data.url;
       window.location.href = checkoutUrl;
     } catch (error) {
-      console.log(error);
-      toast.error(error.response.data.message);
+      console.error(error);
+      toast.error("Chức năng thanh toán Online đang bảo trì!");
     } finally {
       set({ isPaymentLoading: false });
     }

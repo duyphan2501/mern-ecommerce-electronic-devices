@@ -47,12 +47,11 @@ const Register = () => {
         return;
       }
       await register(email, password, userName);
-      console.log(useAuthStore.getState().user);
       toast.success(useAuthStore.getState().message);
       navigator("/verify-email");
     } catch (error) {
       toast.error(useAuthStore.getState().message);
-      console.log(error);
+      console.error(error);
     }
   };
 

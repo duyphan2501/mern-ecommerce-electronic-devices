@@ -52,7 +52,7 @@ const MyAccount = () => {
       window.location.href = "/";
     } catch (error) {
       toast.error(useAuthStore.getState().message);
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -77,7 +77,7 @@ const MyAccount = () => {
       reader.readAsDataURL(file);
     } catch (error) {
       toast.error(useUserStore.getState().message);
-      console.log(error);
+      console.error(error);
     }
   };
 

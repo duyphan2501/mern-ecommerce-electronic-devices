@@ -64,7 +64,7 @@ const Profile = () => {
         navigator("/verify-email");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(useUserStore.getState().message);
     }
   };
@@ -86,7 +86,7 @@ const Profile = () => {
       await logout();
       navigator("/login");
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(useUserStore.getState().message);
     }
   };

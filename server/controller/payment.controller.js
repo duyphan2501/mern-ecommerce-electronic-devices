@@ -138,7 +138,7 @@ const cancelPayment = async (req, res) => {
     }
     return res.redirect(`${FRONTEND_URL}/checkout`);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: error.message || error, success: false });
   }
 };
