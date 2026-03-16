@@ -14,6 +14,8 @@ import {
 } from "@mui/material";
 import useAddressStore from "../store/addressStore";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import provincesData from "../data/provinces.json";
+import wardsData from "../data/wards.json";
 
 const AddressForm = () => {
   const [provinces, setProvinces] = useState([]);
@@ -32,51 +34,38 @@ const AddressForm = () => {
     isDefault: false,
   });
 
-  const { isOpenAddrFrm, closeAddrFrm, fiLoader, updateAddr } = useContext(MyContext);
+  const { isOpenAddrFrm, closeAddrFrm, fiLoader, updateAddr } =
+    useContext(MyContext);
   const axiosPrivate = useAxiosPrivate();
 
   const loadWards = (provinceName, allProvinces, allWards) => {
     const selectedProvince = allProvinces.find(
-      (item) => item.name === provinceName
+      (item) => item.name === provinceName,
     );
     if (!selectedProvince) return;
 
     const perspectiveWards = allWards.filter(
-      (item) => item.province_code === selectedProvince.code
+      (item) => item.province_code === selectedProvince.code,
     );
     setWards(perspectiveWards);
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [pRes, wRes] = await Promise.all([
-          fetch("./provinces.json"),
-          fetch("./wards.json"),
-        ]);
-        const provincesData = await pRes.json();
-        const wardsData = await wRes.json();
+    setProvinces(provincesData);
+    setWardsList(wardsData);
 
-        setProvinces(provincesData);
-        setWardsList(wardsData);
-
-        if (updateAddr) {
-          loadWards(updateAddr.province, provincesData, wardsData);
-          setFormData({
-            receiver: updateAddr.receiver || "",
-            phone: updateAddr.phone || "",
-            province: updateAddr.province || "",
-            ward: updateAddr.ward || "",
-            addressType: updateAddr.addressType || "home",
-            addressDetail: updateAddr.addressDetail || "",
-            isDefault: updateAddr.isDefault || false,
-          });
-        }
-      } catch (err) {
-        console.error("Lỗi khi load dữ liệu:", err);
-      }
-    };
-    loadData();
+    if (updateAddr) {
+      loadWards(updateAddr.province, provincesData, wardsData);
+      setFormData({
+        receiver: updateAddr.receiver || "",
+        phone: updateAddr.phone || "",
+        province: updateAddr.province || "",
+        ward: updateAddr.ward || "",
+        addressType: updateAddr.addressType || "home",
+        addressDetail: updateAddr.addressDetail || "",
+        isDefault: updateAddr.isDefault || false,
+      });
+    }
   }, []);
 
   const handleProvinceChange = (e) => {
@@ -116,7 +105,7 @@ const AddressForm = () => {
           ...formData,
           id: address._id,
         },
-        axiosPrivate
+        axiosPrivate,
       );
     } else {
       success = await createAddress(formData, axiosPrivate);
@@ -130,7 +119,9 @@ const AddressForm = () => {
       <div className="bg-white rounded-md p-5 z-50 border-b shadow-md w-[500px]">
         <div className="flex justify-between items-center border-b-2 pb-2 border-gray-300">
           <h4 className="font-semibold text-lg">
-            {updateAddr ? "Chỉnh Sửa Địa Chỉ Giao Hàng" : "Thêm Địa Chỉ Giao Hàng"}
+            {updateAddr
+              ? "Chỉnh Sửa Địa Chỉ Giao Hàng"
+              : "Thêm Địa Chỉ Giao Hàng"}
           </h4>
           <div
             className="size-8 rounded-full p-1 cursor-pointer hover:bg-gray-200 flex justify-center items-center"
