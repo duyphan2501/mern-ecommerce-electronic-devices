@@ -5,7 +5,7 @@ const ServiceCard = ({ image, name }) => {
           <img
             src={image}
             alt={name}
-            className="w-full h-full object-contain hover:scale-105 transition"
+            className="w-full h-full object-center hover:scale-105 transition"
           />
         </div>
         <p className="py-2 text-center font-semibold px-2 flex-grow line-clamp-2 text-black">

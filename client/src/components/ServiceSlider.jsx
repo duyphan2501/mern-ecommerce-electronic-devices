@@ -3,26 +3,28 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
 import ServiceCard from "./ServiceCard";
+import serviceImage1 from "../../public/image/8b67d689-58c9-4ae3-b09f-be392f9a9bb7.jpg"
+import serviceImage2 from "../../public/image/88c0fb88-77e5-4b51-871b-e130769da504.jpg"
 
 const services = [
   {
-    image: "https://powertech.vn/thumbs/380x280x1/upload/news/powertech-8027.png",
+    image: serviceImage1,
     name: "Sửa chữa thiết bị điện",
   },
   {
-    image: "https://powertech.vn/thumbs/380x280x1/upload/news/powertech-8027.png",
+    image: serviceImage2,
     name: "Lắp đặt hệ thống điện mặt trời",
   },
   {
-    image: "https://powertech.vn/thumbs/380x280x1/upload/news/powertech-8027.png",
+    image: serviceImage1,
     name: "Bảo trì hệ thống điện",
   },
   {
-    image: "https://powertech.vn/thumbs/380x280x1/upload/news/powertech-8027.png",
+    image: serviceImage2,
     name: "Tư vấn giải pháp điện năng lượng mặt trời",
   },
   {
-    image: "https://powertech.vn/thumbs/380x280x1/upload/news/powertech-8027.png",
+    image: serviceImage1,
     name: "Cung cấp thiết bị điện",
   },
 ]
@@ -46,7 +48,7 @@ const ServiceSlider = () => {
         >
           {services.map((service, index) => {
             return (
-              <SwiperSlide className="py-2">
+              <SwiperSlide className="py-2" key={index}>
                 <ServiceCard image={service.image} name={service.name}/>
               </SwiperSlide>
             )
