@@ -46,11 +46,18 @@ const ProductPage = () => {
         maxPrice,
       };
 
-    const decoded = decodeURIComponent(slug);
-    const [brandPart, categoryPart] = decoded.split("_");
+    const decoded = decodeURIComponent(slug || "all_all");
+    const [brandPart, categoryPart] = decoded.split("_" || "all_all");
+    console.log(brandPart, categoryPart);
 
-    const brandSlugs = brandPart === "all" ? [] : brandPart.split("|");
-    const categorySlugs = categoryPart === "all" ? [] : categoryPart.split("|");
+    const brandSlugs =
+      brandPart === "all" || brandPart === undefined
+        ? []
+        : brandPart.split("|");
+    const categorySlugs =
+      categoryPart === "all" || categoryPart === undefined
+        ? []
+        : categoryPart.split("|");
 
     const brandIds = brandList
       .filter((b) => brandSlugs.includes(b.slug))
@@ -162,9 +169,11 @@ const ProductPage = () => {
         h1: "Tất cả sản phẩm",
       };
 
-    const [brandPart, categoryPart] = decodeURIComponent(slug).split("_");
-    const brandSlugs = brandPart === "all" ? [] : brandPart.split("|");
-    const categorySlugs = categoryPart === "all" ? [] : categoryPart.split("|");
+    const [brandPart, categoryPart] = decodeURIComponent(
+      slug || "all_all",
+    ).split("_");
+    const brandSlugs = brandPart === "all" || brandPart === undefined ? [] : brandPart.split("|");
+    const categorySlugs = categoryPart === "all" || categoryPart === undefined ? [] : categoryPart.split("|");
 
     const brands = brandList
       .filter((b) => brandSlugs.includes(b.slug))

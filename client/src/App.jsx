@@ -108,8 +108,7 @@ function App() {
 
             <Route element={<PersistentLogin />}>
               <Route path="/" element={<Home />} />
-              <Route path="/products/:slug" element={<ProductPage />} />
-              <Route path="/products" element={<ProductPage />} />
+              <Route path="/products/:slug?" element={<ProductPage />} />
               <Route path="/product/:slug" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route element={<ProtectedRoute />}>

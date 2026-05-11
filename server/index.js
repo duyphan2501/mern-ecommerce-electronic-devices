@@ -48,7 +48,7 @@ connectDB().then(() => {
   app.listen(PORT, async () => {
     console.log("Server is running on Port", PORT);
     startNgrokAndConfirmWebhook();
-    startInventoryWorker();
+    startInventoryWorker();     
     await rebuildStockRedis();
   });
 });
