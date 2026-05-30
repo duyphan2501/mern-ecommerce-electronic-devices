@@ -3,6 +3,7 @@ import Dashboard from "./Pages/Dashboard";
 import Login from "./Pages/Login";
 import ListProduct from "./Pages/Products/ListProduct";
 import CreateProduct from "./Pages/Products/CreateProduct";
+import EditProduct from "./Pages/Products/EditProduct";
 import { Toaster } from "react-hot-toast";
 import PersistentLogin from "./components/PersistentLogin";
 import Layout from "./components/Layout";
@@ -26,6 +27,10 @@ function App() {
               <Route
                 path="/products/create"
                 element={<CreateProduct />}
+              ></Route>
+              <Route
+                path="/products/edit/:id"
+                element={<EditProduct />}
               ></Route>
             </Route>
           </Route>

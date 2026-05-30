@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ImageItem from "./ImageItem";
 import MyContext from "../../Context/MyContext";
 import ImageView from "./ImageView";
@@ -7,6 +7,16 @@ const ProductImage = ({ product, handleChangeValue }) => {
   const [imageSrcArray, setImageSrcArray] = useState(
     product?.images.length > 0 ? product?.images : [null]
   );
+
+  useEffect(() => {
+    const nextImages =
+      product?.images?.length > 0
+        ? product.images.map((image) =>
+            image instanceof File ? URL.createObjectURL(image) : image,
+          )
+        : [null];
+    setImageSrcArray(nextImages);
+  }, [product?.images]);
 
   // const updateProductImage = (imagesArr) => {
   //   setImageSrcArray(imagesArr);

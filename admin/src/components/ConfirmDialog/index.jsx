@@ -23,14 +23,14 @@ export default function ConfirmDialog({
       disableEnforceFocus
       disableRestoreFocus
     >
-      <DialogTitle id="confirm-dialog-title">Xác nhận</DialogTitle>
+      <DialogTitle id="confirm-dialog-title">Confirm</DialogTitle>
       <DialogContent>
         <DialogContentText id="confirm-dialog-description">
           {content}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Hủy</Button>
+        <Button onClick={onClose}>Cancel</Button>
         <Button onClick={onConfirm} color="error">
           {action}
         </Button>

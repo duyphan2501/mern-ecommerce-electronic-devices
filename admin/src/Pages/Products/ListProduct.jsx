@@ -1,6 +1,6 @@
 import { Button, Paper } from "@mui/material";
-import StockTable from "../../components/StockTable";
 import { Link } from "react-router-dom";
+import ProductTable from "../../components/ProductTable";
 
 const ListProduct = () => {
   return (
@@ -16,7 +16,7 @@ const ListProduct = () => {
         </Button>
       </div>
       <div className="mt-2">
-        <StockTable />
+        <ProductTable />
       </div>
     </Paper>
   );

@@ -3,8 +3,8 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
-import { DashboardCardProduct } from "../../../components/DashboardCard";
-import formatMoney from "../../../utils/MoneyFormat";
+import { DashboardCardProduct } from "../DashboardCard";
+import formatMoney from "../../utils/MoneyFormat";
 
 const InventorySummaryCards = ({ summary }) => {
   return (

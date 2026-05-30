@@ -68,7 +68,7 @@ const ImageItem = ({
       {!imageSrc ? (
         <div className="">
           <label
-            htmlFor="productImage"
+            htmlFor={`productImage-${index}`}
             className="cursor-pointer size-33 p-2 border-2 border-dashed border-gray-300 rounded-lg text-center h-full flex flex-col justify-center items-center z-10"
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -84,7 +84,7 @@ const ImageItem = ({
           <input
             type="file"
             className="hidden"
-            id="productImage"
+            id={`productImage-${index}`}
             onChange={handleImageChange}
             accept=".jpg,.jpeg,.png"
           />

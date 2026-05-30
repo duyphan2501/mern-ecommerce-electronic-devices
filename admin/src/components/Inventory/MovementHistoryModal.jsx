@@ -8,9 +8,9 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { formatDateTime } from "../../../utils/DateFormat";
-import formatMoney from "../../../utils/MoneyFormat";
-import { movementTypeLabel } from "../inventoryUtils";
+import { formatDateTime } from "../../utils/DateFormat";
+import formatMoney from "../../utils/MoneyFormat";
+import { movementTypeLabel } from "../../utils/inventoryUtils";
 
 const MovementHistoryModal = ({ item, movements, onClose, open }) => {
   return (

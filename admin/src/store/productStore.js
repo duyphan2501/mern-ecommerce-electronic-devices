@@ -6,11 +6,16 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 let cancelSource = null;
 
+const isFile = (value) => value instanceof File;
+
 const useProductStore = create((set) => {
   const uploadImages = async (images, axiosPrivate) => {
-    if (!images?.length) return [];
+    const imageList = images || [];
+    const files = imageList.filter(isFile);
+    if (!files.length) return imageList;
+
     const formData = new FormData();
-    images.forEach((img) => formData.append("productImages", img));
+    files.forEach((img) => formData.append("productImages", img));
 
     try {
       const res = await axiosPrivate.post(
@@ -19,28 +24,41 @@ const useProductStore = create((set) => {
         { cancelToken: cancelSource?.token },
       );
       toast.success(res.data?.message);
-      const uploadedImages = res.data?.uploadedImages || [];
-      const data = uploadedImages.map((item) => item.url);
-      return data || [];
+
+      const uploadedUrls = (res.data?.uploadedImages || []).map(
+        (item) => item.url,
+      );
+      let uploadIndex = 0;
+
+      return imageList.map((image) => {
+        if (!isFile(image)) return image;
+        const uploadedUrl = uploadedUrls[uploadIndex];
+        uploadIndex += 1;
+        return uploadedUrl;
+      });
     } catch (err) {
       if (axios.isCancel(err)) {
         console.log("Upload images canceled");
       } else {
-        toast.error(err.response?.data?.message || "Lỗi upload ảnh");
+        toast.error(err.response?.data?.message || "Image upload failed");
       }
       throw err;
     }
   };
 
   const uploadDocumentsForModels = async (models, axiosPrivate) => {
-    const newModels = [...models];
+    const newModels = (models || []).map((model) => ({
+      ...model,
+      documents: model.documents || [],
+    }));
+
     for (let i = 0; i < newModels.length; i++) {
-      if (!newModels[i].documents?.length) continue;
+      const documents = newModels[i].documents || [];
+      const files = documents.filter(isFile);
+      if (!files.length) continue;
 
       const formData = new FormData();
-      newModels[i].documents.forEach((doc) =>
-        formData.append("documents", doc),
-      );
+      files.forEach((doc) => formData.append("documents", doc));
 
       try {
         const res = await axiosPrivate.post(
@@ -49,16 +67,26 @@ const useProductStore = create((set) => {
           { cancelToken: cancelSource?.token },
         );
         toast.success(res.data?.message);
-        newModels[i].documents = res.data?.uploadedDocuments || [];
+
+        const uploadedDocuments = res.data?.uploadedDocuments || [];
+        let uploadIndex = 0;
+
+        newModels[i].documents = documents.map((document) => {
+          if (!isFile(document)) return document;
+          const uploadedDocument = uploadedDocuments[uploadIndex];
+          uploadIndex += 1;
+          return uploadedDocument;
+        });
       } catch (err) {
         if (axios.isCancel(err)) {
           console.log("Upload documents canceled");
         } else {
-          toast.error(err.response?.data?.message || "Lỗi upload tài liệu");
+          toast.error(err.response?.data?.message || "Document upload failed");
         }
         throw err;
       }
     }
+
     return newModels;
   };
 
@@ -75,7 +103,7 @@ const useProductStore = create((set) => {
 
       const payload = {
         ...product,
-        images: uploadedImages.length ? uploadedImages : product.images,
+        images: uploadedImages,
         models: newModels,
       };
 
@@ -87,15 +115,18 @@ const useProductStore = create((set) => {
         cancelToken: cancelSource.token,
       });
       toast.success(res.data?.message);
+      return res.data;
     } catch (error) {
       if (axios.isCancel(error)) {
         toast.error("Save product progress canceled");
       } else {
         toast.error(
-          error.response?.data?.message || error.message || "Đã có lỗi xảy ra.",
+          error.response?.data?.message ||
+            error.message ||
+            "Unable to save product.",
         );
       }
-      throw error
+      throw error;
     } finally {
       set({ isLoading: false });
       cancelSource = null;
@@ -112,10 +143,70 @@ const useProductStore = create((set) => {
 
   return {
     isLoading: false,
+    isListLoading: false,
+    products: [],
+    totalProducts: 0,
+    totalPages: 0,
+    selectedProduct: null,
+    fetchAdminProducts: async (params, axiosPrivate) => {
+      set({ isListLoading: true });
+      try {
+        const res = await axiosPrivate.get(`${API_URL}/api/product/admin`, {
+          params,
+        });
+        const data = res.data || {};
+        set({
+          products: data.products || [],
+          totalProducts: data.totalProducts || 0,
+          totalPages: data.totalPages || 0,
+        });
+        return data;
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message || "Unable to load products.",
+        );
+        return { products: [], totalProducts: 0, totalPages: 0 };
+      } finally {
+        set({ isListLoading: false });
+      }
+    },
+    fetchAdminProductById: async (id, axiosPrivate) => {
+      set({ isLoading: true, selectedProduct: null });
+      try {
+        const res = await axiosPrivate.get(`${API_URL}/api/product/admin/${id}`);
+        const product = res.data?.product || null;
+        set({ selectedProduct: product });
+        return product;
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message || "Unable to load product.",
+        );
+        return null;
+      } finally {
+        set({ isLoading: false });
+      }
+    },
     createProduct: (product, axiosPrivate) =>
       saveProduct(product, axiosPrivate, false),
     updateProduct: (product, axiosPrivate) =>
       saveProduct(product, axiosPrivate, true),
+    archiveProduct: async (productId, axiosPrivate) => {
+      set({ isLoading: true });
+      try {
+        const res = await axiosPrivate.post(
+          `${API_URL}/api/product/archive/${productId}`,
+        );
+        toast.success(res.data?.message || "Product archived");
+        return true;
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message || "Unable to archive product.",
+        );
+        return false;
+      } finally {
+        set({ isLoading: false });
+      }
+    },
     cancelSaveProduct,
   };
 });

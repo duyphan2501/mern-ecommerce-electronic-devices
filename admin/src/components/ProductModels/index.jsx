@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import TextInput from "../BasicInfoProduct/TextInput";
 import Pricing from "../Pricing";
-import StockTracking from "../StockTracking";
 import TiptapEditor from "../TiptapEditor";
 import DocumentUpload from "../DocumentUpload";
 
@@ -21,12 +20,10 @@ const ProductModels = ({
   const updateModels = (newModels) => {
     setModels(newModels);
     setProduct((prev) => ({ ...prev, models: newModels }));
-    console.log(newModels);
   };
 
   const handleAddModel = () => {
-    console.log(models);
-    updateModels([...models, defaultModel]);
+    updateModels([...models, { ...defaultModel, documents: [] }]);
   };
 
   const handleRemoveModel = (index) => {
@@ -36,14 +33,15 @@ const ProductModels = ({
 
   return (
     <div>
-      <h2 className="font-bold text-xl">Products Models</h2>
+      <h2 className="font-bold text-xl">Product Models</h2>
       {models.map((model, index) => (
-        <div className="my-5" key={index}>
+        <div className="my-5 border border-gray-200 rounded-lg p-4" key={model._id || index}>
           <div className="flex justify-between items-center">
             <h4 className="font-semibold text-xl mb-3">Model {index + 1}</h4>
             <Button
               className="!bg-red-400 !text-white !normal-case !rounded-lg"
               onClick={() => handleRemoveModel(index)}
+              disabled={models.length === 1}
             >
               Delete
             </Button>
@@ -59,13 +57,6 @@ const ProductModels = ({
             </div>
             <div className="mb-5">
               <Pricing
-                product={product}
-                handleChangeValue={handleChangeValue}
-                index={index}
-              />
-            </div>
-            <div className="mb-5">
-              <StockTracking
                 product={product}
                 handleChangeValue={handleChangeValue}
                 index={index}
@@ -88,9 +79,6 @@ const ProductModels = ({
                 handleChangeValue={handleChangeValue}
                 productDocuments={model.documents}
               />
-            </div>
-            <div className="flex justify-center mt-5">
-              <div className="h-[3px] bg-gray-300 w-50"></div>
             </div>
           </div>
         </div>
