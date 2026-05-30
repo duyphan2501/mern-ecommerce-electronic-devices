@@ -8,6 +8,7 @@ import PersistentLogin from "./components/PersistentLogin";
 import Layout from "./components/Layout";
 import ListCategory from "./Pages/Category/ListCategory";
 import Orders from "./Pages/Orders";
+import Inventory from "./Pages/Inventory";
 function App() {
   return (
     <>
@@ -19,6 +20,7 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />}></Route>
               <Route path="/products/list" element={<ListProduct />}></Route>
+              <Route path="/inventory" element={<Inventory />}></Route>
               <Route path="/categories" element={<ListCategory />}></Route>
               <Route path="/orders" element={<Orders />}></Route>
               <Route

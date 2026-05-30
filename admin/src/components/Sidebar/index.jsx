@@ -1,7 +1,7 @@
 import { RxDashboard } from "react-icons/rx";
 import { TbSlideshow, TbBrandProducthunt } from "react-icons/tb";
 import { IoBagCheckOutline } from "react-icons/io5";
-import { MdOutlineCategory } from "react-icons/md";
+import { MdInventory2, MdOutlineCategory } from "react-icons/md";
 import NavItem from "./NavItem";
 import Submenu from "./Submenu";
 import { useContext } from "react";
@@ -47,6 +47,13 @@ const Sidebar = () => {
           </li>
           <li>
             <NavItem
+              icon={<MdInventory2 size={20} />}
+              label="Inventory"
+              link="/inventory"
+            />
+          </li>
+          <li>
+            <NavItem
               icon={<MdOutlineCategory size={20} />}
               label="Categories"
               link="/categories"
@@ -86,6 +93,13 @@ const Sidebar = () => {
                 { label: "Create", link: "/products/create" },
                 { label: "List", link: "/products/list" },
               ]}
+            />
+          </li>
+          <li>
+            <NavItemSmall
+              icon={<MdInventory2 size={25} />}
+              label="Inventory"
+              link="/inventory"
             />
           </li>
           <li>

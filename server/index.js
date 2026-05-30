@@ -10,6 +10,7 @@ import cartRouter from "./routes/cart.route.js";
 import addressRouter from "./routes/address.route.js";
 import paymentRouter from "./routes/payment.route.js";
 import orderRouter from "./routes/order.route.js";
+import inventoryRouter from "./routes/inventory.route.js";
 import { startNgrokAndConfirmWebhook } from "./config/payos.init.js";
 import { startInventoryWorker } from "./workers/inventory.worker.js";
 import { rebuildStockRedis } from "./service/stock.service.js";
@@ -39,8 +40,9 @@ app.use("/api/address", addressRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/brand", brandRouter);
+app.use("/api/inventory", inventoryRouter);
 
-app.use(errorHandler)
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 

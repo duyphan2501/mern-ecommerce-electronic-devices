@@ -3,6 +3,7 @@ import { publishSendOrderEmail } from "../helper/message.helper.js";
 import CartModel from "../model/cart.model.js";
 import orderModel from "../model/order.model.js";
 import ModelsModel from "../model/productModel.model.js";
+import { createOrderExportMovements } from "./inventory.service.js";
 import { StockService } from "./stock.service.js";
 
 async function generateOrderId() {
@@ -72,6 +73,7 @@ const completeOrderCheckout = async (order) => {
   }));
 
   await ModelsModel.bulkWrite(bulkOps);
+  await createOrderExportMovements(order);
   await orderModel.findByIdAndUpdate(order._id, { status: "pending" });
   await CartModel.deleteOne({ userId: order.userId });
 

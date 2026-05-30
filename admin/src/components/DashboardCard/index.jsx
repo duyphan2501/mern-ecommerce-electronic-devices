@@ -68,10 +68,8 @@ function DashboardCardProduct({
             justifyContent: "center",
           }}
         >
-          <Typography fontSize={"100%"} fontWeight={500} mb={0}>
-            {CardHeader}
-          </Typography>
-          <Typography fontSize={"80%"}>{CardDesc}</Typography>
+          <p>{CardHeader}</p>
+          {CardDesc}
         </Box>
 
         <Box flexGrow={1} />
