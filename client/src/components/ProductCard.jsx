@@ -75,8 +75,8 @@ const ProductCard = ({ product }) => {
   if (!product) return null;
 
   return (
-    <div className="productCard border-1 border-gray-200 rounded-md p-2 flex flex-col h-full shadow">
-      <div className="relative group h-[200px] overflow-hidden">
+    <div className="productCard border-1 border-gray-200 rounded-md p-2 flex flex-col h-full shadow min-w-0 w-full">
+      <div className="relative group aspect-[4/3] min-h-[150px] max-h-[220px] overflow-hidden">
         <Link
           to={`/product/${product.productUrl}`}
           onClick={setProductDetail}
@@ -112,8 +112,8 @@ const ProductCard = ({ product }) => {
         )}
       </div>
 
-      <div className="flex flex-col justify-between flex-1">
-        <div>
+      <div className="flex flex-col justify-between flex-1 min-w-0">
+        <div className="min-w-0">
           <h4 className="line-clamp-2 font-[600]">
             {product.productName} - {selectedModel.modelName}
           </h4>
@@ -127,8 +127,8 @@ const ProductCard = ({ product }) => {
             />
           </Stack>
 
-          <div className="my-2 flex justify-between items-center">
-            <div>
+          <div className="my-2 flex justify-between items-start gap-2 min-w-0">
+            <div className="min-w-0">
               {selectedModel.discount === 0 ? (
                 <p className="font-bold">{formattedPrice}</p>
               ) : (
@@ -139,7 +139,7 @@ const ProductCard = ({ product }) => {
                   <span className="rounded-lg bg-gray-100 text-sm text-black p-1">
                     -{selectedModel.discount}%
                   </span>
-                  <span className="ml-2 text-[13px] line-through align-text-top">
+                  <span className="ml-2 text-[13px] line-through align-text-top break-all">
                     {formattedPrice}
                   </span>
                 </>
@@ -148,7 +148,7 @@ const ProductCard = ({ product }) => {
 
             {/* ✅ Dropdown chỉ render khi mở */}
             {product?.modelsId?.length > 1 && (
-              <div className="">
+              <div className="shrink-0">
                 <Tooltip title="Model khác" placement="bottom" arrow>
                   <IconButton
                     className="!bg-gray-100 !p-1 hover:!bg-gray-200 relative"
@@ -161,7 +161,7 @@ const ProductCard = ({ product }) => {
                       } transition-transform`}
                     />
                     {isOpen && (
-                      <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto absolute w-max bg-white p-3 border border-gray-200 shadow rounded-lg right-0 bottom-[115%]">
+                      <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto absolute w-max max-w-[calc(100vw-2rem)] bg-white p-3 border border-gray-200 shadow rounded-lg right-0 bottom-[115%]">
                         {product.modelsId.map((model, index) => (
                           <ProductModel
                             key={model._id}

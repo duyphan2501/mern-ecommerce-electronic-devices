@@ -23,8 +23,9 @@ const ProductSlider = ({ fetchProducts }) => {
           slidesPerView={5}
           spaceBetween={15}
           breakpoints={{
-            320: { slidesPerView: 1.2 },
-            640: { slidesPerView: 2 },
+            320: { slidesPerView: 1.15, spaceBetween: 10 },
+            420: { slidesPerView: 1.35, spaceBetween: 12 },
+            640: { slidesPerView: 2.1 },
             768: { slidesPerView: 3 },
             1024: { slidesPerView: 4 },
             1280: { slidesPerView: 5 },

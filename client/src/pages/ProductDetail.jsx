@@ -75,11 +75,11 @@ const ProductDetail = () => {
           </Helmet>
           <div className="bg-white">
             <div className="container">
-              <section className="lg:flex gap-5 py-10">
-                <div className="">
+              <section className="lg:flex gap-5 py-6 sm:py-10">
+                <div className="w-full lg:w-auto min-w-0">
                   <ProductZoom imageAddress={product.images} />
                 </div>
-                <section>
+                <section className="min-w-0 flex-1">
                   <ProductDetailContent product={product} />
                 </section>
               </section>

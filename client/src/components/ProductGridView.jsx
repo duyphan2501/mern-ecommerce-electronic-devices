@@ -17,11 +17,11 @@ const ProductGridView = ({ products, isLoading = true }) => {
   }
   return (
     <div>
-      <div className="grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-3">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3">
         {products &&
           products.map((product) => {
             return (
-              <div className="" key={product._id}>
+              <div className="min-w-0" key={product._id}>
                 <ProductCard product={product} />
               </div>
             );

@@ -59,9 +59,9 @@ const ProductDetailContent = ({ product }) => {
   const formattedPrice = formatMoney(model.salePrice);
   const formattedDiscountPrice = formatMoney(discountPrice);
   return (
-    <div className="flex flex-col justify-center h-full pl-6 lg:border-l-2">
+    <div className="flex flex-col justify-center h-full pt-4 lg:pt-0 lg:pl-6 lg:border-l-2 min-w-0">
       <div className="">
-        <div className="flex flex-col justify-between flex-1 gap-2">
+        <div className="flex flex-col justify-between flex-1 gap-2 min-w-0">
           <h4 className="text-2xl text-black font-semibold font-sans mb-2">
             {product.productName}
             {product.hasModels && " - " + model.modelName}
@@ -78,11 +78,11 @@ const ProductDetailContent = ({ product }) => {
             </h6>
           )}
           <p
-            className="w-[95%]"
+            className="w-full max-w-full overflow-x-auto"
             dangerouslySetInnerHTML={{ __html: model.specifications }}
           />
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <Stack spacing={1}>
               <Rating
                 size="small"
@@ -143,7 +143,7 @@ const ProductDetailContent = ({ product }) => {
             </>
           )}
 
-          <div className="flex items-center gap-5 my-2">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-5 my-2">
             <div className="">
               {model.discount === 0 ? (
                 <>
@@ -172,7 +172,7 @@ const ProductDetailContent = ({ product }) => {
               </span>
             </div>
           </div>
-          <div className="flex gap-5">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-5">
             <QuantityButton setNumberValue={setAddValue} />
             <div className="w-fit">
               <AddToCartBtn handleAdd={handleAddToCart} />

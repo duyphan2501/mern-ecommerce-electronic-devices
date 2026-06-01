@@ -7,7 +7,7 @@ const AddToCartBtn = ({ handleAdd }) => {
       className=" !w-full !rounded-lg !border-2 !font-sans !font-semibold border-[#6f7f9763] hover:!bg-black hover:!text-white transition"
       onClick={handleAdd}
     >
-      <div className="flex gap-2 items-center pointer-events-none">
+      <div className="flex flex-wrap gap-2 items-center justify-center pointer-events-none">
         <IoCartOutline size={20} />
         <span>Thêm vào giỏ hàng</span>
       </div>
