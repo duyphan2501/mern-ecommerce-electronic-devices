@@ -7,14 +7,15 @@ import {
   OutlinedInput,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { FcGoogle } from "react-icons/fc";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
 import { FiLoader } from "react-icons/fi";
 import PasswordStrength from "../components/PasswordStrength";
+import GoogleButton from "../components/GoogleButton";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -26,6 +27,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const navigator = useNavigate();
+  const location = useLocation();
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -48,23 +50,21 @@ const Register = () => {
       }
       await register(email, password, userName);
       toast.success(useAuthStore.getState().message);
-      navigator("/verify-email");
+      navigator("/verify-email", { state: { from: location.state?.from } });
     } catch (error) {
       toast.error(useAuthStore.getState().message);
       console.error(error);
     }
   };
 
-  useEffect(() => {}, []);
-
   return (
-    <div className="flex justify-center items-center py-15 ">
-      <div className="bg-white rounded shadow p-5">
+    <div className="flex justify-center items-center py-10 sm:py-15 px-4 overflow-x-hidden">
+      <div className="bg-white rounded shadow p-4 sm:p-5 w-full max-w-[440px]">
         <h1 className="text-center font-black !font-sans text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 text-xl mb-3 bg-clip-text uppercase">
           Đăng ký tài khoản
         </h1>
         <form className="flex flex-col loginForm" onSubmit={handleSubmit}>
-          <FormControl sx={{ m: 1, width: "40ch" }}>
+          <FormControl sx={{ my: 1, mx: 0, width: "100%" }}>
             <TextField
               id="outlined-basic"
               label="Họ và Tên"
@@ -73,7 +73,7 @@ const Register = () => {
               onChange={(e) => setUserName(e.target.value)}
             />
           </FormControl>
-          <FormControl sx={{ m: 1, width: "40ch" }}>
+          <FormControl sx={{ my: 1, mx: 0, width: "100%" }}>
             <TextField
               id="outlined-basic"
               label="Email"
@@ -84,7 +84,7 @@ const Register = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
           </FormControl>
-          <FormControl sx={{ m: 1, width: "40ch" }} variant="outlined">
+          <FormControl sx={{ my: 1, mx: 0, width: "100%" }} variant="outlined">
             <InputLabel htmlFor="outlined-adornment-password">
               Mật Khẩu
             </InputLabel>
@@ -120,7 +120,7 @@ const Register = () => {
             </div>
           </FormControl>
 
-          <FormControl sx={{ m: 1, width: "40ch" }} variant="outlined">
+          <FormControl sx={{ my: 1, mx: 0, width: "100%" }} variant="outlined">
             <Button
               className={`!h-10 !bg-blue-500 !text-white !font-bold mb-5`}
               type="submit"
@@ -129,13 +129,17 @@ const Register = () => {
             </Button>
             <div className="flex items-center gap-1 justify-center my-3">
               <p className=" text-gray-400">Đã có tài khoản?</p>
-              <Link to={"/login"} className="link hover:underline">
+              <Link
+                to={"/login"}
+                state={{ from: location.state?.from }}
+                className="link hover:underline"
+              >
                 Đăng nhập
               </Link>
             </div>
-            <Button className="!py-2 !bg-gray-100 gap-2 !items-center !font-sans !font-semibold !text-black">
-              <FcGoogle size={20} /> Đăng nhập với Google
-            </Button>
+            <div className="flex justify-center items-center">
+              <GoogleButton />
+            </div>
           </FormControl>
         </form>
       </div>

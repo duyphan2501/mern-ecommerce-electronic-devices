@@ -24,8 +24,12 @@ const CartDrawer = () => {
   }, [cart?.items]);
 
   const DrawerList = (
-    <Box sx={{ width: 400 }} role="presentation">
-      <div className="px-4 h-[60vh] overflow-y-scroll scroll">
+    <Box
+      sx={{ width: "100%", maxWidth: "100vw" }}
+      className="flex flex-1 min-h-0 flex-col overflow-hidden"
+      role="presentation"
+    >
+      <div className="flex-1 min-h-0 px-3 sm:px-4 overflow-y-auto overscroll-contain scroll">
         {cart?.items && cart?.items.length === 0 ? (
           <div className="flex justify-center items-center h-full">
             <div className="text-center">
@@ -45,8 +49,8 @@ const CartDrawer = () => {
           ))
         )}
       </div>
-      <div className="flex justify-center items-center h-[28vh]">
-        <div className="w-8/10">
+      <div className="shrink-0 flex justify-center items-center px-3 sm:px-4 py-4">
+        <div className="w-full sm:w-8/10">
           <div className="py-2 pt-4 border-b border-gray-300">
             <div className="flex justify-between w-full border-gray-300">
               <div className="">Tổng cộng:</div>
@@ -64,10 +68,10 @@ const CartDrawer = () => {
                 {formatMoney(totalCost)}
               </div>
             </div>
-            <div className="flex gap-4 mt-2">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-2">
               <Button
                 component={Link}
-                to={"/cart?"}
+                to={"/cart"}
                 className="!w-full !py-3 !bg-blue-500 !text-white !font-bold hover:!bg-black"
                 onClick={closeCart}
               >
@@ -94,7 +98,6 @@ const CartDrawer = () => {
         open={isOpenCart}
         onClose={closeCart}
         anchor={"right"}
-        disableScrollLock
         ModalProps={{
           keepMounted: true,
         }}
@@ -107,7 +110,12 @@ const CartDrawer = () => {
           },
           paper: {
             sx: {
-              width: 400,
+              width: { xs: "100vw", sm: 400 },
+              maxWidth: "100vw",
+              height: "100dvh",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
               willChange: "transform", // 2. Ép trình duyệt sử dụng GPU cho animation trượt
               transition:
                 "transform 225ms cubic-bezier(0, 0, 0.2, 1) !important", // 3. Làm mượt gia tốc
@@ -115,13 +123,13 @@ const CartDrawer = () => {
           },
         }}
       >
-        <h3 className="flex items-center justify-between p-3 font-semibold text-content">
+        <h3 className="shrink-0 flex items-center justify-between p-3 font-semibold text-content">
           Giỏ hàng ({cart?.items?.length || 0})
           <div className="hover:bg-gray-200 p-1 rounded-full cursor-pointer transition">
             <IoClose onClick={closeCart} size={25} />
           </div>
         </h3>
-        <Divider />
+        <Divider className="shrink-0" />
         {DrawerList}
       </Drawer>
     </div>

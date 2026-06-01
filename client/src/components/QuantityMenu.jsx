@@ -21,7 +21,7 @@ const QuantityMenu = ({ quantity, handleChange }) => {
   return (
     <div className="">
       <span
-        className="px-1 flex items-center gap-1 rounded-md cursor-pointer hover:bg-gray-300 bg-gray-200 "
+        className="px-1 flex items-center gap-1 rounded-md cursor-pointer hover:bg-gray-300 bg-gray-200 w-fit"
         onClick={handleClick}
       >
         S.L: {quantity} <IoMdArrowDropdown />

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import OtpBox from "../components/OtpBox";
 import { Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
 import { FiLoader } from "react-icons/fi";
@@ -9,6 +9,7 @@ import { FiLoader } from "react-icons/fi";
 const VerifyEmail = () => {
   const [otp, setOtp] = useState("");
   const navigator = useNavigate();
+  const location = useLocation();
   const { user, verifyEmail, isLoading, sendVerificationEmail } =
     useAuthStore();
 
@@ -20,7 +21,7 @@ const VerifyEmail = () => {
     try {
       await verifyEmail(user?.email, otp);
       toast.success(useAuthStore.getState().message);
-      navigator("/login");
+      navigator("/login", { state: { from: location.state?.from } });
     } catch (error) {
       toast.error(useAuthStore.getState().message);
       console.error(error);
@@ -41,13 +42,13 @@ const VerifyEmail = () => {
   };
 
   useEffect(() => {
-    if (!user?.email) navigator("/login");
-  }, []);
+    if (!user?.email) navigator("/login", { state: { from: location.state?.from } });
+  }, [location.state?.from, navigator, user?.email]);
 
   return (
-    <div className="flex justify-center items-center py-15 ">
-      <div className="bg-white rounded shadow overflow-hidden">
-        <div className=" p-5">
+    <div className="flex justify-center items-center py-10 sm:py-15 px-4 overflow-x-hidden">
+      <div className="bg-white rounded shadow overflow-hidden w-full max-w-[440px]">
+        <div className="p-4 sm:p-5">
           <h1 className="text-center font-black !font-sans text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 text-xl mb-3 bg-clip-text uppercase">
             Xác minh tài khoản
           </h1>

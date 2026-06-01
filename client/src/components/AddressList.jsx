@@ -61,7 +61,7 @@ const AddressList = ({
       <div className="flex items-center justify-between">
         <h4 className="text-lg font-bold">{title}</h4>
         <Button
-          className="!gap-1 !bg-white !border-1 !font-semibold  !border-blue-500 !rounded-md"
+          className="!gap-1 !bg-white !border-1 !font-semibold  !border-blue-500 !rounded-md text-nowrap"
           onClick={handleCreate}
         >
           <FaPlus />
@@ -82,6 +82,11 @@ const AddressList = ({
             isCheckout={isCheckout}
           />
         ))}
+        {address.length === 0 && (
+          <div className="text-center text-gray-500 italic">
+            Chưa có địa chỉ nào. Vui lòng thêm địa chỉ để tiếp tục.
+          </div>
+        )}
       </div>
     </div>
   );

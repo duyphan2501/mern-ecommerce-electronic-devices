@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { FcGoogle } from "react-icons/fc";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
@@ -29,7 +28,10 @@ const Login = () => {
   const location = useLocation();
 
   // Lấy trang trước đó từ state, mặc định về "/"
-  const from = location.state?.from?.pathname || "/";
+  const from =
+    location.state?.from?.pathname && location.state?.from?.pathname !== "/login"
+      ? `${location.state.from.pathname}${location.state.from.search || ""}`
+      : "/";
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -48,7 +50,7 @@ const Login = () => {
       await login(email, password);
       toast.success(useAuthStore.getState().message);
       navigator(from, { replace: true }); 
-    } catch (error) {
+    } catch {
       const { isVerified } = useAuthStore.getState();
       if (isVerified === false) {
         navigator("/verify-email");
@@ -78,13 +80,13 @@ const Login = () => {
   }, [persist]);
 
   return (
-    <div className="flex justify-center items-center py-15 ">
-      <div className="bg-white rounded shadow p-5">
+    <div className="flex justify-center items-center py-10 sm:py-15 px-4 overflow-x-hidden">
+      <div className="bg-white rounded shadow p-4 sm:p-5 w-full max-w-[440px]">
         <h1 className="text-center font-black !font-sans text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 text-xl mb-3 bg-clip-text uppercase">
           Đăng nhập tài khoản
         </h1>
         <form className="flex flex-col loginForm" onSubmit={handleSubmit}>
-          <FormControl sx={{ m: 1, width: "40ch" }}>
+          <FormControl sx={{ my: 1, mx: 0, width: "100%" }}>
             <TextField
               id="outlined-basic"
               label="Email"
@@ -95,7 +97,7 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
           </FormControl>
-          <FormControl sx={{ m: 1, width: "40ch" }} variant="outlined">
+          <FormControl sx={{ my: 1, mx: 0, width: "100%" }} variant="outlined">
             <InputLabel htmlFor="outlined-adornment-password">
               Mật Khẩu
             </InputLabel>
@@ -124,7 +126,7 @@ const Login = () => {
               }
               label="Mật Khẩu"
             />
-            <div className="flex justify-between items-center my-3 w-full">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 my-3 w-full">
               <FormControlLabel
                 control={<Checkbox checked={persist} />}
                 label="Remember me"
@@ -150,7 +152,11 @@ const Login = () => {
             </Button>
             <div className="flex items-center gap-1 justify-center my-3">
               <p className=" text-gray-400">Chưa có tài khoản?</p>
-              <Link to={"/register"} className="link hover:underline">
+              <Link
+                to={"/register"}
+                state={{ from: location.state?.from }}
+                className="link hover:underline"
+              >
                 Đăng ký
               </Link>
             </div>

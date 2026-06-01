@@ -61,13 +61,13 @@ const OtpBox = ({ length, onChangeOtp, onSubmit }) => {
   };
 
   return (
-    <div className="flex justify-center items-center gap-1">
+    <div className="flex justify-center items-center gap-1 w-full">
       {otp.map((data, index) => {
         return (
           <input
             type="text"
             maxLength={length}
-            className="rounded size-[45px] text-center border-2 text-black font-black"
+            className="rounded size-10 sm:size-[45px] text-center border-2 text-black font-black min-w-0"
             key={index}
             onChange={(e) => handleChange(e, index)}
             onKeyDown={(e) => handleKeyDown(e, index)}

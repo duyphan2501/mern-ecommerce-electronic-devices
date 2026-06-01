@@ -2,7 +2,7 @@ import { IoBagCheckOutline, IoCartOutline } from "react-icons/io5";
 import Badge from "@mui/material/Badge";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { useContext, useState } from "react";
@@ -28,6 +28,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const navigator = useNavigate();
+  const location = useLocation();
 
   const openProfile = Boolean(anchorEl);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
@@ -43,7 +44,7 @@ const Header = () => {
       await logout(axiosPrivate);
       toast.success(useAuthStore.getState().message);
       navigator("/");
-    } catch (error) {
+    } catch {
       toast.error(useAuthStore.getState().message);
     }
   };
@@ -100,9 +101,21 @@ const Header = () => {
               </>
             ) : (
               <div className="text-sm">
-                <Link className="text-gray-500" to="/login">Đăng nhập</Link>
+                <Link
+                  className="text-gray-500"
+                  to="/login"
+                  state={{ from: location }}
+                >
+                  Đăng nhập
+                </Link>
                 <span className="mx-2 text-gray-300">|</span>
-                <Link className="text-gray-500" to="/register">Đăng ký</Link>
+                <Link
+                  className="text-gray-500"
+                  to="/register"
+                  state={{ from: location }}
+                >
+                  Đăng ký
+                </Link>
               </div>
             )}
 
