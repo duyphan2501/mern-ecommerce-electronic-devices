@@ -1,80 +1,88 @@
 import { Fragment, useMemo, useState } from "react";
 import {
   Box,
+  Button,
+  Chip,
+  Collapse,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
   TablePagination,
+  TableRow,
   TableSortLabel,
   Toolbar,
-  Typography,
-  IconButton,
-  Collapse,
-  MenuItem,
   Select,
-  FormControl,
+  Typography,
 } from "@mui/material";
 import { IoChevronDown, IoChevronForward, IoSearch } from "react-icons/io5";
 import { formatDateTime } from "../../utils/DateFormat";
+import formatMoney from "../../utils/MoneyFormat";
 
-/* ================= SORT UTILS ================= */
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
   if (b[orderBy] > a[orderBy]) return 1;
   return 0;
 }
+
 function getComparator(order, orderBy) {
   return order === "desc"
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-const STATUS_OPTIONS = [
-  { value: "pending", label: "Pending" },
-  { value: "processing", label: "Processing" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
-];
+const STATUS_LABELS = {
+  pending: "Pending Confirmation",
+  confirmed: "Confirmed",
+  packing: "Packing",
+  shipping: "Shipping",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
 
-export default function OrderTable({ orders }) {
+const STATUS_COLORS = {
+  pending: "warning",
+  confirmed: "info",
+  packing: "secondary",
+  shipping: "primary",
+  delivered: "success",
+  cancelled: "error",
+};
+
+const eventLabel = (event) => {
+  if (event.message) return event.message;
+  if (event.from || event.to) return `${event.from || "-"} -> ${event.to || "-"}`;
+  return event.type;
+};
+
+export default function OrderTable({
+  orders,
+  onOpenOrder,
+  pagination = {},
+  searchValue,
+  onSearchChange,
+  onPageChange,
+  filterStatus,
+  onFilterStatusChange,
+  onRowsPerPageChange,
+}) {
   const [order, setOrder] = useState("desc");
   const [orderBy, setOrderBy] = useState("createdAt");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [searchValue, setSearchValue] = useState("");
-  const [openIndex, setOpenIndex] = useState(null);
-
-  const handleChange = (event) => {
-    setStatus(event.target.value);
+  const [openId, setOpenId] = useState(null);
+  const safePagination = {
+    page: Number(pagination.page || 0),
+    limit: Number(pagination.limit || 10),
+    total: Number(pagination.total || 0),
   };
 
-  /* ================= SEARCH ================= */
-  const filteredOrders = useMemo(() => {
-    if (!orders) return [];
-    if (!searchValue) return orders;
-    const q = searchValue.toLowerCase();
-    return orders.filter(
-      (o) =>
-        o.orderId.toLowerCase().includes(q) ||
-        o.shippingInfo.receiver.toLowerCase().includes(q) ||
-        o.shippingInfo.phone.includes(q)
-    );
-  }, [searchValue, orders]);
-
-  /* ================= SORT ================= */
   const sortedOrders = useMemo(
-    () => [...filteredOrders].sort(getComparator(order, orderBy)),
-    [filteredOrders, order, orderBy]
-  );
-
-  /* ================= PAGINATION ================= */
-  const visibleOrders = useMemo(
-    () =>
-      sortedOrders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [sortedOrders, page, rowsPerPage]
+    () => [...(orders || [])].sort(getComparator(order, orderBy)),
+    [orders, order, orderBy],
   );
 
   const handleRequestSort = (property) => {
@@ -82,36 +90,50 @@ export default function OrderTable({ orders }) {
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
-  /* ================= RENDER ================= */
+
   return (
     <Box>
-      {/* ===== TOOLBAR (SEARCH) ===== */}
       <Toolbar sx={{ px: 0, mb: 1 }}>
         <Typography variant="h6" sx={{ flex: "1 1 100%", fontWeight: 600 }}>
           Orders Table
         </Typography>
+        <div className="flex justify-end items-center gap-5">
+        <Box className="flex flex-wrap items-center gap-3">
+          <FormControl size="small" sx={{ minWidth: 220 }}>
+            <InputLabel id="order-status-filter-label">Status</InputLabel>
+            <Select
+              labelId="order-status-filter-label"
+              label="Status"
+              value={filterStatus}
+              onChange={(event) =>
+                onFilterStatusChange(event.target.value)
+              }
+            >
+              <MenuItem value="all">All statuses</MenuItem>
+              <MenuItem value="pending">Pending Confirmation</MenuItem>
+              <MenuItem value="confirmed">Confirmed</MenuItem>
+              <MenuItem value="packing">Packing</MenuItem>
+              <MenuItem value="shipping">Shipping</MenuItem>
+              <MenuItem value="delivered">Delivered</MenuItem>
+              <MenuItem value="cancelled">Cancelled</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
 
-        <Box className="border border-gray-300 rounded-xl h-10 flex items-center px-3 min-w-[320px]">
+        <Box className="flex h-10 min-w-[320px] items-center rounded-md border border-gray-300 px-3">
           <IoSearch className="text-gray-400" />
           <input
             value={searchValue}
-            onChange={(e) => {
-              setSearchValue(e.target.value);
-              setPage(0);
-            }}
+            onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search order / customer / phone"
-            className="ms-2 outline-0 w-full"
+            className="ms-2 w-full outline-0"
           />
         </Box>
+      </div>
       </Toolbar>
 
       <TableContainer className="rounded-md">
-        <Table
-          sx={{
-            "& .MuiTableCell-root": { py: 2.5 },
-          }}
-        >
-          {/* ===== HEAD ===== */}
+        <Table sx={{ "& .MuiTableCell-root": { py: 2.2 } }}>
           <TableHead className="bg-gray-100 text-nowrap">
             <TableRow>
               <TableCell />
@@ -134,7 +156,6 @@ export default function OrderTable({ orders }) {
                 </TableSortLabel>
               </TableCell>
               <TableCell>Customer</TableCell>
-              <TableCell>Address</TableCell>
               <TableCell>Phone</TableCell>
               <TableCell>
                 <TableSortLabel
@@ -147,138 +168,110 @@ export default function OrderTable({ orders }) {
               </TableCell>
               <TableCell>Payment</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell align="right">Action</TableCell>
             </TableRow>
           </TableHead>
 
-          {/* ===== BODY ===== */}
+          <TableBody>
+            {sortedOrders.map((item) => {
+              const isOpen = openId === item._id;
+              const history = [...(item.statusHistory || [])].sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+              );
 
-          {orders && orders.length > 0 && (
-            <TableBody>
-              {visibleOrders.map((order, index) => {
-                const isOpen = openIndex === index;
-
-                return (
-                  <Fragment key={order.id}>
-                    {/* MAIN ROW */}
-                    <TableRow hover>
-                      <TableCell width={40}>
-                        <IconButton
-                          size="small"
-                          onClick={() => setOpenIndex(isOpen ? null : index)}
-                        >
-                          {isOpen ? (
-                            <IoChevronDown size={18} />
-                          ) : (
-                            <IoChevronForward size={18} />
-                          )}
-                        </IconButton>
-                      </TableCell>
-
-                      <TableCell>{order.orderId}</TableCell>
-                      <TableCell>{formatDateTime(order.createdAt)}</TableCell>
-                      <TableCell>{order.shippingInfo.receiver}</TableCell>
-                      <TableCell className="max-w-[260px] text-nowrap">
-                        {order.shippingInfo.addressDetail},{" "}
-                        {order.shippingInfo.ward}, {order.shippingInfo.province}
-                      </TableCell>
-                      <TableCell>{order.shippingInfo.phone}</TableCell>
-                      <TableCell className="text-nowrap">
-                        {order.totalPrice.toLocaleString()} đ
-                      </TableCell>
-                      <TableCell>{order.payment.provider}</TableCell>
-                      <TableCell>
-                        <FormControl fullWidth>
-                          <Select
-                            id="demo-simple-select"
-                            value={order.status}
-                            size="small"
-                            onChange={handleChange}
-                            sx={{ fontFamily: "Outfit, sans-serif" }}
-                          >
-                            {STATUS_OPTIONS.map((stat) => (
-                              <MenuItem
-                                key={stat.value}
-                                value={stat.value}
-                                sx={{ fontFamily: "Outfit, sans-serif" }}
-                              >
-                                {stat.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </TableCell>
-                    </TableRow>
-
-                    {/* ===== EXPAND ROW ===== */}
-                    <TableRow>
-                      <TableCell
-                        colSpan={9}
-                        className="!p-0"
-                        sx={{ p: 0, borderBottom: 0 }}
+              return (
+                <Fragment key={item._id}>
+                  <TableRow hover>
+                    <TableCell width={40}>
+                      <IconButton
+                        size="small"
+                        onClick={() => setOpenId(isOpen ? null : item._id)}
                       >
-                        <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                          <Box sx={{ p: 2 }}>
-                            <Typography
-                              variant="subtitle2"
-                              sx={{ mb: 1, fontWeight: 600 }}
-                            >
-                              Products
-                            </Typography>
+                        {isOpen ? (
+                          <IoChevronDown size={18} />
+                        ) : (
+                          <IoChevronForward size={18} />
+                        )}
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>{item.orderId}</TableCell>
+                    <TableCell>{formatDateTime(item.createdAt)}</TableCell>
+                    <TableCell>{item.shippingInfo?.receiver || "-"}</TableCell>
+                    <TableCell>{item.shippingInfo?.phone || "-"}</TableCell>
+                    <TableCell className="text-nowrap">
+                      {formatMoney(item.totalPrice)}
+                    </TableCell>
+                    <TableCell>
+                      <Box className="flex flex-col gap-1">
+                        <span>{item.payment?.provider}</span>
+                        <Chip
+                          label={item.payment?.status || "pending"}
+                          size="small"
+                          color={item.payment?.status === "paid" ? "success" : "default"}
+                        />
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={STATUS_LABELS[item.status] || item.status}
+                        size="small"
+                        color={STATUS_COLORS[item.status] || "default"}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Button variant="outlined" onClick={() => onOpenOrder(item._id)}>
+                        Details
+                      </Button>
+                    </TableCell>
+                  </TableRow>
 
-                            <Table size="small">
-                              <TableHead sx={{ bgcolor: "#fafafa" }}>
-                                <TableRow>
-                                  <TableCell>Image</TableCell>
-                                  <TableCell>Name</TableCell>
-                                  <TableCell>Qty</TableCell>
-                                  <TableCell>Price</TableCell>
-                                  <TableCell></TableCell>
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {order.items?.map((p, i) => (
-                                  <TableRow key={i}>
-                                    <TableCell>
-                                      <img
-                                        src={p.image}
-                                        alt={p.name}
-                                        className="size-12 rounded-md"
-                                      />
-                                    </TableCell>
-                                    <TableCell>{p.name}</TableCell>
-                                    <TableCell>{p.quantity}</TableCell>
-                                    <TableCell>
-                                      {p.price.toLocaleString()} đ
-                                    </TableCell>
-                                    <TableCell></TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </Box>
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
-                  </Fragment>
-                );
-              })}
-            </TableBody>
-          )}
+                  <TableRow>
+                    <TableCell colSpan={9} className="!p-0" sx={{ borderBottom: 0 }}>
+                      <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                        <Box sx={{ p: 2 }}>
+                          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                            Order Timeline
+                          </Typography>
+                          {history.length === 0 ? (
+                            <Typography variant="body2" color="text.secondary">
+                              No timeline events yet.
+                            </Typography>
+                          ) : (
+                            <Box className="grid gap-3">
+                              {history.map((event, index) => (
+                                <Box
+                                  key={`${event.createdAt}-${index}`}
+                                  className="border-l-2 border-gray-300 pl-3"
+                                >
+                                  <Typography variant="body2" className="!font-semibold">
+                                    {eventLabel(event)}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {event.type} - {formatDateTime(event.createdAt)}
+                                  </Typography>
+                                </Box>
+                              ))}
+                            </Box>
+                          )}
+                        </Box>
+                      </Collapse>
+                    </TableCell>
+                  </TableRow>
+                </Fragment>
+              );
+            })}
+          </TableBody>
         </Table>
       </TableContainer>
 
-      {/* ===== PAGINATION ===== */}
       <TablePagination
         component="div"
-        count={sortedOrders.length}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
-        onPageChange={(_, p) => setPage(p)}
-        onRowsPerPageChange={(e) => {
-          setRowsPerPage(+e.target.value);
-          setPage(0);
-        }}
+        count={safePagination.total}
+        page={safePagination.page}
+        rowsPerPage={safePagination.limit}
+        rowsPerPageOptions={[5, 10, 25, 50]}
+        onPageChange={(_, nextPage) => onPageChange(nextPage)}
+        onRowsPerPageChange={(e) => onRowsPerPageChange(Number(e.target.value))}
       />
     </Box>
   );

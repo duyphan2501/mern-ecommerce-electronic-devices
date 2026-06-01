@@ -1,107 +1,132 @@
-import { Paper, Typography } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Typography,
+} from "@mui/material";
 import { DashboardCardProduct } from "../../components/DashboardCard";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import HandshakeIcon from "@mui/icons-material/Handshake";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
 import { useEffect, useState } from "react";
-import ConfirmDialog from "../../components/ConfirmDialog";
-import { toast } from "react-hot-toast";
 import useOrderStore from "../../store/orderStore";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import OrderTable from "../../components/OrderTable";
+import OrderDetailModal from "../../components/OrderDetailModal";
+import { IoSearch } from "react-icons/io5";
 
 const Orders = () => {
-  //Khai bao state
   const orders = useOrderStore((s) => s.orders);
-  const { getOrders, isLoading } = useOrderStore();
+  const orderDetail = useOrderStore((s) => s.orderDetail);
+  const pagination = useOrderStore((s) => s.pagination);
+  const statusCounts = useOrderStore((s) => s.statusCounts);
+  const { getOrders, getOrderById, setOrderDetail, isLoading } =
+    useOrderStore();
   const axiosPrivate = useAxiosPrivate();
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    status: "all",
+    search: "",
+    page: 0,
+    limit: 10,
+  });
 
   useEffect(() => {
-    getOrders(axiosPrivate);
-  }, []);
+    getOrders(axiosPrivate, filters);
+  }, [axiosPrivate, filters, getOrders]);
 
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [selectedItem, setSelectedItem] = useState([]);
-
-  const handleConfirmDelete = async () => {
-    try {
-      const res = await axiosPrivate.delete("/api/order/delete", {
-        data: { _ids: selectedItem },
-      });
-
-      if (res.data?.success) {
-        toast.success(res.data.message);
-        await getOrders();
-        setSelectedItem([]);
-      }
-    } catch (error) {
-      console.log(error);
-      const message = error.response?.data?.message;
-      toast.error(message || "Xóa đơn hàng thất bại!");
-    }
+  const handleOpenOrder = async (id) => {
+    const detail = await getOrderById(axiosPrivate, id);
+    if (detail) setIsDetailOpen(true);
   };
-  if (isLoading) {
+
+  const handleCloseOrder = () => {
+    setIsDetailOpen(false);
+    setOrderDetail(null);
+  };
+
+  const updateFilters = (nextFilters) => {
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      ...nextFilters,
+    }));
+  };
+
+  const countStatus = (status) => statusCounts[status] || 0;
+
+  if (isLoading && !orders.length) {
     return <Typography>Loading...</Typography>;
   }
+
   return (
     <Paper sx={{ padding: "20px" }} elevation={2} className="!m-5 !rounded-xl">
-      <ConfirmDialog
-        open={confirmDelete}
-        onClose={() => setConfirmDelete(false)}
-        onConfirm={handleConfirmDelete}
-        content={`Bạn có muốn xóa ${selectedItem.length} đơn hàng này?`}
-        action={"Xóa"}
+      <OrderDetailModal
+        open={isDetailOpen}
+        order={orderDetail}
+        onClose={handleCloseOrder}
       />
-      {/* <Navbar active="orders" /> */}
 
       <div className="mt-3">
         <h4 className="font-bold">OVERVIEW</h4>
       </div>
 
-      <div className="mt-3 grid md:grid-cols-5 gap-3">
+      <div className="mt-3 grid gap-3 md:grid-cols-6">
         <DashboardCardProduct
           BackgroundColor="#F57E40"
           icon={InventoryIcon}
-          CardHeader="Canncelled Orders"
-          CardDesc={`${orders.filter((ord) => ord.status === "cancelled").length} Orders`}
+          CardHeader="Cancelled Orders"
+          CardDesc={`${countStatus("cancelled")} Orders`}
         />
         <DashboardCardProduct
           BackgroundColor="#1A2C4E"
           icon={HourglassBottomIcon}
           CardHeader="Pending Orders"
-          CardDesc={`${
-            orders.filter((ord) => ord.status === "pending").length
-          } Orders`}
+          CardDesc={`${countStatus("pending")} Orders`}
         />
         <DashboardCardProduct
           BackgroundColor="#F7B600"
           icon={HandshakeIcon}
           CardHeader="Confirmed Orders"
-          CardDesc={`${
-            orders.filter((ord) => ord.status === "confirmed").length
-          } Orders`}
+          CardDesc={`${countStatus("confirmed")} Orders`}
+        />
+        <DashboardCardProduct
+          BackgroundColor="#7C3AED"
+          icon={Inventory2Icon}
+          CardHeader="Packing Orders"
+          CardDesc={`${countStatus("packing")} Orders`}
         />
         <DashboardCardProduct
           BackgroundColor="#689801"
           icon={LocalShippingIcon}
           CardHeader="Shipping Orders"
-          CardDesc={`${
-            orders.filter((ord) => ord.status === "shipping").length
-          } Orders`}
+          CardDesc={`${countStatus("shipping")} Orders`}
         />
         <DashboardCardProduct
           BackgroundColor="#B01D2A"
           icon={CheckCircleIcon}
           CardHeader="Delivered Orders"
-          CardDesc={`${
-            orders.filter((ord) => ord.status === "delivered").length
-          } Orders`}
+          CardDesc={`${countStatus("delivered")} Orders`}
         />
       </div>
+
       <section className="mt-5">
-        <OrderTable orders={orders} />
+        <OrderTable
+          orders={orders}
+          onOpenOrder={handleOpenOrder}
+          pagination={pagination}
+          searchValue={filters.search}
+          onSearchChange={(search) => updateFilters({ search, page: 0 })}
+          filterStatus={filters.status}
+          onFilterStatusChange={(status) => updateFilters({ status, page: 0 })}
+          onPageChange={(page) => updateFilters({ page })}
+          onRowsPerPageChange={(limit) => updateFilters({ limit, page: 0 })}
+        />
       </section>
     </Paper>
   );

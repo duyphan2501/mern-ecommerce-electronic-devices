@@ -1,10 +1,19 @@
 import orderModel from "../model/order.model.js";
 import {
+  assessAdminRmaService,
   completeOrderCheckout,
+  createAdminRmaService,
   createNewOrder,
+  editAdminOrderService,
+  getAdminOrderByIdService,
+  getAdminOrdersService,
   handleOrderCreation,
   handleReOrder,
+  matchAdminRmaQuantityService,
+  receiveAdminRmaService,
+  refundAdminRmaService,
   restockOrderItems,
+  updateAdminOrderStatusService,
 } from "../service/order.service.js";
 
 const createOrder = async (req, res) => {
@@ -51,7 +60,7 @@ const getAllOrders = async (req, res) => {
   try {
     const orders = await orderModel
       .find({
-        status: { $nin: ["processing", "draft", "deleted", "cancelled"] },
+        status: { $nin: ["draft", "deleted"] },
       })
       .sort({ createdAt: -1 });
     return res.status(200).json({
@@ -63,6 +72,139 @@ const getAllOrders = async (req, res) => {
       message: error.message || error,
       success: false,
     });
+  }
+};
+
+const getAdminOrders = async (req, res) => {
+  try {
+    const { orders, pagination, statusCounts } =
+      await getAdminOrdersService(req.query);
+    return res.status(200).json({
+      orders,
+      pagination,
+      statusCounts,
+      success: true,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: error.message || error, success: false });
+  }
+};
+
+const getAdminOrderById = async (req, res) => {
+  try {
+    const order = await getAdminOrderByIdService(req.params.id);
+    return res
+      .status(200)
+      .json({ order, success: true });
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ message: error.message || error, success: false });
+  }
+};
+
+const updateAdminOrderStatus = async (req, res) => {
+  try {
+    const order = await updateAdminOrderStatusService({
+      id: req.params.id,
+      adminId: req.user.userId,
+      ...req.body,
+    });
+    return res
+      .status(200)
+      .json({ order, success: true });
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ message: error.message || error, success: false });
+  }
+};
+
+const editAdminOrder = async (req, res) => {
+  try {
+    const order = await editAdminOrderService({
+      id: req.params.id,
+      adminId: req.user.userId,
+      ...req.body,
+    });
+    return res
+      .status(200)
+      .json({ order, success: true });
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ message: error.message || error, success: false });
+  }
+};
+
+const createAdminRma = async (req, res) => {
+  try {
+    const { order, rma } = await createAdminRmaService({
+      id: req.params.id,
+      adminId: req.user.userId,
+      ...req.body,
+    });
+    return res.status(201).json({ order, rma, success: true });
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ message: error.message || error, success: false });
+  }
+};
+
+const receiveAdminRma = async (req, res) => {
+  try {
+    const { order, rma } = await receiveAdminRmaService({
+      id: req.params.id,
+      rmaId: req.params.rmaId,
+      adminId: req.user.userId,
+      ...req.body,
+    });
+    return res.status(200).json({ order, rma, success: true });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message || error, success: false });
+  }
+};
+
+const assessAdminRma = async (req, res) => {
+  try {
+    const { order, rma } = await assessAdminRmaService({
+      id: req.params.id,
+      rmaId: req.params.rmaId,
+      adminId: req.user.userId,
+      ...req.body,
+    });
+    return res.status(200).json({ order, rma, success: true });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message || error, success: false });
+  }
+};
+
+const matchAdminRmaQuantity = async (req, res) => {
+  try {
+    const { order, rma } = await matchAdminRmaQuantityService({
+      id: req.params.id,
+      rmaId: req.params.rmaId,
+      adminId: req.user.userId,
+    });
+    return res.status(200).json({ order, rma, success: true });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message || error, success: false });
+  }
+};
+
+const refundAdminRma = async (req, res) => {
+  try {
+    const { order, rma } = await refundAdminRmaService({
+      id: req.params.id,
+      rmaId: req.params.rmaId,
+      adminId: req.user.userId,
+    });
+    return res.status(200).json({ order, rma, success: true });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message || error, success: false });
   }
 };
 
@@ -244,6 +386,15 @@ const reOrder = async (req, res) => {
 
 export {
   getAllOrders,
+  getAdminOrders,
+  getAdminOrderById,
+  updateAdminOrderStatus,
+  editAdminOrder,
+  createAdminRma,
+  receiveAdminRma,
+  assessAdminRma,
+  matchAdminRmaQuantity,
+  refundAdminRma,
   createOrder,
   getOrderByOrderCode,
   getOrders,
