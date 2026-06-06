@@ -115,7 +115,7 @@ const ProductCard = ({ product }) => {
       <div className="flex flex-col justify-between flex-1 min-w-0">
         <div className="min-w-0">
           <h4 className="line-clamp-2 font-[600]">
-            {product.productName} - {selectedModel.modelName}
+            {product.productName} {selectedModel.modelName && `- ${selectedModel.modelName}`}
           </h4>
           <Stack spacing={1}>
             <Rating
