@@ -18,11 +18,18 @@ import {
   TableSortLabel,
   Toolbar,
   Select,
+  TextField,
   Typography,
 } from "@mui/material";
-import { IoChevronDown, IoChevronForward, IoSearch } from "react-icons/io5";
+import SearchIcon from "@mui/icons-material/Search";
+import InputAdornment from "@mui/material/InputAdornment";
+import { IoChevronDown, IoChevronForward } from "react-icons/io5";
 import { formatDateTime } from "../../utils/DateFormat";
 import formatMoney from "../../utils/MoneyFormat";
+import {
+  compactControlSx,
+  compactSecondaryActionClass,
+} from "../../styles/adminControls";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -93,13 +100,12 @@ export default function OrderTable({
 
   return (
     <Box>
-      <Toolbar sx={{ px: 0, mb: 1 }}>
+      <Toolbar sx={{ px: 0, mb: 1, gap: 2, flexWrap: "wrap" }}>
         <Typography variant="h6" sx={{ flex: "1 1 100%", fontWeight: 600 }}>
           Orders Table
         </Typography>
-        <div className="flex justify-end items-center gap-5">
-        <Box className="flex flex-wrap items-center gap-3">
-          <FormControl size="small" sx={{ minWidth: 220 }}>
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <FormControl size="small" sx={{ minWidth: 190, ...compactControlSx }}>
             <InputLabel id="order-status-filter-label">Status</InputLabel>
             <Select
               labelId="order-status-filter-label"
@@ -118,18 +124,24 @@ export default function OrderTable({
               <MenuItem value="cancelled">Cancelled</MenuItem>
             </Select>
           </FormControl>
-        </Box>
 
-        <Box className="flex h-10 min-w-[320px] items-center rounded-md border border-gray-300 px-3">
-          <IoSearch className="text-gray-400" />
-          <input
+          <TextField
+            size="small"
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search order / customer / phone"
-            className="ms-2 w-full outline-0"
+            sx={{ minWidth: 320, ...compactControlSx }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
-        </Box>
-      </div>
+        </div>
       </Toolbar>
 
       <TableContainer className="rounded-md">
@@ -219,7 +231,11 @@ export default function OrderTable({
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <Button variant="outlined" onClick={() => onOpenOrder(item._id)}>
+                      <Button
+                        variant="outlined"
+                        className={compactSecondaryActionClass}
+                        onClick={() => onOpenOrder(item._id)}
+                      >
                         Details
                       </Button>
                     </TableCell>

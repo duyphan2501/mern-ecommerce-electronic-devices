@@ -9,6 +9,11 @@ import MovementHistoryModal from "../../components/Inventory/MovementHistoryModa
 import StockExportDialog from "../../components/Inventory/StockExportDialog";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import useInventoryStore from "../../store/inventoryStore";
+import AdminPageHeader from "../../components/AdminPageHeader";
+import {
+  primaryActionClass,
+  secondaryActionClass,
+} from "../../styles/adminControls";
 
 const Inventory = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -71,37 +76,30 @@ const Inventory = () => {
         }
       />
 
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        gap={2}
-        flexWrap="wrap"
-      >
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Inventory
-          </Typography>
-        </Box>
-        <Box display="flex" gap={1.5} flexWrap="wrap">
-          <Button
-            variant="outlined"
-            startIcon={<OutputIcon />}
-            onClick={() => handleOpenExport()}
-            className="!h-12 !rounded-xl !px-5 !normal-case !font-semibold"
-          >
-            Export Products
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setOpenReceipt(true)}
-            className="!h-12 !rounded-xl !px-5 !normal-case !font-semibold"
-          >
-            Create Goods Receipt
-          </Button>
-        </Box>
-      </Box>
+      <AdminPageHeader
+        title="Inventory"
+        description="Monitor stock levels and record incoming or outgoing goods."
+        actions={
+          <>
+            <Button
+              variant="outlined"
+              startIcon={<OutputIcon />}
+              onClick={() => handleOpenExport()}
+              className={secondaryActionClass}
+            >
+              Export Products
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setOpenReceipt(true)}
+              className={primaryActionClass}
+            >
+              Create Goods Receipt
+            </Button>
+          </>
+        }
+      />
 
       <InventorySummaryCards summary={summary} />
 

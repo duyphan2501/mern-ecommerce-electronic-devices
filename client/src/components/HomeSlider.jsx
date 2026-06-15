@@ -1,33 +1,38 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import { useState } from "react";
+import { API } from "../API/axiosInstance";
 
 const HomeSlider = () => {
-  const [banners, setBanners] = useState([
-    {
-      _id: 1,
-      image:
-        "https://image.cdn2.seaart.me/2026-03-12/d6p7g85e878c73ff6l4g/4ebaa0871babda28a6ed7515c8f1c921_high.webp",
-    },
-    {
-      _id: 2,
-      image:
-        "https://image.cdn2.seaart.me/2026-03-12/d6p7g8le878c73atfep0/387ee040378244bd7425e2b1c1187302_high.webp",
-    },
-    {
-      _id: 3,
-      image:
-        "https://image.cdn2.seaart.me/2026-03-12/d6p7g8de878c73ff6nl0/5db7a0b4086866e55c195b00da666e0f_high.webp",
-    },
-  ]);
+  const [banners, setBanners] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    API.get("/api/slides/public?type=hero")
+      .then((response) => {
+        if (isMounted) setBanners(response.data.slides || []);
+      })
+      .catch(() => {
+        if (isMounted) setBanners([]);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (banners.length === 0) return null;
+
   return (
     <div className="container pb-4">
       <Swiper
         navigation={true}
-        loop={true}
+        loop={banners.length > 1}
         spaceBetween={10}
         autoplay={{
           delay: 5000,
@@ -40,17 +45,43 @@ const HomeSlider = () => {
         modules={[Navigation, Pagination, Autoplay]}
         className="HomeSlider"
       >
-        {banners &&
-          banners.map((banner) => (
-            <SwiperSlide key={banner._id}>
-              <div className="pb-4">
-                <img
-                  src={banner.image}
-                  className="rounded-xl w-full h-[500px] object-center"
-                />
-              </div>
-            </SwiperSlide>
-          ))}
+        {banners.map((banner) => (
+          <SwiperSlide key={banner._id}>
+            <div className="pb-4">
+              {banner.link ? (
+                <Link to={banner.link} className="block">
+                  <picture>
+                    {banner.mobileImage && (
+                      <source
+                        media="(max-width: 640px)"
+                        srcSet={banner.mobileImage}
+                      />
+                    )}
+                    <img
+                      src={banner.image}
+                      alt={banner.name}
+                      className="h-[260px] w-full rounded-xl object-center sm:h-[380px] lg:h-[500px]"
+                    />
+                  </picture>
+                </Link>
+              ) : (
+                <picture>
+                  {banner.mobileImage && (
+                    <source
+                      media="(max-width: 640px)"
+                      srcSet={banner.mobileImage}
+                    />
+                  )}
+                  <img
+                    src={banner.image}
+                    alt={banner.name}
+                    className="h-[260px] w-full rounded-xl object-center sm:h-[380px] lg:h-[500px]"
+                  />
+                </picture>
+              )}
+            </div>
+          </SwiperSlide>
+        ))}
       </Swiper>
     </div>
   );

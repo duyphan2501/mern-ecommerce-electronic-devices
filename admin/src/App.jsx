@@ -10,6 +10,8 @@ import Layout from "./components/Layout";
 import ListCategory from "./Pages/Category/ListCategory";
 import Orders from "./Pages/Orders";
 import Inventory from "./Pages/Inventory";
+import ListSlides from "./Pages/Slides/ListSlides";
+import SlideForm from "./Pages/Slides/SlideForm";
 function App() {
   return (
     <>
@@ -24,6 +26,18 @@ function App() {
               <Route path="/inventory" element={<Inventory />}></Route>
               <Route path="/categories" element={<ListCategory />}></Route>
               <Route path="/orders" element={<Orders />}></Route>
+              <Route
+                path="/home-slides/all"
+                element={<ListSlides />}
+              ></Route>
+              <Route
+                path="/home-slides/add"
+                element={<SlideForm />}
+              ></Route>
+              <Route
+                path="/home-slides/edit/:id"
+                element={<SlideForm />}
+              ></Route>
               <Route
                 path="/products/create"
                 element={<CreateProduct />}

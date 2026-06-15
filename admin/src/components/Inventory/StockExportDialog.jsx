@@ -12,6 +12,11 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import {
+  compactPrimaryActionClass,
+  compactSecondaryActionClass,
+  dangerIconActionClass,
+} from "../../styles/adminControls";
 
 const defaultExportItem = {
   modelId: "",
@@ -163,6 +168,7 @@ const StockExportDialog = ({
                   }
                 />
                 <IconButton
+                  className={dangerIconActionClass}
                   disabled={exportItems.length === 1}
                   onClick={() =>
                     setExportItems((prev) =>
@@ -182,20 +188,24 @@ const StockExportDialog = ({
           onClick={() =>
             setExportItems((prev) => [...prev, { ...defaultExportItem }])
           }
-          className="!mt-4 !normal-case"
+          className={`${compactSecondaryActionClass} !mt-4`}
         >
           Add item
         </Button>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} className="!normal-case">
+        <Button
+          variant="outlined"
+          onClick={onClose}
+          className={compactSecondaryActionClass}
+        >
           Cancel
         </Button>
         <Button
           variant="contained"
           disabled={!isValid || isSaving}
           onClick={handleSubmit}
-          className="!normal-case"
+          className={compactPrimaryActionClass}
         >
           {isSaving ? "Saving..." : "Create export"}
         </Button>

@@ -23,7 +23,10 @@ import {
   IoChevronForward,
   IoChevronDown,
 } from "react-icons/io5";
-import { Button } from "@mui/material";
+import {
+  dangerIconActionClass,
+  iconActionClass,
+} from "../../styles/adminControls";
 
 function descendingComparator(a, b, orderBy) {
   if (b?.[orderBy] < a?.[orderBy]) return -1;
@@ -150,8 +153,6 @@ function EnhancedTableToolbar(props) {
   );
 }
 export default function CategoryTable({ data, onDelete, openModal }) {
-  if (!data) return null;
-
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("name"); // chỉ dùng 'name' cho sort cây
   const [selected, setSelected] = React.useState([]);
@@ -159,6 +160,7 @@ export default function CategoryTable({ data, onDelete, openModal }) {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [expandedIds, setExpandedIds] = React.useState([]);
   const [searchValue, setSearchValue] = React.useState("");
+  const categories = React.useMemo(() => data || [], [data]);
 
   const toggleExpand = (id) => {
     setExpandedIds((prev) =>
@@ -174,7 +176,7 @@ export default function CategoryTable({ data, onDelete, openModal }) {
 
   // Lọc theo từ khoá: giữ node nếu nó khớp hoặc con của nó khớp
   const filteredData = React.useMemo(() => {
-    if (!searchValue) return data;
+    if (!searchValue) return categories;
     const q = searchValue.toLowerCase();
     const filterTree = (nodes) =>
       nodes
@@ -187,8 +189,8 @@ export default function CategoryTable({ data, onDelete, openModal }) {
             node.name?.toLowerCase().includes(q) ||
             (node.children && node.children.length > 0)
         );
-    return filterTree(data);
-  }, [data, searchValue]);
+    return filterTree(categories);
+  }, [categories, searchValue]);
 
   // Sort theo cây: chỉ sort các siblings theo 'name' để không phá cấu trúc
   const treeComparator = React.useMemo(
@@ -293,7 +295,7 @@ export default function CategoryTable({ data, onDelete, openModal }) {
                 <TableCell padding="checkbox">
                   <Checkbox
                     checked={selected.includes(row._id)}
-                    onClick={(e) => {
+                    onClick={() => {
                       handleClick(row._id);
                     }}
                   />
@@ -305,7 +307,7 @@ export default function CategoryTable({ data, onDelete, openModal }) {
                     {row.hasChildren ? (
                       <IconButton
                         size="small"
-                        onClick={(e) => {
+                        onClick={() => {
                           toggleExpand(row._id);
                         }}
                       >
@@ -346,13 +348,17 @@ export default function CategoryTable({ data, onDelete, openModal }) {
                 <TableCell align="right">
                   <Tooltip title="Edit Category">
                     <IconButton
+                      className={iconActionClass}
                       onClick={() => openModal({ isOpen: true, category: row })}
                     >
                       <MdOutlineModeEdit size={20} />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Delete Category">
-                    <IconButton onClick={() => onDelete(row._id)}>
+                    <IconButton
+                      className={dangerIconActionClass}
+                      onClick={() => onDelete(row._id)}
+                    >
                       <MdDeleteOutline size={20} />
                     </IconButton>
                   </Tooltip>

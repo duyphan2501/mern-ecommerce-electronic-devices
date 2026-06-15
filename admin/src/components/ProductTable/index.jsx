@@ -27,18 +27,16 @@ import { IoChevronDown, IoChevronForward } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import ConfirmDialog from "../ConfirmDialog";
 import formatMoney from "../../utils/MoneyFormat";
-import { formatDateTime } from "../../utils/DateFormat";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import useProductStore from "../../store/productStore";
 import ProductStatus from "../StockTable/ProductStatus";
+import {
+  compactControlSx,
+  dangerIconActionClass,
+  iconActionClass,
+} from "../../styles/adminControls";
 
 const CLIENT_URL = import.meta.env.VITE_CLIENT_URL || "";
-
-const statusColor = {
-  active: "success",
-  draft: "warning",
-  archived: "default",
-};
 
 const stripHtml = (value = "") => value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 
@@ -126,7 +124,7 @@ const ProductTable = () => {
             setStatusFilter(event.target.value);
             setPage(0);
           }}
-          sx={{ minWidth: 150 }}
+          sx={{ minWidth: 150, ...compactControlSx }}
         >
           <MenuItem value="all">All statuses</MenuItem>
           <MenuItem value="active">Active</MenuItem>
@@ -142,7 +140,7 @@ const ProductTable = () => {
             setPage(0);
           }}
           placeholder="Search product, model, brand"
-          sx={{ minWidth: 320 }}
+          sx={{ minWidth: 320, ...compactControlSx }}
           slotProps={{
             input: {
               startAdornment: (
@@ -232,7 +230,7 @@ const ProductTable = () => {
                           <IconButton
                             component={Link}
                             to={`/products/edit/${product._id}`}
-                            className="!border !border-gray-200 !rounded-md"
+                            className={iconActionClass}
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
@@ -243,7 +241,7 @@ const ProductTable = () => {
                             href={previewUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="!border !border-gray-200 !rounded-md"
+                            className={iconActionClass}
                             disabled={!product.productUrl}
                           >
                             <OpenInNewIcon fontSize="small" />
@@ -251,7 +249,7 @@ const ProductTable = () => {
                         </Tooltip>
                         <Tooltip title="Archive product">
                           <IconButton
-                            className="!border !border-gray-200 !rounded-md"
+                            className={dangerIconActionClass}
                             onClick={() => setArchiveTarget(product)}
                             disabled={product.status === "archived"}
                           >

@@ -6,6 +6,10 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
+import {
+  compactSecondaryActionClass,
+  dangerActionClass,
+} from "../../styles/adminControls";
 
 export default function ConfirmDialog({
   open,
@@ -30,8 +34,19 @@ export default function ConfirmDialog({
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={onConfirm} color="error">
+        <Button
+          variant="outlined"
+          className={compactSecondaryActionClass}
+          onClick={onClose}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          className={dangerActionClass}
+          onClick={onConfirm}
+          color="error"
+        >
           {action}
         </Button>
       </DialogActions>

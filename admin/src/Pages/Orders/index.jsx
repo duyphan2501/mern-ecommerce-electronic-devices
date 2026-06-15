@@ -1,12 +1,4 @@
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Typography,
-} from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import { DashboardCardProduct } from "../../components/DashboardCard";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
@@ -19,7 +11,7 @@ import useOrderStore from "../../store/orderStore";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import OrderTable from "../../components/OrderTable";
 import OrderDetailModal from "../../components/OrderDetailModal";
-import { IoSearch } from "react-icons/io5";
+import AdminPageHeader from "../../components/AdminPageHeader";
 
 const Orders = () => {
   const orders = useOrderStore((s) => s.orders);
@@ -72,8 +64,15 @@ const Orders = () => {
         onClose={handleCloseOrder}
       />
 
-      <div className="mt-3">
-        <h4 className="font-bold">OVERVIEW</h4>
+      <AdminPageHeader
+        title="Orders"
+        description="Track fulfillment progress, payments, and customer orders."
+      />
+
+      <div className="mt-5">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+          Overview
+        </h2>
       </div>
 
       <div className="mt-3 grid gap-3 md:grid-cols-6">

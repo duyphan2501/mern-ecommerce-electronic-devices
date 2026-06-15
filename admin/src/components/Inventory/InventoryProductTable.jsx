@@ -30,6 +30,10 @@ import {
   statusMap,
 } from "../../utils/inventoryUtils";
 import ProductCell from "./ProductCell";
+import {
+  compactControlSx,
+  iconActionClass,
+} from "../../styles/adminControls";
 
 const headCells = [
   { id: "productName", label: "Product" },
@@ -106,7 +110,7 @@ const InventoryProductTable = ({
             setStatusFilter(event.target.value);
             setPage(0);
           }}
-          sx={{ minWidth: 170 }}
+          sx={{ minWidth: 170, ...compactControlSx }}
         >
           <MenuItem value="all">All statuses</MenuItem>
           <MenuItem value="in_stock">In stock</MenuItem>
@@ -114,18 +118,21 @@ const InventoryProductTable = ({
           <MenuItem value="out_of_stock">Out of stock</MenuItem>
         </TextField>
 
-        <Box className="border border-gray-300 rounded-xl h-10 flex items-center px-3 min-w-[320px]">
-          <IoSearch className="text-gray-400" />
-          <input
-            value={searchValue}
-            onChange={(event) => {
-              setSearchValue(event.target.value);
-              setPage(0);
-            }}
-            placeholder="Search product, model, brand"
-            className="ms-2 outline-0 w-full"
-          />
-        </Box>
+        <TextField
+          size="small"
+          value={searchValue}
+          onChange={(event) => {
+            setSearchValue(event.target.value);
+            setPage(0);
+          }}
+          placeholder="Search product, model, brand"
+          sx={{ minWidth: 320, ...compactControlSx }}
+          slotProps={{
+            input: {
+              startAdornment: <IoSearch className="mr-2 text-gray-400" />,
+            },
+          }}
+        />
       </Toolbar>
 
       <TableContainer className="rounded-md">
@@ -251,7 +258,7 @@ const InventoryProductTable = ({
                                       >
                                         <Tooltip title="Stock history">
                                           <IconButton
-                                            className="!border !border-gray-200 !rounded-md"
+                                            className={iconActionClass}
                                             onClick={() => onOpenHistory(model)}
                                           >
                                             <HistoryIcon fontSize="small" />
@@ -259,7 +266,7 @@ const InventoryProductTable = ({
                                         </Tooltip>
                                         <Tooltip title="Export products">
                                           <IconButton
-                                            className="!border !border-gray-200 !rounded-md"
+                                            className={iconActionClass}
                                             onClick={() => onOpenExport(model)}
                                           >
                                             <OutputIcon fontSize="small" />
