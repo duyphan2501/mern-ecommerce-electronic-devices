@@ -1,6 +1,6 @@
-const ServiceCard = ({ image, name }) => {
-  return (
-      <div className="shadow rounded overflow-hidden flex flex-col h-full">
+const ServiceCard = ({ image, name, link }) => {
+  const content = (
+    <div className="shadow rounded overflow-hidden flex flex-col h-full">
         <div className="w-full h-[240px] overflow-hidden">
           <img
             src={image}
@@ -12,6 +12,14 @@ const ServiceCard = ({ image, name }) => {
           {name}
         </p>
     </div>
+  );
+
+  return link ? (
+    <a href={link} className="block h-full">
+      {content}
+    </a>
+  ) : (
+    content
   );
 };
 

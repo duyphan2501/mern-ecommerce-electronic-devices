@@ -2,11 +2,13 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
+import { useEffect, useState } from "react";
 import ServiceCard from "./ServiceCard";
+import { API } from "../API/axiosInstance";
 import serviceImage1 from "/image/8b67d689-58c9-4ae3-b09f-be392f9a9bb7.jpg"
 import serviceImage2 from "/image/88c0fb88-77e5-4b51-871b-e130769da504.jpg"
 
-const services = [
+const defaultServices = [
   {
     image: serviceImage1,
     name: "Sửa chữa thiết bị điện",
@@ -30,6 +32,26 @@ const services = [
 ]
 
 const ServiceSlider = () => {
+  const [services, setServices] = useState(defaultServices);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    API.get("/api/services/public")
+      .then((response) => {
+        if (isMounted && response.data.services.length > 0) {
+          setServices(response.data.services);
+        }
+      })
+      .catch(() => {
+        // Keep the bundled defaults when the service API is unavailable.
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div>
       <div className="container bg-white">
@@ -48,8 +70,12 @@ const ServiceSlider = () => {
         >
           {services.map((service, index) => {
             return (
-              <SwiperSlide className="py-2" key={index}>
-                <ServiceCard image={service.image} name={service.name}/>
+              <SwiperSlide className="py-2" key={service._id || index}>
+                <ServiceCard
+                  image={service.image}
+                  name={service.name}
+                  link={service.link}
+                />
               </SwiperSlide>
             )
           })}

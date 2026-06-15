@@ -17,6 +17,7 @@ import { rebuildStockRedis } from "./service/stock.service.js";
 import errorHandler from "./middleware/error.middleware.js";
 import brandRouter from "./routes/brand.route.js";
 import slideRouter from "./routes/slide.route.js";
+import serviceRouter from "./routes/service.route.js";
 
 dotenv.config({ quiet: true });
 const app = express();
@@ -43,6 +44,7 @@ app.use("/api/order", orderRouter);
 app.use("/api/brand", brandRouter);
 app.use("/api/inventory", inventoryRouter);
 app.use("/api/slides", slideRouter);
+app.use("/api/services", serviceRouter);
 
 app.use(errorHandler);
 
