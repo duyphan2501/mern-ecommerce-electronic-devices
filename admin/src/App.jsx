@@ -17,6 +17,7 @@ import ServiceForm from "./Pages/Services/ServiceForm";
 import OrderDetail from "./Pages/Orders/OrderDetail";
 import ListBlogs from "./Pages/Blogs/ListBlogs";
 import BlogForm from "./Pages/Blogs/BlogForm";
+import CommonInformation from "./Pages/Settings/CommonInformation";
 function App() {
   return (
     <>
@@ -53,6 +54,10 @@ function App() {
               <Route path="/blogs" element={<ListBlogs />}></Route>
               <Route path="/blogs/add" element={<BlogForm />}></Route>
               <Route path="/blogs/edit/:id" element={<BlogForm />}></Route>
+              <Route
+                path="/settings/common-information"
+                element={<CommonInformation />}
+              ></Route>
               <Route
                 path="/products/create"
                 element={<CreateProduct />}

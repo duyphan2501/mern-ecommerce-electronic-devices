@@ -19,6 +19,7 @@ import brandRouter from "./routes/brand.route.js";
 import slideRouter from "./routes/slide.route.js";
 import serviceRouter from "./routes/service.route.js";
 import blogRouter from "./routes/blog.route.js";
+import settingRouter from "./routes/setting.route.js";
 
 dotenv.config({ quiet: true });
 const app = express();
@@ -47,6 +48,7 @@ app.use("/api/inventory", inventoryRouter);
 app.use("/api/slides", slideRouter);
 app.use("/api/services", serviceRouter);
 app.use("/api/blogs", blogRouter);
+app.use("/api/settings", settingRouter);
 
 app.use(errorHandler);
 
