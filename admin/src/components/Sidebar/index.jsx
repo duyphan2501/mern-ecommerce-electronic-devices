@@ -1,4 +1,5 @@
 import { RxDashboard } from "react-icons/rx";
+import { BsJournalText } from "react-icons/bs";
 import { TbSlideshow, TbBrandProducthunt } from "react-icons/tb";
 import { IoBagCheckOutline } from "react-icons/io5";
 import {
@@ -24,6 +25,16 @@ const navItems = [
     smallIcon: <MdMiscellaneousServices size={25} />,
     label: "Services",
     link: "/services",
+  },
+  {
+    icon: <BsJournalText size={20} />,
+    smallIcon: <BsJournalText size={25} />,
+    label: "Blogs",
+    link: "/blogs",
+    navItems: [
+      { label: "All Blogs", link: "/blogs" },
+      { label: "Add Blog", link: "/blogs/add" },
+    ],
   },
   {
     icon: <TbSlideshow size={20} />,

@@ -15,6 +15,8 @@ import SlideForm from "./Pages/Slides/SlideForm";
 import ListServices from "./Pages/Services/ListServices";
 import ServiceForm from "./Pages/Services/ServiceForm";
 import OrderDetail from "./Pages/Orders/OrderDetail";
+import ListBlogs from "./Pages/Blogs/ListBlogs";
+import BlogForm from "./Pages/Blogs/BlogForm";
 function App() {
   return (
     <>
@@ -48,6 +50,9 @@ function App() {
                 path="/services/edit/:id"
                 element={<ServiceForm />}
               ></Route>
+              <Route path="/blogs" element={<ListBlogs />}></Route>
+              <Route path="/blogs/add" element={<BlogForm />}></Route>
+              <Route path="/blogs/edit/:id" element={<BlogForm />}></Route>
               <Route
                 path="/products/create"
                 element={<CreateProduct />}
