@@ -14,6 +14,7 @@ import ListSlides from "./Pages/Slides/ListSlides";
 import SlideForm from "./Pages/Slides/SlideForm";
 import ListServices from "./Pages/Services/ListServices";
 import ServiceForm from "./Pages/Services/ServiceForm";
+import OrderDetail from "./Pages/Orders/OrderDetail";
 function App() {
   return (
     <>
@@ -28,6 +29,7 @@ function App() {
               <Route path="/inventory" element={<Inventory />}></Route>
               <Route path="/categories" element={<ListCategory />}></Route>
               <Route path="/orders" element={<Orders />}></Route>
+              <Route path="/orders/:id" element={<OrderDetail />}></Route>
               <Route
                 path="/home-slides/all"
                 element={<ListSlides />}

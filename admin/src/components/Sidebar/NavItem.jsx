@@ -3,7 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 
 const NavItem = ({ icon, label, link }) => {
   const location = useLocation();
-  const isActive = link === location.pathname;
+  const isActive =
+    link === location.pathname ||
+    (link !== "/" && location.pathname.startsWith(`${link}/`));
   return (
     <div className="relative px-5">
       <Button

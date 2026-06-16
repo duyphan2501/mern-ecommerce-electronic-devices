@@ -1,59 +1,63 @@
-import React, { PureComponent } from "react";
 import {
-  ComposedChart,
-  Line,
   Bar,
+  CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
 } from "recharts";
 import MySelect from "../MySelect";
 import CustomTooltip from "./CustomTooptip";
 
-const data = [
-  { name: "Jan", Revenue: 590, Expense: 809, amt: 1400 },
-  { name: "Feb", Revenue: 868, Expense: 967, amt: 1506 },
-  { name: "Mar", Revenue: 1397, Expense: 1098, amt: 989 },
-  { name: "Apr", Revenue: 1480, Expense: 1280, amt: 1228 },
-  { name: "May", Revenue: 1520, Expense: 1188, amt: 1100 },
-  { name: "Jun", Revenue: 1400, Expense: 1880, amt: 1700 },
-  { name: "Jul", Revenue: 1350, Expense: 750, amt: 1600 },
-  { name: "Aug", Revenue: 1450, Expense: 1450, amt: 1750 },
-  { name: "Sep", Revenue: 1500, Expense: 1500, amt: 1680 },
-  { name: "Oct", Revenue: 1580, Expense: 860, amt: 1720 },
-  { name: "Nov", Revenue: 1620, Expense: 900, amt: 1800 },
-  { name: "Dec", Revenue: 1700, Expense: 950, amt: 1900 },
-];
+const chartOptions = ["Daily", "Monthly", "Annually"];
 
-const processedData = data.map((item) => ({
-  ...item,
-  Revenue_line: item.Revenue,
-}));
+const SalesChart = ({ data = [], granularity = "Daily", onGranularityChange }) => {
+  const processedData = data.map((item) => ({
+    ...item,
+    Revenue: item.revenue,
+    Expense: item.expense,
+    Revenue_line: item.revenue,
+  }));
 
-const chartOptions = ["Monthly", "Weekly", "Annually"];
-
-export default class Example extends PureComponent {
-  render() {
-    return (
-      <>
-        <div className="flex justify-between items-center mb-5">
-          <h2 className="font-bold text-xl">Sales Report</h2>
-          <div className="">
-            <MySelect selectItems={chartOptions} />
-          </div>
+  return (
+    <>
+      <div className="mb-5 flex items-center justify-between">
+        <h2 className="text-xl font-bold">Sales Report</h2>
+        <div>
+          <MySelect
+            selectItems={chartOptions}
+            value={granularity}
+            onChange={onGranularityChange}
+          />
         </div>
+      </div>
+
+      {processedData.length === 0 ? (
+        <div className="flex h-[500px] items-center justify-center text-gray-500">
+          No sales data in this period.
+        </div>
+      ) : (
         <ResponsiveContainer width="100%" height={500}>
           <ComposedChart
             data={processedData}
-            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+            margin={{ top: 20, right: 20, bottom: 20, left: 10 }}
           >
-            <CartesianGrid strokeDasharray="10 10" vertical={false} stroke="#e0e0e0"/>
-            <XAxis dataKey="name" axisLine={false} tickLine={false}/>
-            <YAxis tickFormatter={(value) => `${value.toLocaleString()} VNĐ`} tickLine={false} axisLine={false}/>
-           <Tooltip content={<CustomTooltip />} />
+            <CartesianGrid
+              strokeDasharray="10 10"
+              vertical={false}
+              stroke="#e0e0e0"
+            />
+            <XAxis dataKey="date" axisLine={false} tickLine={false} />
+            <YAxis
+              tickFormatter={(value) => `${value.toLocaleString()} VND`}
+              tickLine={false}
+              axisLine={false}
+              width={120}
+            />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar
               dataKey="Revenue"
@@ -74,11 +78,13 @@ export default class Example extends PureComponent {
               stroke="#ff7300"
               dot={false}
               strokeWidth={3}
-              legendType="none" // (tuỳ chọn) ẩn trong chú thích
+              legendType="none"
             />
           </ComposedChart>
         </ResponsiveContainer>
-      </>
-    );
-  }
-}
+      )}
+    </>
+  );
+};
+
+export default SalesChart;

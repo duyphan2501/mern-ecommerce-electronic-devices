@@ -14,7 +14,6 @@ const formatDateTime = (timestamp) => {
   const year = date.getFullYear();
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
-  console.log(`${day}/${month}/${year} ${hours}:${minutes}`); 
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
 

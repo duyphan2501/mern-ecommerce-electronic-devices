@@ -10,18 +10,14 @@ import { useEffect, useState } from "react";
 import useOrderStore from "../../store/orderStore";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import OrderTable from "../../components/OrderTable";
-import OrderDetailModal from "../../components/OrderDetailModal";
 import AdminPageHeader from "../../components/AdminPageHeader";
 
 const Orders = () => {
   const orders = useOrderStore((s) => s.orders);
-  const orderDetail = useOrderStore((s) => s.orderDetail);
   const pagination = useOrderStore((s) => s.pagination);
   const statusCounts = useOrderStore((s) => s.statusCounts);
-  const { getOrders, getOrderById, setOrderDetail, isLoading } =
-    useOrderStore();
+  const { getOrders, isLoading } = useOrderStore();
   const axiosPrivate = useAxiosPrivate();
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: "all",
     search: "",
@@ -32,16 +28,6 @@ const Orders = () => {
   useEffect(() => {
     getOrders(axiosPrivate, filters);
   }, [axiosPrivate, filters, getOrders]);
-
-  const handleOpenOrder = async (id) => {
-    const detail = await getOrderById(axiosPrivate, id);
-    if (detail) setIsDetailOpen(true);
-  };
-
-  const handleCloseOrder = () => {
-    setIsDetailOpen(false);
-    setOrderDetail(null);
-  };
 
   const updateFilters = (nextFilters) => {
     setFilters((currentFilters) => ({
@@ -58,12 +44,6 @@ const Orders = () => {
 
   return (
     <Paper sx={{ padding: "20px" }} elevation={2} className="!m-5 !rounded-xl">
-      <OrderDetailModal
-        open={isDetailOpen}
-        order={orderDetail}
-        onClose={handleCloseOrder}
-      />
-
       <AdminPageHeader
         title="Orders"
         description="Track fulfillment progress, payments, and customer orders."
@@ -117,7 +97,6 @@ const Orders = () => {
       <section className="mt-5">
         <OrderTable
           orders={orders}
-          onOpenOrder={handleOpenOrder}
           pagination={pagination}
           searchValue={filters.search}
           onSearchChange={(search) => updateFilters({ search, page: 0 })}

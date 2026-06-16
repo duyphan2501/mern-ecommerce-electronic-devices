@@ -15,6 +15,19 @@ import {
   restockOrderItems,
   updateAdminOrderStatusService,
 } from "../service/order.service.js";
+import { getDashboardService } from "../service/dashboard.service.js";
+
+const getAdminDashboard = async (req, res) => {
+  try {
+    const dashboard = await getDashboardService(req.query);
+    return res.status(200).json({ dashboard, success: true });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || error,
+      success: false,
+    });
+  }
+};
 
 const createOrder = async (req, res) => {
   try {
@@ -385,6 +398,7 @@ const reOrder = async (req, res) => {
 };
 
 export {
+  getAdminDashboard,
   getAllOrders,
   getAdminOrders,
   getAdminOrderById,

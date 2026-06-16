@@ -26,6 +26,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { IoChevronDown, IoChevronForward } from "react-icons/io5";
 import { formatDateTime } from "../../utils/DateFormat";
 import formatMoney from "../../utils/MoneyFormat";
+import { Link } from "react-router-dom";
 import {
   compactControlSx,
   compactSecondaryActionClass,
@@ -69,7 +70,6 @@ const eventLabel = (event) => {
 
 export default function OrderTable({
   orders,
-  onOpenOrder,
   pagination = {},
   searchValue,
   onSearchChange,
@@ -206,7 +206,14 @@ export default function OrderTable({
                         )}
                       </IconButton>
                     </TableCell>
-                    <TableCell>{item.orderId}</TableCell>
+                    <TableCell>
+                      <Link
+                        to={`/orders/${item._id}`}
+                        className="font-semibold text-blue-600 hover:text-blue-700"
+                      >
+                        {item.orderId}
+                      </Link>
+                    </TableCell>
                     <TableCell>{formatDateTime(item.createdAt)}</TableCell>
                     <TableCell>{item.shippingInfo?.receiver || "-"}</TableCell>
                     <TableCell>{item.shippingInfo?.phone || "-"}</TableCell>
@@ -234,7 +241,8 @@ export default function OrderTable({
                       <Button
                         variant="outlined"
                         className={compactSecondaryActionClass}
-                        onClick={() => onOpenOrder(item._id)}
+                        component={Link}
+                        to={`/orders/${item._id}`}
                       >
                         Details
                       </Button>

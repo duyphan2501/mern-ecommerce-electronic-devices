@@ -6,6 +6,7 @@ import {
   createOrder,
   editAdminOrder,
   getAdminOrderById,
+  getAdminDashboard,
   getAdminOrders,
   getAllOrders,
   getOrderById,
@@ -24,6 +25,12 @@ import checkAuth from "../middleware/auth.middleware.js";
 const orderRouter = express.Router();
 
 orderRouter.get("/admin", checkAuth, checkAdmin, getAdminOrders);
+orderRouter.get(
+  "/admin/dashboard/summary",
+  checkAuth,
+  checkAdmin,
+  getAdminDashboard,
+);
 orderRouter.get("/admin/:id", checkAuth, checkAdmin, getAdminOrderById);
 orderRouter.put("/admin/:id/status", checkAuth, checkAdmin, updateAdminOrderStatus);
 orderRouter.put("/admin/:id/edit", checkAuth, checkAdmin, editAdminOrder);

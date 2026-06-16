@@ -1,33 +1,31 @@
-import { Rating, Stack } from "@mui/material"
+import formatMoney from "../../utils/MoneyFormat";
 
-const TopProductItem = ({product}) => {
-  return (
-    <div className="py-3 flex justify-between items-center">
-        <div className="flex-1">
-            <div className="flex gap-2  ">
-                <div className="size-[50px] rounded-md bg-gray-300 overflow-hidden border border-gray-200">
-                    <img src={product.image} alt={product.name} className="size-full object-contain"/>
-                </div>
-                <div className="flex flex-col">
-                    <p className=" font-bold line-clamp-1">{product.name}</p>
-                    <p className="text-gray-500">Sold: {product.sold}</p>
-                </div>
-            </div>
+const TopProductItem = ({ product }) => (
+  <div className="flex items-center justify-between border-b border-gray-100 py-3 last:border-0">
+    <div className="min-w-0 flex-1">
+      <div className="flex gap-2">
+        <div className="size-[50px] shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-50">
+          {product.image && (
+            <img
+              src={product.image}
+              alt={product.name}
+              className="size-full object-contain"
+            />
+          )}
         </div>
-        <div className="flex flex-col items-end">
-            <Stack spacing={1}>
-              <Rating
-                size="small"
-                name="half-rating"
-                defaultValue={product.rating}
-                precision={0.5}
-                readOnly
-              />
-            </Stack>
-            <p className="text-gray-500 text-center">{product.reviews} reviews</p>
+        <div className="min-w-0">
+          <p className="line-clamp-1 font-bold">{product.name}</p>
+          <p className="text-gray-500">Sold: {product.sold}</p>
         </div>
+      </div>
     </div>
-  )
-}
+    <div className="ml-3 flex flex-col items-end text-sm">
+      <p className="font-semibold text-gray-800">
+        {formatMoney(product.revenue)}
+      </p>
+      <p className="text-gray-500">revenue</p>
+    </div>
+  </div>
+);
 
-export default TopProductItem
+export default TopProductItem;

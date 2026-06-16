@@ -1,10 +1,12 @@
 import { MenuItem, Select } from "@mui/material";
 import { useState } from "react";
 
-const MySelect = ({ selectItems }) => {
-  const [value, setValue] = useState(selectItems[0]);
+const MySelect = ({ selectItems, value: controlledValue, onChange }) => {
+  const [internalValue, setInternalValue] = useState(selectItems[0]);
+  const value = controlledValue || internalValue;
   const handleChange = (e) => {
-    setValue(e.target.value);
+    setInternalValue(e.target.value);
+    onChange?.(e.target.value);
   };
   return (
     <Select

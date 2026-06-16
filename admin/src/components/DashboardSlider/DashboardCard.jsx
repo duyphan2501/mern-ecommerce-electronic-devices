@@ -1,53 +1,53 @@
 import { Paper } from "@mui/material";
 import {
-  MdKeyboardDoubleArrowUp,
   MdKeyboardDoubleArrowDown,
+  MdKeyboardDoubleArrowUp,
 } from "react-icons/md";
+import formatMoney from "../../utils/MoneyFormat";
 
 const DashboardCard = ({
   icon,
   label,
-  number = -1,
-  price = -1,
+  number,
+  price,
   chartIcon,
-  gapLastmonth,
+  gapLastmonth = 0,
 }) => {
-  const getProp = () => {
-    return gapLastmonth < 0
+  const trend =
+    gapLastmonth < 0
       ? {
           color: "text-red-600",
           icon: <MdKeyboardDoubleArrowDown />,
-          label: "Decreased last month",
         }
       : {
           color: "text-green-600",
           icon: <MdKeyboardDoubleArrowUp />,
-          label: "Increased last month",
         };
-  };
+
   return (
-    <Paper sx={{width:"100%", my:"1px"}} elevation={2}>
-      <div className="p-5  z-0">
-        <div className="flex justify-between items-center pb-4 border-dashed border-b border-gray-300">
+    <Paper sx={{ width: "100%", my: "1px" }} elevation={2}>
+      <div className="p-5">
+        <div className="flex items-center justify-between border-b border-dashed border-gray-300 pb-4">
           <div className="flex items-center gap-2">
             {icon}
             <div className="flex flex-col">
-              <p className=" font-light">{label}</p>
-              <p className="font-bold text-lg text-black">
-                {number != -1
+              <p className="font-light">{label}</p>
+              <p className="text-lg font-bold text-black">
+                {number !== undefined
                   ? number.toLocaleString()
-                  : price.toLocaleString() + " VNĐ"}
+                  : formatMoney(price || 0)}
               </p>
             </div>
           </div>
-          <div className="">{chartIcon}</div>
+          {chartIcon}
         </div>
-        <div className="flex items-center gap-2 pt-2">
-          <span className={`${getProp().color} flex items-center`}>
-            {getProp().icon}{" "}
-            {gapLastmonth < 0 ? gapLastmonth : "+" + gapLastmonth}%
+        <div className="flex items-center gap-2 pt-2 text-sm">
+          <span className={`${trend.color} flex items-center`}>
+            {trend.icon}
+            {gapLastmonth > 0 ? "+" : ""}
+            {gapLastmonth}%
           </span>
-          <p className="text-gray-500 font-light">{getProp().label}</p>
+          <p className="font-light text-gray-500">vs previous period</p>
         </div>
       </div>
     </Paper>
