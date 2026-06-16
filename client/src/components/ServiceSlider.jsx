@@ -39,7 +39,7 @@ const ServiceSlider = () => {
 
     API.get("/api/services/public")
       .then((response) => {
-        if (isMounted && response.data.services.length > 0) {
+        if (isMounted && Array.isArray(response.data.services) && response.data.services.length > 0) {
           setServices(response.data.services);
         }
       })

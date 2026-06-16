@@ -3,7 +3,7 @@ import { useState } from "react";
 
 const MySelect = ({ selectItems, value: controlledValue, onChange }) => {
   const [internalValue, setInternalValue] = useState(selectItems[0]);
-  const value = controlledValue || internalValue;
+  const value = controlledValue !== undefined ? controlledValue : internalValue;
   const handleChange = (e) => {
     setInternalValue(e.target.value);
     onChange?.(e.target.value);

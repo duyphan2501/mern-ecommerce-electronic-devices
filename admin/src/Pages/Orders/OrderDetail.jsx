@@ -31,6 +31,7 @@ import {
 } from "../../styles/adminControls";
 import { formatDateTime } from "../../utils/DateFormat";
 import formatMoney from "../../utils/MoneyFormat";
+import toast from "react-hot-toast";
 
 const STATUS_LABELS = {
   pending: "Pending Confirmation",
@@ -69,7 +70,9 @@ const DetailSection = ({ children, description, title }) => (
   <Paper elevation={2} className="!rounded-xl !p-5">
     <div className="mb-4">
       <h2 className="text-lg font-bold text-slate-800">{title}</h2>
-      {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
+      {description && (
+        <p className="mt-1 text-sm text-slate-500">{description}</p>
+      )}
     </div>
     {children}
   </Paper>
@@ -144,7 +147,8 @@ export default function OrderDetail() {
   const editedTotal = useMemo(
     () =>
       items.reduce(
-        (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0),
+        (sum, item) =>
+          sum + Number(item.price || 0) * Number(item.quantity || 0),
         0,
       ),
     [items],
@@ -160,7 +164,9 @@ export default function OrderDetail() {
 
   const removeItem = (index) => {
     if (items.length <= 1) return;
-    setItems((current) => current.filter((_, itemIndex) => itemIndex !== index));
+    setItems((current) =>
+      current.filter((_, itemIndex) => itemIndex !== index),
+    );
   };
 
   const saveEdits = async () => {
@@ -189,6 +195,22 @@ export default function OrderDetail() {
       }));
 
     if (selectedItems.length === 0) return;
+
+    // Validate that requested quantities don't exceed purchased quantities
+    const invalidItem = selectedItems.find((selectedItem) => {
+      const orderItem = order.items.find(
+        (item) => item.modelId === selectedItem.modelId,
+      );
+      return !orderItem || selectedItem.requestedQty > orderItem.quantity;
+    });
+
+    if (invalidItem) {
+      toast.error(
+        "Requested return quantity exceeds purchased quantity for one or more items.",
+      );
+      return;
+    }
+
     await createRma(axiosPrivate, order._id, {
       items: selectedItems,
       reason: rmaReason,
@@ -199,7 +221,8 @@ export default function OrderDetail() {
     const payloadItems = rma.items.map((item) => ({
       modelId: item.modelId,
       receivedQty: Number(
-        rmaAssessment[rma._id]?.[item.modelId]?.receivedQty ?? item.requestedQty,
+        rmaAssessment[rma._id]?.[item.modelId]?.receivedQty ??
+          item.requestedQty,
       ),
       condition:
         rmaAssessment[rma._id]?.[item.modelId]?.condition ||
@@ -286,7 +309,11 @@ export default function OrderDetail() {
                   disabled={isLoading}
                   onClick={saveEdits}
                 >
-                  {isLoading ? <CircularProgress size={20} color="inherit" /> : "Save changes"}
+                  {isLoading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    "Save changes"
+                  )}
                 </Button>
               )}
             </>
@@ -365,7 +392,10 @@ export default function OrderDetail() {
             </div>
           </DetailSection>
 
-          <DetailSection title="Items" description="Products included in this order.">
+          <DetailSection
+            title="Items"
+            description="Products included in this order."
+          >
             <TableContainer className="rounded-md border border-gray-100">
               <Table sx={{ "& .MuiTableCell-root": { py: 1.5 } }}>
                 <TableHead className="bg-gray-100">
@@ -392,14 +422,18 @@ export default function OrderDetail() {
                               />
                             )}
                           </div>
-                          <span className="font-semibold text-slate-800">{item.name}</span>
+                          <span className="font-semibold text-slate-800">
+                            {item.name}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <TextField
                           value={item.modelId}
                           disabled={!canEdit}
-                          onChange={(e) => updateItem(index, "modelId", e.target.value)}
+                          onChange={(e) =>
+                            updateItem(index, "modelId", e.target.value)
+                          }
                           sx={{ minWidth: 180, ...compactControlSx }}
                         />
                       </TableCell>
@@ -409,13 +443,19 @@ export default function OrderDetail() {
                           value={item.quantity}
                           disabled={!canEdit}
                           inputProps={{ min: 1 }}
-                          onChange={(e) => updateItem(index, "quantity", e.target.value)}
+                          onChange={(e) =>
+                            updateItem(index, "quantity", e.target.value)
+                          }
                           sx={{ width: 96, ...compactControlSx }}
                         />
                       </TableCell>
-                      <TableCell align="right">{formatMoney(item.price)}</TableCell>
+                      <TableCell align="right">
+                        {formatMoney(item.price)}
+                      </TableCell>
                       <TableCell align="right" className="!font-semibold">
-                        {formatMoney(Number(item.price || 0) * Number(item.quantity || 0))}
+                        {formatMoney(
+                          Number(item.price || 0) * Number(item.quantity || 0),
+                        )}
                       </TableCell>
                       <TableCell align="right">
                         <Button
@@ -472,7 +512,10 @@ export default function OrderDetail() {
                       inputProps={{ min: 0, max: item.quantity }}
                       value={rmaItems[item.modelId] || ""}
                       onChange={(e) =>
-                        setRmaItems({ ...rmaItems, [item.modelId]: e.target.value })
+                        setRmaItems({
+                          ...rmaItems,
+                          [item.modelId]: e.target.value,
+                        })
                       }
                       sx={compactControlSx}
                     />
@@ -493,17 +536,26 @@ export default function OrderDetail() {
             <DetailSection title="RMA history">
               <div className="grid gap-4">
                 {order.returns.map((rma) => (
-                  <div key={rma._id} className="rounded-xl border border-gray-200 p-4">
+                  <div
+                    key={rma._id}
+                    className="rounded-xl border border-gray-200 p-4"
+                  >
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                       <Chip label={`RMA: ${rma.status}`} size="small" />
-                      <Chip label={`Refund: ${rma.refundStatus}`} size="small" />
+                      <Chip
+                        label={`Refund: ${rma.refundStatus}`}
+                        size="small"
+                      />
                     </div>
                     <Typography variant="body2" className="!text-slate-600">
                       Reason: {rma.reason || "-"}
                     </Typography>
                     <div className="mt-3 grid gap-3">
                       {rma.items.map((item) => (
-                        <div key={item.modelId} className="grid gap-3 md:grid-cols-4">
+                        <div
+                          key={item.modelId}
+                          className="grid gap-3 md:grid-cols-4"
+                        >
                           <Typography className="!font-semibold !text-slate-800">
                             {item.name}
                           </Typography>
@@ -512,24 +564,36 @@ export default function OrderDetail() {
                             label="Received qty"
                             disabled={rma.status !== "received"}
                             value={
-                              rmaAssessment[rma._id]?.[item.modelId]?.receivedQty ??
+                              rmaAssessment[rma._id]?.[item.modelId]
+                                ?.receivedQty ??
                               item.receivedQty ??
                               item.requestedQty
                             }
                             onChange={(e) =>
-                              setAssessment(rma._id, item.modelId, "receivedQty", e.target.value)
+                              setAssessment(
+                                rma._id,
+                                item.modelId,
+                                "receivedQty",
+                                e.target.value,
+                              )
                             }
                             sx={compactControlSx}
                           />
                           <Select
                             disabled={rma.status !== "received"}
                             value={
-                              rmaAssessment[rma._id]?.[item.modelId]?.condition ||
+                              rmaAssessment[rma._id]?.[item.modelId]
+                                ?.condition ||
                               item.condition ||
                               "new"
                             }
                             onChange={(e) =>
-                              setAssessment(rma._id, item.modelId, "condition", e.target.value)
+                              setAssessment(
+                                rma._id,
+                                item.modelId,
+                                "condition",
+                                e.target.value,
+                              )
                             }
                             sx={compactControlSx}
                           >
@@ -547,7 +611,9 @@ export default function OrderDetail() {
                         <Button
                           variant="outlined"
                           className={compactSecondaryActionClass}
-                          onClick={() => receiveRma(axiosPrivate, order._id, rma._id, {})}
+                          onClick={() =>
+                            receiveRma(axiosPrivate, order._id, rma._id, {})
+                          }
                         >
                           Receive
                         </Button>
@@ -565,7 +631,9 @@ export default function OrderDetail() {
                         <Button
                           variant="outlined"
                           className={compactSecondaryActionClass}
-                          onClick={() => matchRmaQuantity(axiosPrivate, order._id, rma._id)}
+                          onClick={() =>
+                            matchRmaQuantity(axiosPrivate, order._id, rma._id)
+                          }
                         >
                           Match quantity
                         </Button>
@@ -574,7 +642,9 @@ export default function OrderDetail() {
                         <Button
                           variant="contained"
                           className={compactPrimaryActionClass}
-                          onClick={() => refundRma(axiosPrivate, order._id, rma._id)}
+                          onClick={() =>
+                            refundRma(axiosPrivate, order._id, rma._id)
+                          }
                         >
                           Refund
                         </Button>
@@ -601,14 +671,24 @@ export default function OrderDetail() {
                 color={order.payment?.status === "paid" ? "success" : "default"}
               />
               {order.refund?.status && order.refund.status !== "none" && (
-                <Chip label={`Refund: ${order.refund.status}`} size="small" color="warning" />
+                <Chip
+                  label={`Refund: ${order.refund.status}`}
+                  size="small"
+                  color="warning"
+                />
               )}
             </div>
             <div className="grid gap-4">
               <InfoLine label="Customer email" value={order.email} />
-              <InfoLine label="Payment provider" value={order.payment?.provider} />
+              <InfoLine
+                label="Payment provider"
+                value={order.payment?.provider}
+              />
               <InfoLine label="Payment status" value={order.payment?.status} />
-              <InfoLine label="Refund status" value={order.refund?.status || "none"} />
+              <InfoLine
+                label="Refund status"
+                value={order.refund?.status || "none"}
+              />
               <InfoLine label="Carrier" value={order.shipment?.carrier} />
               <InfoLine label="Tracking" value={order.shipment?.trackingCode} />
             </div>
@@ -654,7 +734,9 @@ export default function OrderDetail() {
                       />
                     )}
                     <Button
-                      variant={status === "cancelled" ? "outlined" : "contained"}
+                      variant={
+                        status === "cancelled" ? "outlined" : "contained"
+                      }
                       color={status === "cancelled" ? "error" : "primary"}
                       className={
                         status === "cancelled"

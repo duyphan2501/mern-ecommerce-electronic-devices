@@ -12,7 +12,7 @@ export default function DateToDatePicker({ fromDate, toDate, onChange }) {
         toDate: dayjs(),
       });
     }
-  }, [fromDate, onChange, toDate]);
+  }, [fromDate, toDate]);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>

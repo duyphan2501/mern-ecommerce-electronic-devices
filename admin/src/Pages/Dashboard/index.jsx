@@ -30,11 +30,19 @@ const Dashboard = () => {
   const handleRangeChange = useCallback((nextRange) => setRange(nextRange), []);
 
   useEffect(() => {
-    getDashboard(axiosPrivate, {
-      startDate: range.fromDate.format("YYYY-MM-DD"),
-      endDate: range.toDate.format("YYYY-MM-DD"),
-      granularity: GRANULARITY_PARAMS[chartGranularity],
-    });
+    const controller = new AbortController();
+
+    getDashboard(
+      axiosPrivate,
+      {
+        startDate: range.fromDate.format("YYYY-MM-DD"),
+        endDate: range.toDate.format("YYYY-MM-DD"),
+        granularity: GRANULARITY_PARAMS[chartGranularity],
+      },
+      controller.signal,
+    );
+
+    return () => controller.abort();
   }, [axiosPrivate, chartGranularity, getDashboard, range]);
 
   const showInitialLoading = isLoading && !dashboard.sales.length;

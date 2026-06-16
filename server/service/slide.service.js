@@ -12,7 +12,7 @@ const createHttpError = (statusCode, message) =>
 
 const normalizeSlidePayload = (payload) => ({
   name: payload.name?.trim(),
-  type: payload.type,
+  type: payload.type?.trim(),
   image: payload.image?.trim(),
   mobileImage: payload.mobileImage?.trim() || "",
   title: payload.title?.trim() || "",

@@ -44,7 +44,7 @@ const ServiceForm = () => {
 
     const loadService = async () => {
       if (!id) {
-        setService(defaultService);
+        setService({ ...defaultService });
         return;
       }
 

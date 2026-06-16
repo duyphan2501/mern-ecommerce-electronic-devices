@@ -14,15 +14,18 @@ const useDashboardStore = create((set) => ({
   isLoading: false,
   error: null,
 
-  getDashboard: async (axiosPrivate, params) => {
+  getDashboard: async (axiosPrivate, params, signal) => {
     set({ isLoading: true, error: null });
     try {
       const response = await axiosPrivate.get(
         "/api/order/admin/dashboard/summary",
-        { params },
+        { params, signal },
       );
       set({ dashboard: response.data?.dashboard || emptyDashboard });
     } catch (error) {
+      if (error?.code === "ERR_CANCELED" || error?.name === "CanceledError") {
+        return;
+      }
       const message =
         error.response?.data?.message || "Unable to load dashboard data";
       set({ error: message });
