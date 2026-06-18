@@ -1,5 +1,16 @@
 import { create } from "zustand";
 import { API } from "../API/axiosInstance";
+
+const initialProductLoading = {
+  getAllProducts: false,
+  getProductBySlug: false,
+  fetchProducts: false,
+  getProductByCategoryId: false,
+  getProductsByCategoryIds: false,
+  getNewProducts: false,
+  searchProducts: false,
+};
+
 const cleanParams = (params) => {
   const cleaned = {};
   for (const key in params) {
@@ -16,9 +27,24 @@ const cleanParams = (params) => {
 };
 
 const useProductStore = create((get, set) => {
-  const setLoading = (isLoading) => set({ isLoading });
+  const setProductLoading = (key, value) => {
+    set((state) => {
+      const productLoading = {
+        ...state.productLoading,
+        [key]: value,
+      };
+
+      return {
+        productLoading,
+        isLoading: Object.values(productLoading).some(Boolean),
+      };
+    });
+  };
+
+  const setLoading = (isLoading) => setProductLoading("fetchProducts", isLoading);
+
   const getAllProducts = async () => {
-    set({ isLoading: true });
+    setProductLoading("getAllProducts", true);
     try {
       const url = `/api/product/all`;
       const res = await API.get(url);
@@ -26,12 +52,12 @@ const useProductStore = create((get, set) => {
     } catch (error) {
       console.error(error.response?.data?.message || "Get all product error");
     } finally {
-      set({ isLoading: false });
+      setProductLoading("getAllProducts", false);
     }
   };
 
   const getProductBySlug = async (slug) => {
-    set({ isLoading: true });
+    setProductLoading("getProductBySlug", true);
     try {
       const url = `/api/product/get/${slug}`;
       const res = await API.get(url);
@@ -39,7 +65,7 @@ const useProductStore = create((get, set) => {
     } catch (error) {
       console.error(error.response?.data?.message || "Get product error");
     } finally {
-      set({ isLoading: false });
+      setProductLoading("getProductBySlug", false);
     }
   };
 
@@ -49,7 +75,7 @@ const useProductStore = create((get, set) => {
     sortOption,
     filterParams,
   ) => {
-    set({ isLoading: true });
+    setProductLoading("fetchProducts", true);
     try {
       const params = new URLSearchParams(
         cleanParams({
@@ -83,12 +109,12 @@ const useProductStore = create((get, set) => {
       console.error(error.response?.data?.message || "Get product error");
       return { products: [], totalPages: 0 };
     } finally {
-      set({ isLoading: false });
+      setProductLoading("fetchProducts", false);
     }
   };
 
   const getProductByCategoryId = async (cateId) => {
-    set({ isLoading: true });
+    setProductLoading("getProductByCategoryId", true);
     try {
       const url = `/api/product/category/${cateId}`;
       const res = await API.get(url);
@@ -96,12 +122,12 @@ const useProductStore = create((get, set) => {
     } catch (error) {
       console.error(error.response?.data?.message || "Get product error");
     } finally {
-      set({ isLoading: false });
+      setProductLoading("getProductByCategoryId", false);
     }
   };
 
   const getProductsByCategoryIds = async (cateIds) => {
-    set({ isLoading: true });
+    setProductLoading("getProductsByCategoryIds", true);
     try {
       const url = `/api/product/categoryIds`;
       const res = await API.get(url, {
@@ -113,12 +139,12 @@ const useProductStore = create((get, set) => {
     } catch (error) {
       console.error(error.response?.data?.message || "Get product error");
     } finally {
-      set({ isLoading: false });
+      setProductLoading("getProductsByCategoryIds", false);
     }
   };
 
   const getNewProducts = async () => {
-    set({ isLoading: true });
+    setProductLoading("getNewProducts", true);
     try {
       const url = `/api/product/new`;
       const res = await API.get(url);
@@ -127,10 +153,11 @@ const useProductStore = create((get, set) => {
     } catch (error) {
       console.error(error.response?.data?.message || "Get product error");
     } finally {
-      set({ isLoading: false });
+      setProductLoading("getNewProducts", false);
     }
   };
   const searchProducts = async (searchTerm) => {
+    setProductLoading("searchProducts", true);
     try {
       const url = `/api/product/search?q=${encodeURIComponent(searchTerm)}`;
       const res = await API.get(url);
@@ -138,13 +165,17 @@ const useProductStore = create((get, set) => {
     } catch (error) {
       console.error(error.response?.data?.message || "Search product error");
       return [];
+    } finally {
+      setProductLoading("searchProducts", false);
     }
   };
 
   return {
     isLoading: false,
+    productLoading: initialProductLoading,
     newProducts: [],
     setLoading,
+    setProductLoading,
     getAllProducts,
     getProductBySlug,
     getProductByCategoryId,
