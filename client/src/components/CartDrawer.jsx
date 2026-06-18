@@ -100,6 +100,7 @@ const CartDrawer = () => {
         anchor={"right"}
         ModalProps={{
           keepMounted: true,
+          disableScrollLock: true,
         }}
         slotProps={{
           backdrop: {

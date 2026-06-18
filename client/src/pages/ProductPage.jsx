@@ -19,14 +19,17 @@ const ProductPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { fetchProducts, isLoading, setLoading } = useProductStore();
+  const { fetchProducts, productLoading } = useProductStore();
   const { categoryList } = useCategoryStore();
   const { brandList } = useBrandStore();
 
   const [products, setProducts] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [hasLoadedProducts, setHasLoadedProducts] = useState(false);
   const [openSort, setOpenSort] = useState(false);
   const sortRef = useRef(null);
+  const isProductsLoading =
+    !hasLoadedProducts || productLoading.fetchProducts;
 
   // 1. Lấy params từ URL
   const currentPage = Number(searchParams.get("page")) || 1;
@@ -47,7 +50,7 @@ const ProductPage = () => {
       };
 
     const decoded = decodeURIComponent(slug || "all_all");
-    const [brandPart, categoryPart] = decoded.split("_" || "all_all");
+    const [brandPart, categoryPart] = decoded.split("_");
 
     const brandSlugs =
       brandPart === "all" || brandPart === undefined
@@ -82,22 +85,30 @@ const ProductPage = () => {
 
   // 3. Fetch Data
   useEffect(() => {
+    let ignore = false;
+
     const fetchAPI = async () => {
-      setLoading(true);
+      setHasLoadedProducts(false);
       const res = await fetchProducts(
         currentPage,
         8,
         sortBy.value,
         debouncedFilter,
       );
-      if (res) {
-        setProducts(res.products);
-        setTotalPages(res.totalPages);
+      if (res && !ignore) {
+        setProducts(res.products || []);
+        setTotalPages(res.totalPages || 1);
       }
-      setLoading(false);
+      if (!ignore) {
+        setHasLoadedProducts(true);
+      }
     };
     if (categoryList.length > 0) fetchAPI();
-  }, [currentPage, sortBy.value, debouncedFilter, categoryList]);
+
+    return () => {
+      ignore = true;
+    };
+  }, [currentPage, sortBy.value, debouncedFilter, categoryList, fetchProducts]);
 
   // 4. Xử lý thay đổi filter từ Sidebar (Chuyển thành thay đổi URL)
   const handleChangeFilter = (field, value) => {
@@ -240,7 +251,7 @@ const ProductPage = () => {
             <div className="rounded bg-gray-100 flex justify-between items-center p-2">
               <div className="flex items-center">
                 <span className="ml-2 text-[15px]">
-                  Có {isLoading ? "0" : products?.length} sản phẩm
+                  Có {isProductsLoading ? "0" : products?.length} sản phẩm
                 </span>
               </div>
               <div className="flex items-center gap-1">
@@ -275,7 +286,10 @@ const ProductPage = () => {
             </div>
           </div>
           <div className="my-4">
-            <ProductGridView products={products} isLoading={isLoading} />
+            <ProductGridView
+              products={products}
+              isLoading={isProductsLoading}
+            />
           </div>
           <div className="flex justify-center items-center my-6">
             <Stack spacing={2}>
