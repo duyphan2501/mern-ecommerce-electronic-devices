@@ -19,7 +19,6 @@ const PersistentLogin = () => {
         await refreshToken();
       } catch (error) {
         if (isMounted) {
-          console.log(error);
           toast.error("You have to login first!");
           navigator("/login");
         }

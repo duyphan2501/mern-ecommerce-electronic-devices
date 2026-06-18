@@ -151,7 +151,7 @@ const createNewOrder = async ({
         : item.productName,
       quantity: item.quantity,
       price: discountPrice,
-      image: item.images[0] || "",
+      image: item.images?.[0] || "",
     };
   });
 
@@ -220,7 +220,7 @@ const getOrderItemFromModel = async (modelId, quantity) => {
       : product.productName,
     quantity,
     price,
-    image: product.images?.[0] || "",
+    image: model.images?.[0] || "",
   };
 };
 

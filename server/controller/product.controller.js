@@ -46,6 +46,7 @@ const normalizeModelPayload = (model, productId) => ({
   minimumQuantity: Number(model.minimumQuantity || 0),
   costPrice: Number(model.costPrice || 0),
   specifications: model.specifications || "<p></p>",
+  images: Array.isArray(model.images) ? model.images.filter(Boolean) : [],
   documents: (model.documents || []).map(normalizeDocument),
   productId,
 });
@@ -260,7 +261,6 @@ const createProduct = async (req, res) => {
       productName,
       description,
       models,
-      images,
       categoryIds,
       brandId,
       shippingCost,
@@ -306,7 +306,6 @@ const createProduct = async (req, res) => {
           metaKeywords,
           metaDescription,
           productUrl,
-          images,
           status,
           hasModels,
           modelsId: [],
@@ -353,7 +352,6 @@ const updateProduct = async (req, res) => {
       productName,
       description,
       models,
-      images,
       categoryIds,
       brandId,
       shippingCost,
@@ -440,7 +438,6 @@ const updateProduct = async (req, res) => {
     product.metaKeywords = metaKeywords;
     product.metaDescription = metaDescription;
     product.productUrl = productUrl;
-    product.images = images || [];
     product.status = status;
     product.hasModels = hasModels;
     product.modelsId = nextModelIds;
@@ -707,8 +704,8 @@ const searchProducts = async (req, res) => {
     const products = await ProductModel.find({
       productName: { $regex: safeTerm, $options: "i" },
     })
-      .select("_id productName productUrl images")
-      .populate("modelsId", "salePrice discount")
+      .select("_id productName productUrl")
+      .populate("modelsId", "salePrice discount images")
       .limit(limit)
       .sort({ createdAt: -1 })
       .lean();

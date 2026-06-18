@@ -84,6 +84,7 @@ const Header = () => {
                   anchorEl={anchorEl}
                   open={openProfile}
                   onClose={handleClose}
+                  disableScrollLock
                   transformOrigin={{ horizontal: "right", vertical: "top" }}
                   anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 >

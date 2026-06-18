@@ -7,20 +7,19 @@ const ImageItem = ({
   index,
   imageSrc,
   imageSrcArray,
-  product,
+  images,
   onChangeImageFile,
   onChangeImageBase64,
-  addImageHolder,
+  onViewImage,
   deleteImage,
 }) => {
-  const { setIndexImageView, notify } = useContext(MyContext);
+  const { notify } = useContext(MyContext);
   const [isDragging, setIsDragging] = useState(false);
 
   const processFile = (file) => {
-    // Cập nhật File trong product.images
-    const updatedFiles = [...product.images];
+    const updatedFiles = [...images];
     updatedFiles[index] = file;
-    onChangeImageFile("images", updatedFiles);
+    onChangeImageFile(updatedFiles);
 
     // Cập nhật preview
     const reader = new FileReader();
@@ -29,7 +28,6 @@ const ImageItem = ({
       const updatedPreviews = [...imageSrcArray];
       updatedPreviews[index] = previewBase64;
       onChangeImageBase64(updatedPreviews);
-      addImageHolder(updatedPreviews);
     };
     reader.readAsDataURL(file);
   };
@@ -98,7 +96,7 @@ const ImageItem = ({
               <IoMdEye
                 size={25}
                 className="text-white cursor-pointer hover:text-gray-200"
-                onClick={() => setIndexImageView(index)}
+                onClick={() => onViewImage(index)}
               />
               <RiDeleteBin5Fill
                 size={20}

@@ -21,7 +21,7 @@ const buildInventoryItem = (model) => {
     productId: product._id,
     productName: product.productName || "",
     productUrl: product.productUrl || "",
-    image: product.images?.[0] || "",
+    image: model.images?.[0] || "",
     brand: brand?.name || "",
     stockQuantity,
     minimumQuantity,
@@ -85,7 +85,7 @@ const getInventoryItems = async () => {
   const models = await ModelsModel.find({})
     .populate({
       path: "productId",
-      select: "productName productUrl images brandId",
+      select: "productName productUrl brandId",
       populate: { path: "brandId", select: "name slug" },
     })
     .sort({ updatedAt: -1 })
@@ -135,7 +135,7 @@ const getInventoryMovements = async (modelId, limit = 10) => {
     .sort({ createdAt: -1 })
     .limit(Math.min(Number(limit) || 10, 50))
     .populate("modelId", "modelName")
-    .populate("productId", "productName images")
+    .populate("productId", "productName")
     .lean();
 };
 

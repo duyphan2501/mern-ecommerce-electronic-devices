@@ -1,22 +1,35 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ImageItem from "./ImageItem";
-import MyContext from "../../Context/MyContext";
 import ImageView from "./ImageView";
 
-const ProductImage = ({ product, handleChangeValue }) => {
-  const [imageSrcArray, setImageSrcArray] = useState(
-    product?.images.length > 0 ? product?.images : [null]
+const ProductImage = ({
+  images = [],
+  handleChangeValue,
+  title = "Product Image",
+}) => {
+  const buildImageSources = (imageList = []) => {
+    const sources = imageList
+      .filter(Boolean)
+      .map((image) =>
+        image instanceof File ? URL.createObjectURL(image) : image,
+      );
+
+    return [...sources, null];
+  };
+
+  const withImageHolder = (imageList = []) => {
+    const sources = imageList.filter(Boolean);
+    return [...sources, null];
+  };
+
+  const [imageSrcArray, setImageSrcArray] = useState(() =>
+    buildImageSources(images),
   );
+  const [indexImageView, setIndexImageView] = useState(-1);
 
   useEffect(() => {
-    const nextImages =
-      product?.images?.length > 0
-        ? product.images.map((image) =>
-            image instanceof File ? URL.createObjectURL(image) : image,
-          )
-        : [null];
-    setImageSrcArray(nextImages);
-  }, [product?.images]);
+    setImageSrcArray(buildImageSources(images));
+  }, [images]);
 
   // const updateProductImage = (imagesArr) => {
   //   setImageSrcArray(imagesArr);
@@ -33,25 +46,15 @@ const ProductImage = ({ product, handleChangeValue }) => {
   // };
 
   const deleteImageSrc = (index) => {
-    const updatedImageSrcs = [...imageSrcArray];
-    const updatedImageFile = [...product.images]
-    updatedImageSrcs.splice(index, 1);
+    const updatedImageFile = [...images]
     updatedImageFile.splice(index, 1);
-    setImageSrcArray(updatedImageSrcs);
-    handleChangeValue("images", updatedImageFile)
+    setImageSrcArray(buildImageSources(updatedImageFile));
+    handleChangeValue(updatedImageFile)
   };
-
-  const addImageHolder = (imageArr) => {
-    const updatedImages = [...imageArr];
-    updatedImages.push(null);
-    setImageSrcArray(updatedImages);
-  };
-
-  const indexImageView = useContext(MyContext).indexImageView;
 
   return (
     <div className="flex flex-col gap-3 ">
-      <h3 className="text-xl font-bold">Product Image</h3>
+      <h3 className="text-xl font-bold">{title}</h3>
       <p className="text-gray-500">
         Choose a product photo or simply drag and drop up here.
       </p>
@@ -63,15 +66,23 @@ const ProductImage = ({ product, handleChangeValue }) => {
             index={index}
             imageSrc={imageSrc}
             onChangeImageFile={handleChangeValue}
-            onChangeImageBase64={setImageSrcArray}
-            addImageHolder={addImageHolder}
+            onChangeImageBase64={(nextImages) =>
+              setImageSrcArray(withImageHolder(nextImages))
+            }
             deleteImage={deleteImageSrc}
+            onViewImage={setIndexImageView}
             imageSrcArray={imageSrcArray}
-            product={product}
+            images={images}
           />
         ))}
       </div>
-      {indexImageView >= 0 && <ImageView imageSrc={imageSrcArray} />}
+      {indexImageView >= 0 && (
+        <ImageView
+          imageSrc={imageSrcArray}
+          indexImageView={indexImageView}
+          onClose={() => setIndexImageView(-1)}
+        />
+      )}
       <p className="text-gray-500 text-sm">
         Image formats: .jpg, .jpeg, .png, preferred size: 1:1, image size is
         restricted to a maximum of 500kb.

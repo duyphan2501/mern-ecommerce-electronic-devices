@@ -90,20 +90,35 @@ const useProductStore = create((set) => {
     return newModels;
   };
 
+  const uploadImagesForModels = async (models, axiosPrivate) => {
+    const newModels = (models || []).map((model) => ({
+      ...model,
+      images: model.images || [],
+    }));
+
+    for (let i = 0; i < newModels.length; i++) {
+      newModels[i].images = await uploadImages(newModels[i].images, axiosPrivate);
+    }
+
+    return newModels;
+  };
+
   const saveProduct = async (product, axiosPrivate, isEdit = false) => {
     set({ isLoading: true });
     cancelSource = axios.CancelToken.source();
 
     try {
-      const uploadedImages = await uploadImages(product.images, axiosPrivate);
-      const newModels = await uploadDocumentsForModels(
+      const modelsWithImages = await uploadImagesForModels(
         product.models,
+        axiosPrivate,
+      );
+      const newModels = await uploadDocumentsForModels(
+        modelsWithImages,
         axiosPrivate,
       );
 
       const payload = {
         ...product,
-        images: uploadedImages,
         models: newModels,
       };
 

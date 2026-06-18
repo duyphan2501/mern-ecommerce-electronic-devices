@@ -12,26 +12,29 @@ import ProductModel from "./ProductModel";
 import { IoMdArrowDropdown } from "react-icons/io";
 import useCartStore from "../store/cartStore";
 import useAuthStore from "../store/authStore";
+import { getSelectedModelImages } from "../utils/productImages";
 
 const ProductCard = ({ product }) => {
   const [selectedModelIndex, setSelectedModelIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   
-  const selectedModel = product.modelsId[selectedModelIndex];
+  const selectedModel = product?.modelsId?.[selectedModelIndex] || null;
+  const selectedImages = getSelectedModelImages(product, selectedModelIndex);
   const { openModal, setSelectedProduct } = useContext(MyContext);
   const { addToCart } = useCartStore();
 
   // ⚡ Memo hóa giá, format, isNew
   const discountPrice = useMemo(
     () =>
-      selectedModel.salePrice -
-      selectedModel.salePrice * (selectedModel.discount / 100),
-    [selectedModel.salePrice, selectedModel.discount],
+      Number(selectedModel?.salePrice || 0) -
+      Number(selectedModel?.salePrice || 0) *
+        (Number(selectedModel?.discount || 0) / 100),
+    [selectedModel],
   );
 
   const formattedPrice = useMemo(
-    () => formatMoney(selectedModel.salePrice),
-    [selectedModel.salePrice],
+    () => formatMoney(selectedModel?.salePrice || 0),
+    [selectedModel],
   );
 
   const formattedDiscountPrice = useMemo(
@@ -41,11 +44,11 @@ const ProductCard = ({ product }) => {
 
   const isNew = useMemo(() => {
     return (
-      (Date.now() - new Date(selectedModel.createdAt).getTime()) /
+      (Date.now() - new Date(selectedModel?.createdAt).getTime()) /
         (1000 * 60 * 60 * 24) <
       7
     );
-  }, [selectedModel.createdAt]);
+  }, [selectedModel]);
 
   // ⚡ Tách hàm để tránh tạo lại trong render
   const handleSelectModel = useCallback((index) => {
@@ -72,7 +75,7 @@ const ProductCard = ({ product }) => {
     await addToCart(cartData);
   };
 
-  if (!product) return null;
+  if (!product || !selectedModel) return null;
 
   return (
     <div className="productCard border-1 border-gray-200 rounded-md p-2 flex flex-col h-full shadow min-w-0 w-full">
@@ -82,14 +85,14 @@ const ProductCard = ({ product }) => {
           onClick={setProductDetail}
         >
           <img
-            src={product.images[0]}
+            src={selectedImages[0]}
             alt={product.productName}
             loading="lazy" // ✅ lazy load ảnh
             className="w-full object-contain h-full rounded-md"
           />
-          {product.images[1] && (
+          {selectedImages[1] && (
             <img
-              src={product.images[1]}
+              src={selectedImages[1]}
               alt={product.productName}
               loading="lazy"
               className="w-full object-contain h-full rounded-md absolute top-0 left-0 opacity-0 group-hover:opacity-100 transition duration-500 ease-in-out cursor-pointer group-hover:scale-105"

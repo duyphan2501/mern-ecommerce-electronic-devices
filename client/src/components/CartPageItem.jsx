@@ -14,7 +14,7 @@ const CartPageItem = ({ item, onUpdate, onDelete }) => {
             <Link to={`/product/${item.slug}`}>
               <div className="h-22 w-20 shrink-0 rounded-md overflow-hidden">
                 <img
-                  src={item.images[0]}
+                  src={item.images?.[0] || ""}
                   alt=""
                   className="w-full h-full object-cover hover:scale-105 transition"
                 />

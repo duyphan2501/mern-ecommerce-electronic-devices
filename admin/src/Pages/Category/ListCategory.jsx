@@ -21,7 +21,6 @@ const ListCategory = () => {
     try {
       const cates = await getListCategories();
       setCategories(cates);
-      console.log(cates);
     } catch (error) {
       console.log(error);
     }

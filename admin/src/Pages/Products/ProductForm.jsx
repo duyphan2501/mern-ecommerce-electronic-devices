@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import Attribute from "../../components/Attribute";
 import BasicInfo from "../../components/BasicInfoProduct";
 import CreateFooter from "../../components/CreateFooter";
-import ProductImage from "../../components/ProductImage";
 import ProductModels from "../../components/ProductModels";
 import SEO_Information from "../../components/SEO_Information";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
@@ -20,6 +19,7 @@ const defaultModel = {
   soldQuantity: 0,
   expectedQuantity: 0,
   minimumQuantity: 0,
+  images: [],
   documents: [],
   specifications: "<p></p>",
 };
@@ -28,7 +28,6 @@ const defaultProduct = {
   productName: "",
   description: "",
   models: [{ ...defaultModel }],
-  images: [],
   categoryIds: [],
   brandId: "",
   shippingCost: 0,
@@ -49,7 +48,6 @@ const normalizeProductForForm = (product) => ({
     ...model,
     documents: model.documents || [],
   })),
-  images: product.images || [],
   categoryIds: (product.categoryIds || []).map((category) =>
     typeof category === "string" ? category : category._id,
   ),
@@ -188,17 +186,10 @@ const ProductForm = ({ mode = "create" }) => {
         </div>
 
         <div className="lg:w-[430px] xl:w-[523px] h-fit mt-5 lg:mt-0">
-          <Paper sx={{ padding: "20px" }} elevation={2} className="!rounded-xl">
-            <ProductImage
-              product={product}
-              handleChangeValue={handleChangeProduct}
-            />
-          </Paper>
-
           <Paper
             sx={{ padding: "20px" }}
             elevation={2}
-            className="!rounded-xl mt-5"
+            className="!rounded-xl"
           >
             <Attribute
               product={product}

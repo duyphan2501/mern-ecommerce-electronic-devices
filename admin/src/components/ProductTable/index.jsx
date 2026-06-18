@@ -60,6 +60,10 @@ const getPriceRange = (models = []) => {
   return min === max ? formatMoney(min) : `${formatMoney(min)} - ${formatMoney(max)}`;
 };
 
+const getProductImage = (product) =>
+  product.modelsId?.find((model) => model.images?.length)?.images?.[0] ||
+  "/vite.svg";
+
 const getPreviewUrl = (slug) => {
   if (!slug) return "#";
   return `${CLIENT_URL}/product/${slug}`;
@@ -200,7 +204,7 @@ const ProductTable = () => {
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={1.5}>
                         <img
-                          src={product.images?.[0] || "/vite.svg"}
+                          src={getProductImage(product)}
                           alt={product.productName}
                           className="size-12 rounded-md object-cover border border-gray-200"
                         />

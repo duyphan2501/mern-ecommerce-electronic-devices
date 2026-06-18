@@ -27,7 +27,6 @@ const productSchema = new mongoose.Schema(
       default: "draft",
     },
     shippingCost: { type: Number, required: true },
-    images: { type: [String], required: true },
     pageTitle: String,
     metaKeywords: String,
     metaDescription: String,

@@ -4,6 +4,7 @@ import TextInput from "../BasicInfoProduct/TextInput";
 import Pricing from "../Pricing";
 import TiptapEditor from "../TiptapEditor";
 import DocumentUpload from "../DocumentUpload";
+import ProductImage from "../ProductImage";
 
 const ProductModels = ({
   product,
@@ -60,6 +61,15 @@ const ProductModels = ({
                 product={product}
                 handleChangeValue={handleChangeValue}
                 index={index}
+              />
+            </div>
+            <div className="mb-5">
+              <ProductImage
+                images={model.images || []}
+                handleChangeValue={(images) =>
+                  handleChangeValue("images", index, images)
+                }
+                title={`Model ${index + 1} Images`}
               />
             </div>
             <div className="mb-5">

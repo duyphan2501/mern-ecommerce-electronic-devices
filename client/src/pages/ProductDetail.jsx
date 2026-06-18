@@ -8,6 +8,7 @@ import { useParams } from "react-router-dom";
 import { useContext } from "react";
 import MyContext from "../Context/MyContext";
 import { Helmet } from "react-helmet-async";
+import { getSelectedModel, getSelectedModelImages } from "../utils/productImages";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -15,6 +16,7 @@ const ProductDetail = () => {
   const { getProductBySlug, isLoading, getProductsByCategoryIds } =
     useProductStore();
   const { selectedProduct } = useContext(MyContext);
+  const [selectedModelIndex, setSelectedModelIndex] = useState(0);
 
   useEffect(() => {
     const getProduct = async () => {
@@ -22,13 +24,14 @@ const ProductDetail = () => {
         let fetchProduct = await getProductBySlug(slug);
         const selectedModelIndex = selectedProduct?.selectedModelIndex || 0;
         fetchProduct = { ...fetchProduct, selectedModelIndex };
+        setSelectedModelIndex(selectedModelIndex);
         setProduct(fetchProduct);
       } catch (error) {
         console.error(error);
       }
     };
     getProduct();
-  }, [slug, getProductBySlug]);
+  }, [slug, getProductBySlug, selectedProduct?.selectedModelIndex]);
 
   if (!product || !product._id)
     return (
@@ -37,11 +40,14 @@ const ProductDetail = () => {
       </div>
     );
 
+  const selectedModel = getSelectedModel(product, selectedModelIndex);
+  const selectedImages = getSelectedModelImages(product, selectedModelIndex);
+
   const jsonLd = {
     "@context": "https://schema.org/",
     "@type": "Product",
     name: product.productName,
-    image: product.images,
+    image: selectedImages,
     description: product.metaDescription,
     sku: product._id,
     mpn: product._id,
@@ -53,7 +59,7 @@ const ProductDetail = () => {
       "@type": "Offer",
       url: window.location.href, 
       priceCurrency: "VND",
-      price: product.basePrice || 0,
+      price: selectedModel?.salePrice || 0,
       priceValidUntil: "2026-12-31",
       itemCondition: "https://schema.org/NewCondition",
       availability: "https://schema.org/InStock",
@@ -69,7 +75,7 @@ const ProductDetail = () => {
             <meta name="description" content={product.metaDescription} />
             <meta name="keywords" content={product.metaKeywords} />
             <meta property="og:title" content={product.productName} />
-            <meta property="og:image" content={product.images[0]} />
+            <meta property="og:image" content={selectedImages[0] || ""} />
             <meta property="og:type" content="product" />
             <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
           </Helmet>
@@ -77,10 +83,13 @@ const ProductDetail = () => {
             <div className="container">
               <section className="lg:flex gap-5 py-6 sm:py-10">
                 <div className="w-full lg:w-auto min-w-0">
-                  <ProductZoom imageAddress={product.images} />
+                  <ProductZoom imageAddress={selectedImages} />
                 </div>
                 <section className="min-w-0 flex-1">
-                  <ProductDetailContent product={product} />
+                  <ProductDetailContent
+                    product={product}
+                    onSelectedModelChange={setSelectedModelIndex}
+                  />
                 </section>
               </section>
               <section className="">

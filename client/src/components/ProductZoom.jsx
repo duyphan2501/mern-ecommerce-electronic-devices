@@ -24,6 +24,11 @@ const ProductZoom = ({ imageAddress }) => {
     return () => mediaQuery.removeEventListener("change", updateSize);
   }, []);
 
+  useEffect(() => {
+    setSlideIndex(0);
+    largeSlideRef.current?.swiper?.slideTo(0);
+  }, [imageAddress]);
+
   if (!imageAddress || imageAddress.length === 0 ) return null;
 
   return (

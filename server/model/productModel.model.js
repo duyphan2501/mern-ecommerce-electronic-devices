@@ -12,6 +12,7 @@ const modelSchema = new mongoose.Schema(
     minimumQuantity: { type: Number, required: true },
     costPrice: { type: Number, required: true },
     specifications: { type: String, required: true },
+    images: { type: [String], default: [] },
     documents: [
       {
         url: String,

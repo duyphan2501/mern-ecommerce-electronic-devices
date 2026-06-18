@@ -232,7 +232,7 @@ const getLowStockItems = () =>
             "$product.productName",
           ],
         },
-        image: { $arrayElemAt: ["$product.images", 0] },
+        image: { $arrayElemAt: ["$images", 0] },
         stockQuantity: 1,
         minimumQuantity: 1,
         expectedQuantity: 1,

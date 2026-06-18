@@ -1,7 +1,7 @@
 import { Rating, Stack } from "@mui/material";
 import QuantityButton from "./QuantityButton";
 import AddToCartBtn from "./AddToCartBtn";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProductModel from "./ProductModel";
 import formatMoney from "../utils/MoneyFormat";
 import {
@@ -16,13 +16,23 @@ import { AiFillFileText } from "react-icons/ai";
 import useCartStore from "../store/cartStore";
 import useAuthStore from "../store/authStore";
 
-const ProductDetailContent = ({ product }) => {
+const ProductDetailContent = ({ product, onSelectedModelChange }) => {
+  const [selectedModelIndex, setSelectedModelIndex] = useState(
+    product?.selectedModelIndex || 0,
+  );
+  const [addValue, setAddValue] = useState(1);
+  const { addToCart } = useCartStore();
+  const userId = useAuthStore.getState().user?._id;
+
+  useEffect(() => {
+    setSelectedModelIndex(product?.selectedModelIndex || 0);
+  }, [product]);
+
   if (!product || !product._id) return null;
 
-  const [selectedModelIndex, setSelectedModelIndex] = useState(
-    product.selectedModelIndex || 0,
-  );
   const model = product?.modelsId?.[selectedModelIndex];
+  if (!model) return null;
+
   const discountPrice =
     model.salePrice - model.salePrice * (model.discount / 100);
 
@@ -43,9 +53,10 @@ const ProductDetailContent = ({ product }) => {
         return <FaFile />;
     }
   };
-  const [addValue, setAddValue] = useState(1);
-  const { addToCart } = useCartStore();
-  const userId = useAuthStore.getState().user?._id;
+  const handleSelectModel = (index) => {
+    setSelectedModelIndex(index);
+    onSelectedModelChange?.(index);
+  };
 
   const handleAddToCart = async () => {
     const cartData = {
@@ -102,7 +113,7 @@ const ProductDetailContent = ({ product }) => {
                   <ProductModel
                     model={model}
                     isSelected={selectedModelIndex === index}
-                    onSelect={() => setSelectedModelIndex(index)}
+                    onSelect={() => handleSelectModel(index)}
                     key={model.modelName}
                   />
                 ))}

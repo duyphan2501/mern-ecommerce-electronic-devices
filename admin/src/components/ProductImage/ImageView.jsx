@@ -1,10 +1,6 @@
-import { useContext } from "react";
-import MyContext from "../../Context/MyContext";
 import { IoClose } from "react-icons/io5";
 
-const ImageView = ({imageSrc}) => {
-  const { indexImageView, setIndexImageView } = useContext(MyContext);
-
+const ImageView = ({ imageSrc, indexImageView, onClose }) => {
   return (
     <div>
       <div className="size-screen fixed inset-0 bg-black opacity-40 z-200"></div>
@@ -13,7 +9,7 @@ const ImageView = ({imageSrc}) => {
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-bold">Image {indexImageView + 1}</h2>
             <button
-              onClick={() => setIndexImageView(-1)}
+              onClick={onClose}
               className="p-1 rounded-full transition bg-gray-200 border-0 hover:bg-gray-300
               cursor-pointer"
             >

@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { getProductPreviewImage } from "../utils/productImages";
 
 const MetaSEO = ({ title, description, url, noIndex, products }) => {
   // Tạo cấu trúc dữ liệu ItemList cho Google Search
@@ -13,7 +14,7 @@ const MetaSEO = ({ title, description, url, noIndex, products }) => {
         "@type": "Product",
         "url": `${window.location.origin}/product/${prod.slug}`,
         "name": prod.name,
-        "image": prod.images?.[0] || "",
+        "image": getProductPreviewImage(prod),
         "description": prod.summary || prod.name,
         "offers": {
           "@type": "Offer",

@@ -28,7 +28,7 @@ async function formatCartItemInfo(items) {
       discount: model.discount,
       productId: product?._id,
       productName: product?.productName,
-      images: product?.images,
+      images: model.images || [],
       slug: product?.productUrl,
     };
   }).filter(Boolean);
