@@ -83,7 +83,7 @@ const Footer = () => {
                 <input
                   type="email"
                   placeholder="Nhập email của bạn"
-                  className="outline-[1px] outline-gray-300 bg-white rounded p-3 focus:outline-[1px] border-0 focus:outline-gray-400 w-full"
+                  className="outline-[1px] outline-gray-300 bg-white rounded py-2 px-3 focus:outline-[1px] border-0 focus:outline-gray-400 w-full"
                 />
                 <Button className="!inline-block !px-2 !py-2 !bg-[#50e3c2] !text-black !font-sans !font-bold hover:!text-">
                   Đăng ký ngay
