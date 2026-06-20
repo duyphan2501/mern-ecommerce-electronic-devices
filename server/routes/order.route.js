@@ -41,6 +41,7 @@ orderRouter.put("/admin/:id/rma/:rmaId/match-quantity", checkAuth, checkAdmin, m
 orderRouter.put("/admin/:id/rma/:rmaId/refund", checkAuth, checkAdmin, refundAdminRma);
 orderRouter.get("/all", checkAuth, checkAdmin, getAllOrders);
 orderRouter.post("/create", checkAuth, createOrder);
+orderRouter.get("/", checkAuth, getOrders);
 orderRouter.get("/by-order-code/:orderCode", checkAuth, getOrderByOrderCode);
 orderRouter.get("/id/:orderId", checkAuth, getOrderById);
 orderRouter.put("/set-status/:orderIdObj", checkAuth, setOrderStatus);

@@ -1,13 +1,84 @@
-import React, { useState, useEffect } from "react";
-
-import { useParams } from "react-router-dom";
-import useOrderStore from "../store/orderStore";
-import { FaCheckCircle, FaTruck } from "react-icons/fa";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { BiCreditCard, BiLoader, BiMapPin, BiPackage } from "react-icons/bi";
-import { CgLock } from "react-icons/cg";
+import {
+  FaBoxOpen,
+  FaCircleCheck,
+  FaClock,
+  FaTruck,
+  FaXmark,
+} from "react-icons/fa6";
 import formatMoney from "../utils/MoneyFormat";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import useOrderStore from "../store/orderStore";
 import { formatDateTime } from "../utils/DateFormat";
+
+const ORDER_STEPS = [
+  { value: "pending", label: "Chờ xác nhận" },
+  { value: "confirmed", label: "Đã xác nhận" },
+  { value: "packing", label: "Đang đóng gói" },
+  { value: "shipping", label: "Đang giao" },
+  { value: "delivered", label: "Đã giao" },
+];
+
+const STATUS_META = {
+  pending: {
+    label: "Chờ xác nhận",
+    description: "Đơn hàng đã được tạo và đang chờ cửa hàng xác nhận.",
+    icon: <FaClock className="h-6 w-6 text-orange-600" />,
+    cardClass: "border-orange-300 bg-orange-50 text-orange-800",
+  },
+  confirmed: {
+    label: "Đã xác nhận",
+    description: "Cửa hàng đã xác nhận đơn và đang chuẩn bị xử lý.",
+    icon: <BiPackage className="h-6 w-6 text-purple-600" />,
+    cardClass: "border-purple-300 bg-purple-50 text-purple-800",
+  },
+  packing: {
+    label: "Đang đóng gói",
+    description: "Sản phẩm đang được đóng gói trước khi bàn giao vận chuyển.",
+    icon: <FaBoxOpen className="h-6 w-6 text-indigo-600" />,
+    cardClass: "border-indigo-300 bg-indigo-50 text-indigo-800",
+  },
+  shipping: {
+    label: "Đang giao",
+    description: "Đơn hàng đang trên đường giao đến bạn.",
+    icon: <FaTruck className="h-6 w-6 text-blue-600" />,
+    cardClass: "border-blue-300 bg-blue-50 text-blue-800",
+  },
+  delivered: {
+    label: "Đã giao",
+    description: "Đơn hàng đã được giao thành công.",
+    icon: <FaCircleCheck className="h-6 w-6 text-green-600" />,
+    cardClass: "border-green-300 bg-green-50 text-green-800",
+  },
+  cancelled: {
+    label: "Đã hủy",
+    description: "Đơn hàng đã bị hủy và không tiếp tục giao.",
+    icon: <FaXmark className="h-6 w-6 text-red-600" />,
+    cardClass: "border-red-300 bg-red-50 text-red-800",
+  },
+};
+
+const PAYMENT_PROVIDER_LABEL = {
+  cod: "Thanh toán khi nhận hàng",
+  payos: "Thanh toán qua PayOS",
+};
+
+const PAYMENT_STATUS_LABEL = {
+  pending: "Chưa thanh toán",
+  paid: "Đã thanh toán",
+  cancelled: "Đã hủy",
+  failed: "Thanh toán thất bại",
+};
+
+const getStatusMeta = (status) =>
+  STATUS_META[status] || {
+    label: status || "Không rõ",
+    description: "Trạng thái đơn hàng đang được cập nhật.",
+    icon: <FaClock className="h-6 w-6 text-gray-500" />,
+    cardClass: "border-gray-300 bg-gray-50 text-gray-800",
+  };
 
 const OrderTracking = () => {
   const { orderId } = useParams();
@@ -16,217 +87,301 @@ const OrderTracking = () => {
   const { getOrderById } = useOrderStore();
   const axiosPrivate = useAxiosPrivate();
 
-  useEffect(() => {
-    fetchOrder();
-  }, [orderId]);
-
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       if (!orderId) return;
+      setLoading(true);
       const result = await getOrderById(axiosPrivate, orderId);
-      setCurrentOrder(result);
+      setCurrentOrder(result || null);
     } catch (err) {
       console.error("Error fetching order:", err);
+      setCurrentOrder(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [axiosPrivate, getOrderById, orderId]);
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "delivered":
-        return <FaCheckCircle className="w-6 h-6 text-green-600" />;
-      case "shipping":
-        return <FaTruck className="w-6 h-6 text-blue-600" />;
-      case "confirmed":
-        return <BiPackage className="w-6 h-6 text-purple-600" />;
-      default:
-        return <CgLock className="w-6 h-6 text-orange-600" />;
-    }
-  };
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
 
-  const getStatusColorClass = (status) => {
-    switch (status) {
-      case "delivered":
-        return "bg-green-50 border-green-500";
-      case "shipping":
-        return "bg-blue-50 border-blue-500";
-      case "confirmed":
-        return "bg-purple-50 border-purple-500";
-      default:
-        return "bg-orange-50 border-orange-500";
-    }
-  };
-
-  const statusLabelMap = {
-    pending: "Đang chờ xác nhận",
-    confirmed: "Đã xác nhận",
-    shipping: "Đang giao hàng",
-    delivered: "Đã giao hàng",
-  };
-
-  const paymentLabelMap = {
-    cod: "Thanh toán khi nhận hàng",
-    payos: "Thanh toán qua PayOS",
-  };
+  const statusMeta = getStatusMeta(currentOrder?.status);
+  const currentStepIndex = useMemo(
+    () => ORDER_STEPS.findIndex((step) => step.value === currentOrder?.status),
+    [currentOrder?.status],
+  );
+  const createdAt = currentOrder?.createdAt
+    ? formatDateTime(currentOrder.createdAt)
+    : "";
+  const [createdDate, createdTime] = createdAt.split(" ");
+  const shippingInfo = currentOrder?.shippingInfo || {};
+  const payment = currentOrder?.payment || {};
+  const itemsTotal =
+    currentOrder?.items?.reduce(
+      (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0),
+      0,
+    ) || 0;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <BiLoader className="w-8 h-8 animate-spin text-gray-600" />
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <BiLoader className="h-8 w-8 animate-spin text-gray-600" />
       </div>
     );
   }
+
   if (!currentOrder) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-600">Không tìm thấy đơn hàng.</p>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <div className="rounded-md border border-dashed border-gray-300 bg-white p-8 text-center shadow-sm">
+          <BiPackage className="mx-auto mb-3 h-12 w-12 text-gray-400" />
+          <p className="text-lg font-bold text-gray-800">
+            Không tìm thấy đơn hàng
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            Mã đơn không tồn tại hoặc bạn không có quyền xem đơn này.
+          </p>
+          <Link
+            to="/my-account/orders"
+            className="mt-5 inline-flex rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-600"
+          >
+            Quay lại đơn hàng
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-5xl mx-auto px-4 md:px-8 py-8">
-        {/* Thông tin đơn hàng */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex items-center gap-3 mb-3">
-              <CgLock className="w-5 h-5 text-gray-600" />
-              <h3 className="font-bold text-sm uppercase">Ngày đặt hàng</h3>
-            </div>
-            <p className="text-lg font-semibold">Ngày: {formatDateTime(currentOrder.createdAt).split(" ")[0]}</p>
-            <p className="text-sm text-gray-600">Lúc: {formatDateTime(currentOrder.createdAt).split(" ")[1]}</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex items-center gap-3 mb-3">
-              <FaTruck className="w-5 h-5 text-gray-600" />
-              <h3 className="font-bold text-sm uppercase">
-                {currentOrder.deliveryDate ? "Đã giao" : "Dự kiến giao hàng"}
-              </h3>
-            </div>
-            <p className="text-lg font-semibold">
-              {currentOrder.deliveryDate ||
-                currentOrder.estimatedDelivery ||
-                "Đang cập nhật"}
+      <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+              Theo dõi đơn hàng
             </p>
-            <p className="text-sm text-gray-600">Giao hàng tiêu chuẩn</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {currentOrder.orderId}
+            </h1>
+          </div>
+          <Link
+            to="/my-account/orders"
+            className="w-fit rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 transition hover:border-blue-500 hover:text-blue-600"
+          >
+            Quay lại danh sách
+          </Link>
+        </div>
+
+        <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="rounded-md border border-gray-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-semibold uppercase text-gray-500">
+              Ngày đặt hàng
+            </p>
+            <p className="mt-2 text-lg font-bold text-gray-900">
+              {createdDate || "Đang cập nhật"}
+            </p>
+            <p className="text-sm text-gray-500">
+              {createdTime ? `Lúc ${createdTime}` : ""}
+            </p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex items-center gap-3 mb-3">
-              <BiPackage className="w-5 h-5 text-gray-600" />
-              <h3 className="font-bold text-sm uppercase">Tổng tiền</h3>
+          <div className="rounded-md border border-gray-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-semibold uppercase text-gray-500">
+              Trạng thái hiện tại
+            </p>
+            <div className="mt-2 flex items-center gap-3">
+              {statusMeta.icon}
+              <p className="text-lg font-bold text-gray-900">
+                {statusMeta.label}
+              </p>
             </div>
-            <p className="text-lg font-bold">
+          </div>
+
+          <div className="rounded-md border border-gray-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-semibold uppercase text-gray-500">
+              Tổng tiền
+            </p>
+            <p className="mt-2 text-lg font-bold text-gray-900">
               {formatMoney(currentOrder.totalPrice)}
             </p>
-            <p className="text-sm text-gray-600">
-              {paymentLabelMap[currentOrder.payment.provider]}
+            <p className="text-sm text-gray-500">
+              {PAYMENT_PROVIDER_LABEL[payment.provider] || "Đang cập nhật"}
             </p>
           </div>
         </div>
 
-        {/* Trạng thái đơn hàng */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h3 className="font-bold text-xl mb-6 uppercase">
-            Trạng thái đơn hàng
-          </h3>
-
+        <section className="mb-6 rounded-md border border-gray-200 bg-white p-5 shadow-sm">
           <div
-            className={`flex items-center gap-4 p-5 rounded-lg border-l-4 ${getStatusColorClass(
-              currentOrder.status,
-            )}`}
+            className={`mb-6 rounded-md border-l-4 p-4 ${statusMeta.cardClass}`}
           >
-            {getStatusIcon(currentOrder.status)}
-            <div className="flex-1">
-              <p className="font-bold text-lg">{statusLabelMap[currentOrder.status]}</p>
-              <p className="text-sm text-gray-600 mt-1">
-                {currentOrder.status === "pending" &&
-                  "Đơn hàng đã được đặt thành công và đang chờ xác nhận"}
-                {currentOrder.status === "confirmed" &&
-                  "Đơn hàng đã được xác nhận và đang chuẩn bị"}
-                {currentOrder.status === "shipping" &&
-                  "Đơn hàng đang trên đường giao đến bạn"}
-                {currentOrder.status === "delivered" &&
-                  "Đơn hàng đã được giao thành công"}
-              </p>
+            <div className="flex items-start gap-3">
+              {statusMeta.icon}
+              <div>
+                <h2 className="text-lg font-bold">{statusMeta.label}</h2>
+                <p className="mt-1 text-sm">{statusMeta.description}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Sản phẩm */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h3 className="font-bold text-xl mb-4 uppercase">Sản phẩm</h3>
-          <div className="space-y-4">
-            {currentOrder.items.map((product, idx) => (
-              <div
-                key={idx}
-                className="flex gap-4 pb-4 border-b last:border-b-0"
-              >
-                <div className="w-20 h-20 bg-gray-100 rounded flex items-center justify-center shrink-0">
-                  {product.image ? (
-                    <img
-                      src={`${product.image}`}
-                      alt={product.name}
-                      className="w-full h-full object-cover rounded"
-                    />
-                  ) : (
-                    <span className="text-3xl">👟</span>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-lg mb-1">{product.name}</p>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p>Số lượng: {product.quantity}</p>
+          {currentOrder.status !== "cancelled" ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+              {ORDER_STEPS.map((step, index) => {
+                const isDone = index <= currentStepIndex;
+                const isCurrent = index === currentStepIndex;
+                return (
+                  <div key={step.value} className="flex items-center gap-3">
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold ${
+                        isDone
+                          ? "border-blue-600 bg-blue-600 text-white"
+                          : "border-gray-300 bg-white text-gray-400"
+                      }`}
+                    >
+                      {isDone ? <FaCircleCheck className="h-4 w-4" /> : index + 1}
+                    </div>
+                    <div>
+                      <p
+                        className={`text-sm font-semibold ${
+                          isCurrent ? "text-blue-700" : "text-gray-700"
+                        }`}
+                      >
+                        {step.label}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600">
+              Đơn hàng đã hủy nên không còn tiến trình giao hàng.
+            </p>
+          )}
+        </section>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+          <section className="rounded-md border border-gray-200 bg-white p-5 shadow-sm">
+            <h2 className="mb-4 text-lg font-bold text-gray-900">Sản phẩm</h2>
+            <div className="divide-y divide-gray-100 rounded-md border border-gray-100">
+              {currentOrder.items?.map((product, index) => (
+                <div
+                  key={`${product.modelId}-${index}`}
+                  className="flex gap-4 p-4"
+                >
+                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-md bg-gray-100">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <BiPackage className="m-auto mt-6 h-8 w-8 text-gray-400" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-gray-900">{product.name}</p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Số lượng: {product.quantity}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-900">
+                      {formatMoney(product.price)}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {formatMoney(product.price * product.quantity)}
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-lg">
-                    {formatMoney(product.price)}
-                  </p>
+              ))}
+            </div>
+
+            <div className="mt-5 space-y-2 border-t border-gray-200 pt-4">
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>Tạm tính</span>
+                <span>{formatMoney(itemsTotal)}</span>
+              </div>
+              <div className="flex justify-between text-lg font-bold text-gray-900">
+                <span>Tổng cộng</span>
+                <span>{formatMoney(currentOrder.totalPrice)}</span>
+              </div>
+            </div>
+          </section>
+
+          <div className="space-y-6">
+            <section className="rounded-md border border-gray-200 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center gap-3">
+                <BiMapPin className="h-5 w-5 text-gray-600" />
+                <h2 className="font-bold text-gray-900">Địa chỉ giao hàng</h2>
+              </div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p className="font-semibold">
+                  {shippingInfo.receiver || "Đang cập nhật"}
+                </p>
+                <p>{shippingInfo.phone || "Đang cập nhật"}</p>
+                <p>
+                  {[shippingInfo.addressDetail, shippingInfo.ward, shippingInfo.province]
+                    .filter(Boolean)
+                    .join(", ") || "Đang cập nhật"}
+                </p>
+              </div>
+            </section>
+
+            <section className="rounded-md border border-gray-200 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center gap-3">
+                <BiCreditCard className="h-5 w-5 text-gray-600" />
+                <h2 className="font-bold text-gray-900">
+                  Phương thức thanh toán
+                </h2>
+              </div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <div className="flex justify-between gap-4">
+                  <span>Phương thức</span>
+                  <span className="font-semibold">
+                    {PAYMENT_PROVIDER_LABEL[payment.provider] || "Đang cập nhật"}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span>Trạng thái</span>
+                  <span className="font-semibold">
+                    {PAYMENT_STATUS_LABEL[payment.status] || "Đang cập nhật"}
+                  </span>
                 </div>
               </div>
-            ))}
-          </div>
-          <div className="mt-6 pt-4 border-t-2 border-gray-200">
-            <div className="flex justify-between items-center">
-              <p className="font-bold text-lg">TỔNG CỘNG:</p>
-              <p className="font-bold text-2xl">
-                {formatMoney(currentOrder.totalPrice)}
-              </p>
-            </div>
-          </div>
-        </div>
+            </section>
 
-        {/* Thông tin giao hàng */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <BiMapPin className="w-5 h-5 text-gray-600" />
-              <h3 className="font-bold uppercase">Địa chỉ giao hàng</h3>
-            </div>
-            <div className="space-y-2 text-gray-700">
-              <p className="font-semibold">
-                {currentOrder.shippingInfo.receiver}
-              </p>
-              <p>{currentOrder.shippingInfo.phone}</p>
-              <p>
-                {currentOrder.shippingInfo.addressDetail},{" "}
-                {currentOrder.shippingInfo.ward},{" "}
-                {currentOrder.shippingInfo.province}{" "}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <BiCreditCard className="w-5 h-5 text-gray-600" />
-              <h3 className="font-bold uppercase">Phương thức thanh toán</h3>
-            </div>
-            <p className="text-gray-700">{paymentLabelMap[currentOrder.payment.provider]}</p>
-            <p className="text-gray-700">Trạng thái: {currentOrder.payment.status === "paid" ? "Đã thanh toán" : "Chưa thanh toán"}</p>
+            {currentOrder.shipment?.trackingCode && (
+              <section className="rounded-md border border-gray-200 bg-white p-5 shadow-sm">
+                <div className="mb-4 flex items-center gap-3">
+                  <FaTruck className="h-5 w-5 text-gray-600" />
+                  <h2 className="font-bold text-gray-900">
+                    Thông tin vận chuyển
+                  </h2>
+                </div>
+                <div className="space-y-2 text-sm text-gray-700">
+                  <p>
+                    Mã vận đơn:{" "}
+                    <span className="font-semibold">
+                      {currentOrder.shipment.trackingCode}
+                    </span>
+                  </p>
+                  {currentOrder.shipment.carrier && (
+                    <p>Đơn vị: {currentOrder.shipment.carrier}</p>
+                  )}
+                  {currentOrder.shipment.trackingUrl && (
+                    <a
+                      href={currentOrder.shipment.trackingUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex font-semibold text-blue-600 hover:underline"
+                    >
+                      Xem vận chuyển
+                    </a>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
         </div>
       </div>

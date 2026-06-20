@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import orderModel from "../model/order.model.js";
 import {
   assessAdminRmaService,
@@ -239,21 +240,90 @@ const getOrderByOrderCode = async (req, res) => {
   }
 };
 
+const parseOrderCursor = (cursor) => {
+  if (!cursor) return null;
+
+  try {
+    const decoded = JSON.parse(Buffer.from(cursor, "base64").toString("utf8"));
+    if (!decoded.createdAt || !decoded._id) return null;
+
+    return {
+      createdAt: new Date(decoded.createdAt),
+      _id: new mongoose.Types.ObjectId(decoded._id),
+    };
+  } catch {
+    return null;
+  }
+};
+
+const createOrderCursor = (order) =>
+  Buffer.from(
+    JSON.stringify({
+      createdAt: order.createdAt,
+      _id: order._id,
+    }),
+  ).toString("base64");
+
 const getOrders = async (req, res) => {
-  // Implementation for getting orders for a specific user
   try {
     const userId = req.user.userId;
-    const status = req.params.status;
-    const terms = req.query.terms;
-    if (!status) {
-      return res
-        .status(400)
-        .json({ message: "Missing status parameter", success: false });
+    const status = req.query.status || req.params.status || "all";
+    const { startDate, endDate, cursor } = req.query;
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+    const query = {
+      userId,
+      status: { $nin: ["draft", "deleted"] },
+    };
+
+    if (status && status !== "all") {
+      query.status = status;
     }
+
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) {
+        query.createdAt.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = end;
+      }
+    }
+
+    const parsedCursor = parseOrderCursor(cursor);
+    if (parsedCursor) {
+      query.$or = [
+        { createdAt: { $lt: parsedCursor.createdAt } },
+        {
+          createdAt: parsedCursor.createdAt,
+          _id: { $lt: parsedCursor._id },
+        },
+      ];
+    }
+
     const orders = await orderModel
-      .find({ userId, status })
-      .sort({ createdAt: -1 });
-    return res.status(200).json({ orders, success: true });
+      .find(query)
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(limit + 1);
+    const hasMore = orders.length > limit;
+    const pageOrders = hasMore ? orders.slice(0, limit) : orders;
+    const totalQuery = { ...query };
+    delete totalQuery.$or;
+    const total = await orderModel.countDocuments(totalQuery);
+
+    return res.status(200).json({
+      orders: pageOrders,
+      pagination: {
+        limit,
+        hasMore,
+        nextCursor: hasMore
+          ? createOrderCursor(pageOrders[pageOrders.length - 1])
+          : null,
+        total,
+      },
+      success: true,
+    });
   } catch (error) {
     return res
       .status(500)

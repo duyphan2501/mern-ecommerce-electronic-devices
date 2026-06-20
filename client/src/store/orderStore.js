@@ -4,6 +4,12 @@ import useCartStore from "./cartStore";
 
 const useOrderStore = create((set, get) => ({
   orders: [],
+  orderPagination: {
+    total: 0,
+    limit: 10,
+    hasMore: false,
+    nextCursor: null,
+  },
   isLoading: false,
   setOrders: (newOrders) => set({ orders: [...newOrders] }),
   createOrder: async (axiosPrivate, orderData) => {
@@ -41,13 +47,33 @@ const useOrderStore = create((set, get) => ({
     }
   },
 
-  getOrders: async (axiosPrivate, status) => {
+  getOrders: async (axiosPrivate, filters = {}, options = {}) => {
     set({ isLoading: true });
     try {
-      const res = await axiosPrivate.get(`/api/order/${status}`);
-      set({ orders: res.data.orders });
+      const res = await axiosPrivate.get("/api/order", {
+        params: {
+          status: filters.status || "all",
+          startDate: filters.startDate || undefined,
+          endDate: filters.endDate || undefined,
+          cursor: options.cursor || undefined,
+          limit: options.limit || 10,
+        },
+      });
+      set((state) => ({
+        orders: options.append
+          ? [...state.orders, ...res.data.orders]
+          : res.data.orders,
+        orderPagination: res.data.pagination || {
+          total: res.data.orders?.length || 0,
+          limit: options.limit || 10,
+          hasMore: false,
+          nextCursor: null,
+        },
+      }));
+      return res.data;
     } catch (error) {
       console.error("Failed to fetch orders:", error);
+      return null;
     } finally {
       set({ isLoading: false });
     }
