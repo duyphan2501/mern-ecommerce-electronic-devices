@@ -1,4 +1,3 @@
-import { FaFacebookMessenger } from "react-icons/fa";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Suspense, lazy, useContext, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
@@ -21,6 +20,8 @@ import OrderTracking from "./pages/OrderTracking";
 import useCategoryStore from "./store/categoryStore";
 import useBrandStore from "./store/brandStore";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AiChatWidget from "./components/AiChatWidget";
+import { FaFacebookMessenger } from "react-icons/fa6";
 
 // Lazy load cho các page
 const Home = lazy(() => import("./pages/Home"));
@@ -82,14 +83,13 @@ function App() {
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="fixed bottom-5 right-3 z-20 hidden lg:block">
+      {/* <div className="fixed bottom-20 right-3 z-20 hidden lg:block">
         <div className="relative">
           <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center shadow-md animate-bounce cursor-pointer ">
             <FaFacebookMessenger size={27} className="text-white" />
           </div>
         </div>
-      </div>
-
+      </div> */}
       <BrowserRouter>
         <TopStrip />
         <Header />
@@ -125,6 +125,7 @@ function App() {
         <CartDrawer />
         {isOpenModal && <ViewMoreDialog />}
         {isOpenAddrFrm && <AddressForm />}
+        <AiChatWidget />
       </BrowserRouter>
       <Footer />
     </>
