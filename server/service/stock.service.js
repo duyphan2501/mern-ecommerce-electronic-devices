@@ -5,6 +5,8 @@ import {
   RESERVE_LUA,
   RECLAIM_LUA,
   CONFIRM_ORDER_LUA,
+  CHECKOUT_BATCH_LUA,
+  ROLLBACK_BATCH_LUA,
 } from "../scripts/stock.lua.js";
 
 const StockService = {
@@ -37,6 +39,16 @@ const StockService = {
         "reservation:zset",
       ],
       arguments: [item.modelId.toString()],
+    }),
+  confirmCheckout: (checkoutArgs) =>
+    redisClient.eval(CHECKOUT_BATCH_LUA, {
+      keys: [],
+      arguments: checkoutArgs,
+    }),
+  rollbackCheckout: (rollbackArgs) =>
+    redisClient.eval(ROLLBACK_BATCH_LUA, {
+      keys: [],
+      arguments: rollbackArgs,
     }),
   getStockinfo: async (modelId) => {
     const stockData = await redisClient.hGetAll(`stock:${modelId}`);

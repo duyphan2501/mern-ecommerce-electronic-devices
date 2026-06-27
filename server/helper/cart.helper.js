@@ -30,6 +30,7 @@ async function formatCartItemInfo(items) {
       productName: product?.productName,
       images: model.images || [],
       slug: product?.productUrl,
+      status: item.status || "available",
     };
   }).filter(Boolean);
 }

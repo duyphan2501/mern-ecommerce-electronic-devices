@@ -104,7 +104,6 @@ const verifyWebhookData = async (req, res) => {
     if (verifiedData.code === "00") {
       order.payment.status = "paid";
       await completeOrderCheckout(order);
-      // xoá giỏ hàng
       await handleOrderCreation(order);
     } else {
       // Thanh toán thất bại

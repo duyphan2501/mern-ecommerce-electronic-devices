@@ -1,18 +1,14 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Suspense, lazy, useContext, useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 
 // Components thường dùng chung (load ngay từ đầu)
 import Header from "./components/Header";
 import TopStrip from "./components/TopStrip";
 import Footer from "./components/Footer";
-import ViewMoreDialog from "./components/ViewMoreDialog";
-import CartDrawer from "./components/CartDrawer";
 import PersistentLogin from "./components/PersistentLogin";
-import MyContext from "./Context/MyContext";
 import useAuthStore from "./store/authStore";
 import useCartStore from "./store/cartStore";
-import AddressForm from "./components/AddressForm";
 import useAxiosPrivate from "./hooks/useAxiosPrivate";
 import useAddressStore from "./store/addressStore";
 import OrderSuccess from "./pages/OrderSuccess";
@@ -20,8 +16,8 @@ import OrderTracking from "./pages/OrderTracking";
 import useCategoryStore from "./store/categoryStore";
 import useBrandStore from "./store/brandStore";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AiChatWidget from "./components/AiChatWidget";
 import { FaFacebookMessenger } from "react-icons/fa6";
+import PageOverlays from "./components/PageOverlays";
 
 // Lazy load cho các page
 const Home = lazy(() => import("./pages/Home"));
@@ -37,7 +33,6 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 
 function App() {
-  const { isOpenModal, isOpenAddrFrm } = useContext(MyContext);
   const user = useAuthStore((state) => state.user);
   const loadCart = useCartStore((state) => state.loadCart);
 
@@ -121,11 +116,7 @@ function App() {
             </Route>
           </Routes>
         </Suspense>
-
-        <CartDrawer />
-        {isOpenModal && <ViewMoreDialog />}
-        {isOpenAddrFrm && <AddressForm />}
-        <AiChatWidget />
+        <PageOverlays />
       </BrowserRouter>
       <Footer />
     </>

@@ -12,29 +12,39 @@ const CartPageItem = ({ item, onUpdate, onDelete }) => {
         <div className="md:w-4/9 min-w-0">
           <div className="flex gap-3 min-w-0">
             <Link to={`/product/${item.slug}`}>
-              <div className="h-22 w-20 shrink-0 rounded-md overflow-hidden">
+              <div className="h-22 w-20 shrink-0 rounded-md overflow-hidden relative">
                 <img
                   src={item.images?.[0] || ""}
                   alt=""
                   className="w-full h-full object-cover hover:scale-105 transition"
                 />
+                {item?.status !== "available" && (
+                  <div className="absolute size-full inset-0 bg-black/30 text-center flex items-center justify-center">
+                    <p
+                      className={`${item?.status === "out_of_stock" ? "text-red-500" : "text-yellow-400"} font-semibold text-sm p-3`}
+                    >
+                      {item?.status === "out_of_stock"
+                        ? "Hết hàng"
+                        : "Cần gia hạn giữ chỗ"}
+                    </p>
+                  </div>
+                )}
               </div>
             </Link>
             <div className="flex flex-col justify-center gap-1 min-w-0">
               <p className="font-semibold text-black line-clamp-2">
                 {item.productName} {item.modelName && ` - ${item.modelName}`}
               </p>
-              <div className="">
-                <Stack spacing={1}>
-                  <Rating
-                    size="small"
-                    name="half-rating"
-                    defaultValue={item.rating || 5}
-                    precision={0.5}
-                    readOnly
-                  />
-                </Stack>
-              </div>
+              {item?.renewStatus === 1 && (
+                <span className="text-xs text-red-500 p-1 rounded w-fit bg-red-100">
+                  Đã hết hàng
+                </span>
+              )}
+              {item?.renewStatus === 2 && (
+                <span className="text-xs text-yellow-500 p-1 rounded w-fit bg-yellow-100">
+                  Đã điều chỉnh số lượng
+                </span>
+              )}
             </div>
           </div>
         </div>

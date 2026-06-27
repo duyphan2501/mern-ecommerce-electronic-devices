@@ -33,12 +33,23 @@ const CartItem = ({ product, userId }) => {
   return (
     <div className="flex gap-3 border-b-1 border-gray-300 w-full min-w-0 py-2">
       <Link to={`/product/${product.slug}`} onClick={closeCart}>
-        <div className="size-20 sm:size-25 rounded-md overflow-hidden p-1">
+        <div className="size-20 sm:size-25 rounded-md overflow-hidden p-1 relative">
           <img
             src={product?.images?.[0]}
             alt=""
             className="w-full h-full object-cover hover:scale-105 transition"
           />
+          {product?.status !== "available" && (
+            <div className="absolute size-full inset-0 bg-black/30 text-center flex items-center justify-center">
+              <p
+                className={`${product?.status === "out_of_stock" ? "text-red-500" : "text-yellow-400"} font-semibold text-sm p-3`}
+              >
+                {product?.status === "out_of_stock"
+                  ? "Hết hàng"
+                  : "Cần gia hạn giữ chỗ"}
+              </p>
+            </div>
+          )}
         </div>
       </Link>
       <div className="flex flex-col justify-center flex-1 gap-2 min-w-0">
@@ -50,7 +61,17 @@ const CartItem = ({ product, userId }) => {
             <IoTrashOutline className="size-5" onClick={handleRemoveItem} />
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-5 text-sm">
+        {product?.renewStatus === 1 && (
+          <span className="text-xs text-red-500 p-1 rounded w-fit bg-red-100">
+            Đã hết hàng
+          </span>
+        )}
+        {product?.renewStatus === 2 && (
+          <span className="text-xs text-yellow-500 p-1 rounded w-fit bg-yellow-100">
+            Điều chỉnh số lượng
+          </span>
+        )}
+        <div className="flex flex-row items-center gap-5 text-sm">
           <QuantityMenu
             quantity={product.quantity}
             handleChange={(quantity) => handleUpdateQuantity(quantity)}

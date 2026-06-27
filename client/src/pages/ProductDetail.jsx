@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
 import MyContext from "../Context/MyContext";
@@ -7,7 +7,10 @@ import ProductDetailContent from "../components/ProductDetailContent";
 import ProductDetailInfo from "../components/ProductDetailInfo";
 import ProductZoom from "../components/ProductZoom";
 import useProductStore from "../store/productStore";
-import { getSelectedModel, getSelectedModelImages } from "../utils/productImages";
+import {
+  getSelectedModel,
+  getSelectedModelImages,
+} from "../utils/productImages";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -15,8 +18,12 @@ const ProductDetail = () => {
   const [selectedModelIndex, setSelectedModelIndex] = useState(0);
   const [productStatus, setProductStatus] = useState("loading");
   const { selectedProduct } = useContext(MyContext);
-  const { getProductBySlug, getProductsByCategoryIds } = useProductStore();
-
+  const { getProductBySlug, getProductsByCategoryIds } =
+    useProductStore.getState();
+  const fetchRelatedProducts = useCallback(async () => {
+    const cateIds = product?.categoryIds.map((cate) => cate._id);
+    return getProductsByCategoryIds(cateIds);
+  }, [getProductsByCategoryIds, product?.categoryIds]);
   useEffect(() => {
     let ignore = false;
 
@@ -132,10 +139,7 @@ const ProductDetail = () => {
         <div className="pt-5 pb-10">
           <LazyComponentWrapper
             importFunc={() => import("../components/ProductSlider")}
-            fetchProducts={async () => {
-              const cateIds = product.categoryIds.map((cate) => cate._id);
-              return getProductsByCategoryIds(cateIds);
-            }}
+            fetchProducts={fetchRelatedProducts}
           />
         </div>
       </div>

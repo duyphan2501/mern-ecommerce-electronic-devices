@@ -3,117 +3,67 @@ import {
   loadCart,
   removeCartItem,
   syncRedisCartToMongo,
+  updateCartQuantity,
 } from "../service/cart.service.js";
 import { StockService } from "../service/stock.service.js";
 import redisClient from "../config/init.redis.js";
 import { CART_TTL_MS } from "../config/constants.js";
 import { cookieOptions } from "../helper/auth.helper.js";
 
-const addToCart = async (req, res) => {
+const handleCartResponse = async (req, res, operationType) => {
   try {
     const { modelId, quantity, userId } = req.body;
-    let { cartId } = req.cookies;
-
-    const ownerId = userId || cartId || uuidv4();
-    const isUser = Boolean(userId);
-
-    // 1. Lấy số lượng hiện tại từ Redis
-    const currentQty =
-      (await redisClient.hGet(`cart:${ownerId}`, `product:${modelId}`)) || 0;
-    const targetQty = parseInt(currentQty) + parseInt(quantity);
-
-    // 2. Thực thi qua Lua (Check kho + Trừ kho + Giữ chỗ)
-    const [finalQty, status] = await StockService.reserve(
-      ownerId,
-      modelId,
-      targetQty,
-      isUser,
-    );
-
-    // 3. Set cookie nếu là khách mới
-    if (!userId && !cartId) {
-      res.cookie("cartId", ownerId, {
-        maxAge: CART_TTL_MS.GUEST,
-        ...cookieOptions
-      });
-    }
-
-    // 4. Nếu là User, đồng bộ vào MongoDB (Background task - không đợi)
-    await syncRedisCartToMongo(userId, modelId, finalQty);
-
-    const isFullSuccess = status === 0;
-    const message = isFullSuccess
-      ? "Thêm thành công"
-      : status === 2
-        ? `Chỉ còn ${finalQty} sản phẩm`
-        : "Hết hàng";
-    return res.status(isFullSuccess ? 200 : 400).json({
-      success: isFullSuccess,
-      message,
-      currentCartQty: finalQty,
-    });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: error.message || error, success: false });
-  }
-};
-
-const updateCart = async (req, res) => {
-  try {
-    const { userId, modelId, quantity } = req.body;
     const { cartId } = req.cookies;
 
-    if (!userId && !cartId) {
-      return res.status(400).json({ message: "No cart found", success: false });
+    if (!modelId || quantity === undefined) {
+      return res.status(400).json({ message: "Thiếu thông tin sản phẩm hoặc số lượng!", success: false });
     }
 
-    if (!modelId || !quantity) {
-      return res
-        .status(400)
-        .json({ message: "Missing information!", success: false });
-    }
-
-    const ownerId = userId || cartId || uuidv4();
-    const isUser = Boolean(userId);
-
-    const targetQty = parseInt(quantity);
-
-    // 2. Thực thi qua Lua (Check kho + Trừ kho + Giữ chỗ)
-    const [finalQty, status] = await StockService.reserve(
-      ownerId,
+    // Gọi tầng Service xử lý nghiệp vụ
+    const { finalQty, status, ownerId, isNewGuest } = await updateCartQuantity({
       modelId,
-      targetQty,
-      isUser,
-    );
+      quantity,
+      userId,
+      cartId,
+      operationType
+    });
 
-    // 3. Set cookie nếu là khách mới
-    if (!userId && !cartId) {
+    // Cấp phát cookie ngay tại tầng Controller nếu là khách vãng lai mới
+    if (isNewGuest) {
       res.cookie("cartId", ownerId, {
         maxAge: CART_TTL_MS.GUEST,
         ...cookieOptions
       });
     }
 
-    // 4. Nếu là User, đồng bộ vào MongoDB (Background task - không đợi)
-    await syncRedisCartToMongo(userId, modelId, finalQty);
-    const isFullSuccess = status === 0;
-    const message = isFullSuccess
-      ? "Cập nhật thành công"
-      : status === 2
-        ? `Chỉ còn ${finalQty} sản phẩm`
-        : "Hết hàng";
-    return res.status(isFullSuccess ? 200 : 400).json({
-      success: isFullSuccess,
+    // Xử lý phân cấp mã lỗi HTTP dựa trên trạng thái của Kho tổng (status từ Lua)
+    if (status === 1) {
+      return res.status(409).json({
+        success: false,
+        message: "Sản phẩm đã hết hàng trong kho tổng",
+        currentCartQty: finalQty,
+      });
+    }
+
+    const message = status === 2
+      ? `Kho tổng không đủ, tự động điều chỉnh còn ${finalQty} sản phẩm`
+      : operationType === "ADD" ? "Thêm vào giỏ hàng thành công" : "Cập nhật giỏ hàng thành công";
+
+    return res.status(200).json({
+      success: true,
       message,
+      status,
       currentCartQty: finalQty,
     });
+
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: error.message || error, success: false });
+    return res.status(500).json({ message: error.message || error, success: false });
   }
 };
+
+const addToCart = (req, res) => handleCartResponse(req, res, "ADD");
+const updateCart = (req, res) => handleCartResponse(req, res, "SET");
+
 
 const getCart = async (req, res) => {
   try {

@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+import { getReserveExpireAt } from "../config/constants.js";
 import redisClient from "../config/init.redis.js";
 import { publishSendOrderEmail } from "../helper/message.helper.js";
 import CartModel from "../model/cart.model.js";
@@ -83,54 +85,116 @@ async function generateOrderId() {
 }
 
 const completeOrderCheckout = async (order) => {
+  // 1. Chuẩn bị tham số cho Batch Checkout Script
+  const checkoutArgs = [order.userId.toString()];
   for (const item of order.items) {
-    const confirmedQty = await StockService.confirm({
-      item,
-      userId: order.userId,
-    });
-
-    if (confirmedQty === 0) {
-      const availableStock = await StockService.getStockinfo(item.modelId);
-      if (availableStock.available < item.quantity) {
-        throw new Error(
-          `Sản phẩm ${item.name} không đủ số lượng, vui lòng tải lại giỏ hàng! Hiện có ${availableStock.available} sản phẩm trong kho.`,
-        );
-      } else {
-        await StockService.reserve(
-          order.userId,
-          item.modelId,
-          item.quantity,
-          true,
-          true,
-        );
-      }
-    }
+    checkoutArgs.push(item.modelId.toString(), item.quantity.toString());
   }
 
-  const bulkOps = order.items.map((item) => ({
-    updateOne: {
-      filter: { _id: item.modelId },
-      update: { $inc: { stockQuantity: -item.quantity } },
-    },
-  }));
+  const session = await mongoose.startSession();
+  let isRedisCommitted = false; // Cờ kiểm soát trạng thái giao dịch trên Redis
 
-  await ModelsModel.bulkWrite(bulkOps);
-  await createOrderExportMovements(order);
-  await orderModel.findByIdAndUpdate(order._id, {
-    status: "pending",
-    $push: {
-      statusHistory: {
-        type: "status",
-        message: "Order moved to pending confirmation",
-        from: order.status,
-        to: "pending",
-        createdBy: order.userId,
-      },
-    },
-  });
-  await CartModel.deleteOne({ userId: order.userId });
+  try {
+    // GIAI ĐOẠN 1: XỬ LÝ NGUYÊN TỬ TRÊN REDIS (LUA SCRIPT)
+    const [status, resultData] =
+      await StockService.confirmCheckout(checkoutArgs);
 
-  return true;
+    // Nếu kho không đủ, Lua Script trả về status = 0 kèm ModelId bị lỗi
+    if (status === 0) {
+      const failedItem = order.items.find(
+        (item) => item.modelId.toString() === resultData,
+      );
+      const itemName = failedItem ? failedItem.name : resultData;
+      throw new Error(
+        `Sản phẩm "${itemName}" đã hết hàng hoặc không đủ số lượng khả dụng!`,
+      );
+    }
+
+    // Đánh dấu: Đã trừ kho và xóa giữ chỗ tạm thời trên Redis thành công
+    isRedisCommitted = true;
+
+    // GIAI ĐOẠN 2: THỰC THI & COMMIT VÀO MONGODB TRANSACTION
+    await session.withTransaction(async () => {
+      // 1. Khấu trừ số lượng kho vật lý trong MongoDB của tất cả sản phẩm
+      const bulkOps = order.items.map((item) => ({
+        updateOne: {
+          filter: { _id: item.modelId },
+          update: { $inc: { stockQuantity: -item.quantity } },
+        },
+      }));
+      await Promise.all([
+        ModelsModel.bulkWrite(bulkOps, { session }),
+        createOrderExportMovements(order, session),
+        orderModel.findByIdAndUpdate(
+          order._id,
+          {
+            status: "pending",
+            $push: {
+              statusHistory: {
+                type: "status",
+                message: "Order moved to pending confirmation",
+                from: order.status,
+                to: "pending",
+                createdBy: order.userId,
+              },
+            },
+          },
+          { session },
+        ),
+      ]);
+    });
+
+    return { success: true, message: "Đặt hàng thành công!" };
+  } catch (error) {
+    console.error(
+      "Phát hiện lỗi hệ thống, kiểm tra kích hoạt luồng tự vá (Rollback)...",
+    );
+
+    // Nếu lỗi văng ra từ bước KIỂM TRA KHO (isRedisCommitted = false) -> Không rollback Redis
+    if (error.message.includes("hết hàng") || !isRedisCommitted) {
+      throw error;
+    }
+
+    // GIAI ĐOẠN 3: TỰ VÁ DỮ LIỆU (SELF-HEALING) QUA LUA ROLLBACK
+    // Chỉ chạy khi: Kho Redis đã bị trừ, nhưng MongoDB Transaction bị sập / timeout / mất kết nối chớp nhoáng.
+    console.warn(
+      "MongoDB lỗi bất ngờ! Tiến hành ROLLBACK kho và khôi phục Giữ chỗ trên Redis...",
+    );
+
+    // Chuẩn bị tham số cho Script Rollback: [ownerId, modelId1, qty1, expireAt1, ...]
+    const rollbackArgs = [order.userId];
+    for (const item of order.items) {
+      rollbackArgs.push(
+        item.modelId.toString(),
+        item.quantity.toString(),
+        getReserveExpireAt(),
+      );
+    }
+
+    try {
+      const [rollbackStatus, rollbackMsg] =
+        await StockService.rollbackCheckout(rollbackArgs);
+
+      if (rollbackStatus === 1) {
+        console.log(
+          `Tự vá dữ liệu thành công [Redis Rollback]: ${rollbackMsg}`,
+        );
+      }
+    } catch (redisRollbackError) {
+      // Tình huống cực đoan: Bản thân Single Node Redis bị chết đúng giây phút này
+      console.error(
+        "CỰC KỲ NGUY HIỂM: Giao thức Rollback Redis thất bại hoàn toàn!",
+        redisRollbackError,
+      );
+    }
+
+    throw new Error(
+      `Hệ thống bận (Database Timeout), vui lòng thử lại sau giây lát!`,
+    );
+  } finally {
+    // Đóng session bảo đảm giải phóng tài nguyên hệ thống
+    await session.endSession();
+  }
 };
 
 const createNewOrder = async ({
@@ -276,7 +340,11 @@ const buildEditedOrderItems = async (currentItems, nextItems) => {
     await ModelsModel.findByIdAndUpdate(item.modelId, {
       $inc: { stockQuantity: -item.delta },
     });
-    await redisClient.hIncrBy(`stock:${item.modelId}`, "available", -item.delta);
+    await redisClient.hIncrBy(
+      `stock:${item.modelId}`,
+      "available",
+      -item.delta,
+    );
   }
 
   return editedItems;
@@ -458,7 +526,10 @@ const editAdminOrderService = async ({ id, items, shippingInfo, adminId }) => {
   }
 
   if (shippingInfo) {
-    order.shippingInfo = { ...order.shippingInfo?.toObject?.(), ...shippingInfo };
+    order.shippingInfo = {
+      ...order.shippingInfo?.toObject?.(),
+      ...shippingInfo,
+    };
   }
 
   appendOrderEvent(order, {
@@ -479,7 +550,10 @@ const createAdminRmaService = async ({ id, items, reason, adminId }) => {
   const order = await orderModel.findById(id);
   if (!order) throw createServiceError("Order not found", 404);
   if (order.status !== "delivered") {
-    throw createServiceError("RMA can only be created for delivered orders", 400);
+    throw createServiceError(
+      "RMA can only be created for delivered orders",
+      400,
+    );
   }
   if (!Array.isArray(items) || items.length === 0) {
     throw createServiceError("RMA must contain at least one item", 400);
@@ -487,7 +561,8 @@ const createAdminRmaService = async ({ id, items, reason, adminId }) => {
 
   const normalizedItems = items.map((item) => {
     const orderItem = order.items.find((i) => i.modelId === item.modelId);
-    if (!orderItem) throw createServiceError("Returned item is not part of this order", 400);
+    if (!orderItem)
+      throw createServiceError("Returned item is not part of this order", 400);
     const requestedQty = Number(item.requestedQty);
     if (
       !Number.isInteger(requestedQty) ||
@@ -522,7 +597,12 @@ const createAdminRmaService = async ({ id, items, reason, adminId }) => {
   return { order: await buildOrderResponse(order), rma };
 };
 
-const receiveAdminRmaService = async ({ id, rmaId, warehouseNote, adminId }) => {
+const receiveAdminRmaService = async ({
+  id,
+  rmaId,
+  warehouseNote,
+  adminId,
+}) => {
   const rma = await ReturnModel.findOne({ _id: rmaId, orderId: id });
   const order = await orderModel.findById(id);
   if (!rma || !order) throw createServiceError("RMA not found", 404);
@@ -594,7 +674,10 @@ const matchAdminRmaQuantityService = async ({ id, rmaId, adminId }) => {
   const order = await orderModel.findById(id);
   if (!rma || !order) throw createServiceError("RMA not found", 404);
   if (rma.status !== "assessed") {
-    throw createServiceError("RMA must be assessed before quantity matching", 400);
+    throw createServiceError(
+      "RMA must be assessed before quantity matching",
+      400,
+    );
   }
   if (rma.items.some((item) => item.receivedQty !== item.requestedQty)) {
     throw createServiceError(

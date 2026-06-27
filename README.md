@@ -62,18 +62,18 @@ Backend route groups:
 
 ## Tech Stack
 
-| Layer | Technology |
-| --- | --- |
-| Customer Frontend | React 19, Vite, Tailwind CSS v4, Zustand, React Router, Axios |
-| Admin Frontend | React 19, Vite, Tailwind CSS v4, MUI, Ant Design, TipTap, Recharts, Zustand |
-| Backend | Node.js, Express 5, ES Modules |
-| Database | MongoDB, Mongoose |
-| Cache / Inventory | Redis |
-| Authentication | JWT, HTTP-only cookies, Google OAuth, bcryptjs |
-| Media Storage | Cloudinary, Multer |
-| Payment | PayOS |
-| Email | Nodemailer |
-| Development Tools | ngrok, nodemon, ESLint |
+| Layer             | Technology                                                                  |
+| ----------------- | --------------------------------------------------------------------------- |
+| Customer Frontend | React 19, Vite, Tailwind CSS v4, Zustand, React Router, Axios               |
+| Admin Frontend    | React 19, Vite, Tailwind CSS v4, MUI, Ant Design, TipTap, Recharts, Zustand |
+| Backend           | Node.js, Express 5, ES Modules                                              |
+| Database          | MongoDB, Mongoose                                                           |
+| Cache / Inventory | Redis                                                                       |
+| Authentication    | JWT, HTTP-only cookies, Google OAuth, bcryptjs                              |
+| Media Storage     | Cloudinary, Multer                                                          |
+| Payment           | PayOS                                                                       |
+| Email             | Nodemailer                                                                  |
+| Development Tools | ngrok, nodemon, ESLint                                                      |
 
 ## Features
 
@@ -170,6 +170,8 @@ Redis tracks:
 
 An inventory worker runs periodically and releases expired cart reservations. This returns abandoned stock back to the available pool.
 
+Reservation expiration is driven by `reservation:zset`; the reservation hash stores metadata but is not removed by a Redis TTL. The worker must process expired zset entries to restore stock and clean up stale cart lines.
+
 This prevents products from staying locked forever when users add items to cart but never complete checkout.
 
 ### 5. JWT Authentication with Refresh Token
@@ -197,24 +199,24 @@ The backend uses MongoDB with Mongoose models.
 
 Main collections:
 
-| Model | Purpose |
-| --- | --- |
-| `User` | Customer/admin accounts, auth data, profile data |
-| `Category` | Product categories |
-| `Brand` | Product brands |
-| `Product` | Main product information |
-| `ProductModel` | Product variants/models such as color, storage, stock, price |
-| `Cart` | Authenticated user cart snapshot |
-| `Address` | Customer shipping addresses |
-| `Order` | Orders, payment status, shipping status, order items |
-| `Return` | RMA/return data |
-| `GoodsReceipt` | Inventory import records |
-| `StockExport` | Inventory export records |
-| `InventoryMovement` | Stock movement history |
-| `Slide` | Homepage/banner slides |
-| `Service` | Service display content |
-| `Blog` | Blog/content posts |
-| `Setting` | Common website settings |
+| Model               | Purpose                                                      |
+| ------------------- | ------------------------------------------------------------ |
+| `User`              | Customer/admin accounts, auth data, profile data             |
+| `Category`          | Product categories                                           |
+| `Brand`             | Product brands                                               |
+| `Product`           | Main product information                                     |
+| `ProductModel`      | Product variants/models such as color, storage, stock, price |
+| `Cart`              | Authenticated user cart snapshot                             |
+| `Address`           | Customer shipping addresses                                  |
+| `Order`             | Orders, payment status, shipping status, order items         |
+| `Return`            | RMA/return data                                              |
+| `GoodsReceipt`      | Inventory import records                                     |
+| `StockExport`       | Inventory export records                                     |
+| `InventoryMovement` | Stock movement history                                       |
+| `Slide`             | Homepage/banner slides                                       |
+| `Service`           | Service display content                                      |
+| `Blog`              | Blog/content posts                                           |
+| `Setting`           | Common website settings                                      |
 
 Redis is used for fast-changing operational data:
 

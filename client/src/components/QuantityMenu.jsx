@@ -2,11 +2,12 @@ import { Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 
-const QuantityMenu = ({ quantity, handleChange }) => {
+const QuantityMenu = ({ quantity, handleChange, disabled = false }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
+    if (disabled) return;
     setAnchorEl(event.currentTarget);
   };
   const handleSelectItem = (value) => {
@@ -21,8 +22,10 @@ const QuantityMenu = ({ quantity, handleChange }) => {
   return (
     <div className="">
       <span
-        className="px-1 flex items-center gap-1 rounded-md cursor-pointer hover:bg-gray-300 bg-gray-200 w-fit"
+        className={`px-1 flex items-center gap-1 rounded-md w-fit ${disabled ? "opacity-60 text-gray-400 cursor-not-allowed" : "cursor-pointer hover:bg-gray-300 bg-gray-200"}`}
         onClick={handleClick}
+        role="button"
+        aria-disabled={disabled}
       >
         S.L: {quantity} <IoMdArrowDropdown />
       </span>

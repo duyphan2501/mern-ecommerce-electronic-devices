@@ -1,11 +1,17 @@
 import LazyComponentWrapper from "../components/LazyComponentWrapper";
 import useCategoryStore from "../store/categoryStore";
 import useProductStore from "../store/productStore";
+import CategoryProductSlider from "../components/CategoryProductSlider";
 
 const Home = () => {
-  const { getProductByCategoryId, getNewProducts } = useProductStore();
   const categoryListStore = useCategoryStore((s) => s.categoryList);
-  const categoryList = categoryListStore?.slice(0, 5) || []
+  const categoryList = categoryListStore?.slice(0, 5) || [];
+
+  const getNewProducts = useProductStore((s) => s.getNewProducts);
+  const getProductByCategoryId = useProductStore(
+    (s) => s.getProductByCategoryId,
+  );
+
   return (
     <div>
       <section className="py-5 mb-4">
@@ -111,10 +117,7 @@ const Home = () => {
                   </div>
                 </div>
                 <div className="">
-                  <LazyComponentWrapper
-                    importFunc={() => import("../components/ProductSlider")}
-                    fetchProducts={() => getProductByCategoryId(cate._id)}
-                  />
+                  <CategoryProductSlider cateId={cate._id} />
                 </div>
               </div>
             ))}

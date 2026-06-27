@@ -6,14 +6,24 @@ import Divider from "@mui/material/Divider";
 import { IoClose } from "react-icons/io5";
 import CartItem from "./CartItem";
 import formatMoney from "../utils/MoneyFormat";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import { Link } from "react-router-dom";
 import useCartStore from "../store/cartStore";
+import { FiLoader, FiRefreshCw } from "react-icons/fi";
+import useAuthStore from "../store/authStore";
 
 const CartDrawer = () => {
   const { isOpenCart, closeCart } = useContext(MyContext);
+  const user = useAuthStore((state) => state.user);
   const cart = useCartStore((state) => state.cart);
-
+  const needRenewSlot = useCartStore((state) => state.needRenewSlot());
+  const isLoading = useCartStore((state) => state.isLoading);
+  const renewReservation = useCartStore((state) => state.renewReservation);
+  const handleRenewReservation = async () => {
+    if (!isLoading) {
+      await renewReservation(user?._id);
+    }
+  };
   const totalCost = useMemo(() => {
     if (!cart?.items) return 0;
     return cart.items.reduce((sum, product) => {
@@ -125,7 +135,24 @@ const CartDrawer = () => {
         }}
       >
         <h3 className="shrink-0 flex items-center justify-between p-3 font-semibold text-content">
-          Giỏ hàng ({cart?.items?.length || 0})
+          <div className=" flex items-center gap-2">
+            Giỏ hàng ({cart?.items?.length || 0})
+            {needRenewSlot && (
+              <button
+                className="flex items-center gap-1 text-xs text-whie px-2 py-1  rounded-2xl hover:text-blue-700 transition cursor-pointer bg-blue-100 hover:bg-blue-200 min-w-20 justify-center"
+                onClick={handleRenewReservation}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="animate-spin">
+                    <FiLoader size={15} />
+                  </div>
+                ) : (
+                  "Gia hạn giữ chỗ"
+                )}
+              </button>
+            )}
+          </div>
           <div className="hover:bg-gray-200 p-1 rounded-full cursor-pointer transition">
             <IoClose onClick={closeCart} size={25} />
           </div>

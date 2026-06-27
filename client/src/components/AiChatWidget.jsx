@@ -173,7 +173,7 @@ const AiChatWidget = () => {
   };
 
   return (
-    <div className="fixed bottom-5 right-3 z-[9999]">
+    <div className="fixed bottom-5 right-3 z-[100]">
       {isOpen && (
         <div className="flex h-[min(620px,calc(100vh-2.5rem))] w-[calc(100vw-1.5rem)] max-w-[390px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl">
           <div className="flex items-center justify-between bg-[#0d68f3] px-4 py-3 text-white">

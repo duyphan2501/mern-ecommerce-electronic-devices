@@ -21,14 +21,13 @@ const useOrderStore = create((set, get) => ({
     try {
       const res = await axiosPrivate.post("/api/order/create", orderData);
       toast.success("Tạo đơn hàng thành công!");
-      useCartStore.getState().clearCart();
       return res.data;
     } catch (error) {
       console.error("Failed to create order:", error);
       toast.error(
         error.response?.data?.message || "Đã xảy ra lỗi khi tạo đơn hàng.",
       );
-      return null;
+      return error.response?.data;
     } finally {
       set({ isLoading: false });
     }
@@ -93,7 +92,7 @@ const useOrderStore = create((set, get) => ({
     try {
       const res = await axiosPrivate.put(`/api/order/cancel/${orderId}`);
       toast.success("Hủy đơn hàng thành công!");
-      set({orders: get().orders.filter((order) => order._id !== orderId)});
+      set({ orders: get().orders.filter((order) => order._id !== orderId) });
       return res.data.order;
     } catch (error) {
       console.error("Failed to cancel order:", error);

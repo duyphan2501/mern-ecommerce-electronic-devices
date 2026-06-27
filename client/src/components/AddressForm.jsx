@@ -99,11 +99,11 @@ const AddressForm = () => {
     e.preventDefault();
     if (isLoadingAddress) return;
     let success = false;
-    if (address) {
+    if (updateAddr) {
       success = await updateAddress(
         {
           ...formData,
-          id: address._id,
+          id: updateAddr._id,
         },
         axiosPrivate,
       );

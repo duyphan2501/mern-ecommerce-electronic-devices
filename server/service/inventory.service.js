@@ -159,7 +159,9 @@ const createGoodsReceipt = async ({ items, note, createdBy }) => {
       throw err;
     }
     if (seenModelIds.has(item.modelId)) {
-      const err = new Error("Each product model can appear only once per receipt");
+      const err = new Error(
+        "Each product model can appear only once per receipt",
+      );
       err.statusCode = 400;
       throw err;
     }
@@ -196,14 +198,16 @@ const createGoodsReceipt = async ({ items, note, createdBy }) => {
   const receiptCode = await generateReceiptCode();
   const goodsReceipt = await GoodsReceiptModel.create({
     receiptCode,
-    items: receiptItems.map(({ model, quantity, unitCost, note: itemNote }) => ({
-      modelId: model._id,
-      productId: model.productId,
-      quantity,
-      unitCost,
-      totalCost: quantity * unitCost,
-      note: itemNote,
-    })),
+    items: receiptItems.map(
+      ({ model, quantity, unitCost, note: itemNote }) => ({
+        modelId: model._id,
+        productId: model.productId,
+        quantity,
+        unitCost,
+        totalCost: quantity * unitCost,
+        note: itemNote,
+      }),
+    ),
     totalQuantity: receiptItems.reduce((sum, item) => sum + item.quantity, 0),
     totalCost: receiptItems.reduce(
       (sum, item) => sum + item.quantity * item.unitCost,
@@ -275,7 +279,9 @@ const createStockExport = async ({ items, note, createdBy }) => {
       throw err;
     }
     if (seenModelIds.has(item.modelId)) {
-      const err = new Error("Each product model can appear only once per export");
+      const err = new Error(
+        "Each product model can appear only once per export",
+      );
       err.statusCode = 400;
       throw err;
     }
@@ -306,7 +312,9 @@ const createStockExport = async ({ items, note, createdBy }) => {
       throw err;
     }
 
-    const stockInfo = await redisClient.hGetAll(`stock:${model._id.toString()}`);
+    const stockInfo = await redisClient.hGetAll(
+      `stock:${model._id.toString()}`,
+    );
     const availableStock = Number(stockInfo.available || 0);
     if (availableStock < quantity) {
       const err = new Error(
@@ -327,23 +335,25 @@ const createStockExport = async ({ items, note, createdBy }) => {
   const exportCode = await generateExportCode();
   const stockExport = await StockExportModel.create({
     exportCode,
-    items: exportItems.map(({ model, quantity, unitSalePrice, note: itemNote }) => {
-      const unitCost = Number(model.costPrice || 0);
-      const totalCost = unitCost * quantity;
-      const totalSale = unitSalePrice * quantity;
+    items: exportItems.map(
+      ({ model, quantity, unitSalePrice, note: itemNote }) => {
+        const unitCost = Number(model.costPrice || 0);
+        const totalCost = unitCost * quantity;
+        const totalSale = unitSalePrice * quantity;
 
-      return {
-        modelId: model._id,
-        productId: model.productId,
-        quantity,
-        unitCost,
-        unitSalePrice,
-        totalCost,
-        totalSale,
-        profit: totalSale - totalCost,
-        note: itemNote,
-      };
-    }),
+        return {
+          modelId: model._id,
+          productId: model.productId,
+          quantity,
+          unitCost,
+          unitSalePrice,
+          totalCost,
+          totalSale,
+          profit: totalSale - totalCost,
+          note: itemNote,
+        };
+      },
+    ),
     totalQuantity: exportItems.reduce((sum, item) => sum + item.quantity, 0),
     totalCost: exportItems.reduce(
       (sum, item) => sum + Number(item.model.costPrice || 0) * item.quantity,
@@ -405,17 +415,24 @@ const createStockExport = async ({ items, note, createdBy }) => {
   return stockExport;
 };
 
-const createOrderExportMovements = async (order) => {
+const createOrderExportMovements = async (order, session = null) => {
   if (!order?.items?.length) return [];
 
   const modelIds = order.items.map((item) => item.modelId);
+
   const models = await ModelsModel.find({ _id: { $in: modelIds } })
     .select("_id productId costPrice")
+    .session(session)
     .lean();
-  const modelMap = new Map(models.map((model) => [model._id.toString(), model]));
+
+  const modelMap = new Map(
+    models.map((model) => [model._id.toString(), model]),
+  );
 
   const movements = order.items
     .map((item) => {
+      if (!item.modelId) return null;
+
       const model = modelMap.get(item.modelId.toString());
       if (!model) return null;
 
@@ -443,7 +460,7 @@ const createOrderExportMovements = async (order) => {
 
   if (!movements.length) return [];
 
-  return InventoryMovementModel.insertMany(movements);
+  return InventoryMovementModel.insertMany(movements, { session });
 };
 
 export {
