@@ -30,6 +30,7 @@ const Header = () => {
   const navigator = useNavigate();
   const location = useLocation();
 
+  // Kiểm tra an toàn: Chỉ mở khi có sự kiện tương tác và phần tử HTML neo đã tồn tại thực tế
   const openProfile = Boolean(anchorEl);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -40,6 +41,8 @@ const Header = () => {
   const axiosPrivate = useAxiosPrivate();
 
   const handleLogout = async () => {
+    // Chủ động đóng menu lập tức để tránh lỗi giao diện khi component re-render do thay đổi state 'user'
+    handleClose();
     try {
       await logout(axiosPrivate);
       toast.success(useAuthStore.getState().message);
@@ -51,11 +54,9 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
-
       {/* ===== TOP HEADER ===== */}
       <div className="border-b border-gray-200">
         <div className="container flex items-center justify-between gap-3 flex-wrap py-2">
-
           {/* LOGO */}
           <div className="w-auto">
             <Link to="/" className="logo">
@@ -69,7 +70,6 @@ const Header = () => {
 
           {/* ICONS */}
           <div className="flex items-center gap-2 order-2 md:order-3">
-
             {user ? (
               <>
                 <Button
@@ -82,22 +82,40 @@ const Header = () => {
 
                 <Menu
                   anchorEl={anchorEl}
-                  open={openProfile}
+                  // SỬA DÒNG NÀY: Kiểm tra điều kiện nghiêm ngặt để ép đóng menu khi anchorEl không tồn tại hợp lệ
+                  open={Boolean(openProfile && anchorEl)}
                   onClose={handleClose}
                   disableScrollLock
                   transformOrigin={{ horizontal: "right", vertical: "top" }}
                   anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 >
-                  <MenuItem component={Link} to="/my-account/profile" className="!text-sm">
+                  <MenuItem
+                    component={Link}
+                    to="/my-account/profile"
+                    className="!text-sm"
+                    onClick={handleClose}
+                  >
                     Hồ sơ cá nhân
                   </MenuItem>
-                  <MenuItem component={Link} to="/my-account/address" className="!text-sm">
+                  <MenuItem
+                    component={Link}
+                    to="/my-account/address"
+                    className="!text-sm"
+                    onClick={handleClose}
+                  >
                     Sổ địa chỉ
                   </MenuItem>
-                  <MenuItem component={Link} to="/my-account/orders" className="!text-sm">
+                  <MenuItem
+                    component={Link}
+                    to="/my-account/orders"
+                    className="!text-sm"
+                    onClick={handleClose}
+                  >
                     Đơn hàng của tôi
                   </MenuItem>
-                  <MenuItem className="!text-sm" onClick={handleLogout}>Đăng xuất</MenuItem>
+                  <MenuItem className="!text-sm" onClick={handleLogout}>
+                    Đăng xuất
+                  </MenuItem>
                 </Menu>
               </>
             ) : (
@@ -120,12 +138,6 @@ const Header = () => {
               </div>
             )}
 
-            {/* <Tooltip title="Đơn hàng">
-              <IconButton component={Link} to="/my-account/orders">
-                <IoBagCheckOutline className="text-[#0d68f3]" />
-              </IconButton>
-            </Tooltip> */}
-
             <Tooltip title="Giỏ hàng">
               <IconButton onClick={openCart}>
                 <StyledBadge
@@ -136,14 +148,12 @@ const Header = () => {
                 </StyledBadge>
               </IconButton>
             </Tooltip>
-
           </div>
 
           {/* SEARCH */}
           <div className="w-full md:flex-1 md:order-2 order-3 min-w-[220px] md:mx-10">
             <Search />
           </div>
-
         </div>
       </div>
 

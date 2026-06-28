@@ -9,6 +9,7 @@ import {
   cartHashToItems,
 } from "../helper/cart-merge.helper.js";
 import { StockService } from "./stock.service.js";
+import { v4 as uuidv4 } from "uuid";
 
 const syncRedisCartToMongo = async (userId, modelId, finalQty) => {
   if (!userId || !modelId) return;

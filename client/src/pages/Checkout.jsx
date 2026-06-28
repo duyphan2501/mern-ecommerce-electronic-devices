@@ -113,7 +113,7 @@ const Checkout = () => {
               Đơn hàng của bạn
             </h4>
             <div className="flex justify-between items-center p-2 border-b border-gray-300 ">
-              <div className="font-semibold">Sản phẩm</div>
+              <div className="font-semibold">Sản phẩm ({validItems.length})</div>
               <div className="font-semibold">Đơn giá</div>
             </div>
             <div className="max-h-40 overflow-scroll scroll px-2">

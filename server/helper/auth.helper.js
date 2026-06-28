@@ -42,7 +42,7 @@ const handlePostLogin = async (req, res, user) => {
 
   // merge to use cart
   const guestCartId = req.cookies.cartId;
-  await mergeCart(guestCartId, user._id);
+  await mergeCart(guestCartId, user._id.toString());
 
   return accessToken;
 };
