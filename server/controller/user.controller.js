@@ -643,6 +643,20 @@ const googleLogin = async (req, res, next) => {
   }
 };
 
+const getMe = async (req, res, next) => {
+  try {
+    const userId = req.user.userId;
+    const user = await UserModel.findById(userId);
+    return res.status(200).json({
+      user: sanitizeUser(user),
+      message: "Get user successfully",
+      success: true,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   register,
   login,
@@ -656,4 +670,5 @@ export {
   updateUserDetails,
   changePassword,
   googleLogin,
+  getMe,
 };

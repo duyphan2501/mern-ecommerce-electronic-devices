@@ -38,10 +38,11 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigator("/login");
       toast.success(useAuthStore.getState().message);
     } catch {
       toast.error(useAuthStore.getState().message);
+    } finally {
+      navigator("/login");
     }
   };
   return (

@@ -1,12 +1,12 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 
 // Components thường dùng chung (load ngay từ đầu)
+import PersistentLogin from "./components/PersistentLogin";
 import Header from "./components/Header";
 import TopStrip from "./components/TopStrip";
 import Footer from "./components/Footer";
-import PersistentLogin from "./components/PersistentLogin";
 import useAuthStore from "./store/authStore";
 import useCartStore from "./store/cartStore";
 import useAxiosPrivate from "./hooks/useAxiosPrivate";
@@ -85,39 +85,36 @@ function App() {
           </div>
         </div>
       </div> */}
-      <BrowserRouter>
-        <TopStrip />
-        <Header />
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center h-screen">
-              <p>Loading...</p>
-            </div>
-          }
-        >
-          <Routes>
+      <TopStrip />
+      <Header />
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center h-screen">
+            <p>Loading...</p>
+          </div>
+        }
+      >
+        <Routes>
+          <Route element={<PersistentLogin />}>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/reset-password/:token" element={<ChangePassword />} />
-
-            <Route element={<PersistentLogin />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/products/:slug?" element={<ProductPage />} />
-              <Route path="/product/:slug" element={<ProductDetail />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route element={<ProtectedRoute />}>
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/my-account/:tab" element={<MyAccount />} />
-                <Route path="/payment/success" element={<PaymentSuccess />} />
-                <Route path="/order-success" element={<OrderSuccess />} />
-                <Route path="/order/:orderId" element={<OrderTracking />} />
-              </Route>
+            <Route path="/" element={<Home />} />
+            <Route path="/products/:slug?" element={<ProductPage />} />
+            <Route path="/product/:slug" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/my-account/:tab" element={<MyAccount />} />
+              <Route path="/payment/success" element={<PaymentSuccess />} />
+              <Route path="/order-success" element={<OrderSuccess />} />
+              <Route path="/order/:orderId" element={<OrderTracking />} />
             </Route>
-          </Routes>
-        </Suspense>
-        <PageOverlays />
-      </BrowserRouter>
+          </Route>
+        </Routes>
+      </Suspense>
+      <PageOverlays />
       <Footer />
     </>
   );

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -14,7 +15,7 @@ const initialState = {
   accessToken: null,
 };
 
-const useAuthStore = create((set) => ({
+const useAuthStore = create((set, get) => ({
   ...initialState,
   reset: () => {
     set({ message: null, isLoading: false });
@@ -50,7 +51,7 @@ const useAuthStore = create((set) => ({
         `${API_URL}/api/user/send-verification-email`,
         {
           email,
-        }
+        },
       );
       set({
         message: res.data?.message || "Sent successfully",
@@ -70,6 +71,10 @@ const useAuthStore = create((set) => ({
         email,
         password,
       });
+      if (res.data.user?.role !== "admin") {
+        toast.error("You are not admin!");
+        throw new Error("You are not admin!");
+      }
 
       set({
         user: res?.data?.user,
@@ -128,7 +133,7 @@ const useAuthStore = create((set) => ({
         {
           password: newPassword,
           confirmPassword,
-        }
+        },
       );
       set({ user: res.data.user, isLoading: false, message: res.data.message });
     } catch (error) {
@@ -158,6 +163,7 @@ const useAuthStore = create((set) => ({
   },
 
   refreshToken: async () => {
+    if (get().isLoading) return;
     set({ isLoading: true, message: null });
     try {
       const res = await axios.put(`${API_URL}/api/user/refresh-token`);
@@ -183,6 +189,10 @@ const useAuthStore = create((set) => ({
   googleLogin: async (token) => {
     try {
       const res = await axios.post(`${API_URL}/api/user/google`, { token });
+      if (res.data.user?.role !== "admin") {
+        toast.error("You are not admin!");
+        throw new Error("You are not admin!");
+      }
       set({
         user: res.data.user,
         accessToken: res.data.accessToken,
@@ -191,7 +201,23 @@ const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  
+
+  getMe: async (axiosPrivate) => {
+    if (get().isLoading) return;
+    set({ isLoading: true, message: null });
+    try {
+      const getMeRes = await axiosPrivate.get(`${API_URL}/api/user/me`);
+      set({
+        user: getMeRes.data.user,
+        isAuthenticated: true,
+        isVerified: true,
+        accessToken: getMeRes.data.accessToken,
+      });
+    } catch (error) {
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 }));
 
 export default useAuthStore;

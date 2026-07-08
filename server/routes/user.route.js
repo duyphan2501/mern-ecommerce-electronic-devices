@@ -1,5 +1,5 @@
 import express from 'express'
-import { forgotPassword, login, logout, register, verifyEmail, resetPassword, uploadAvatarImage, refreshToken, sendVerificationEmailAgain, updateUserDetails, changePassword, googleLogin } from '../controller/user.controller.js'
+import { forgotPassword, login, logout, register, verifyEmail, resetPassword, uploadAvatarImage, refreshToken, sendVerificationEmailAgain, updateUserDetails, changePassword, googleLogin, getMe } from '../controller/user.controller.js'
 import checkAuth from '../middleware/auth.middleware.js'
 import {uploadImg} from '../middleware/cloudinary.middleware.js'
 import multer from 'multer'
@@ -18,5 +18,6 @@ userRouter.put("/send-verification-email", sendVerificationEmailAgain)
 userRouter.put("/update", checkAuth, updateUserDetails)
 userRouter.put("/change-password", checkAuth, changePassword)
 userRouter.post("/google", googleLogin)
+userRouter.get("/me", checkAuth, getMe)
 
 export default userRouter

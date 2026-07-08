@@ -2,7 +2,11 @@ import { getCartExpireAt, getReserveExpireAt } from "../config/constants.js";
 import redisClient from "../config/init.redis.js";
 import { formatCartItemInfo } from "../helper/cart.helper.js";
 import CartModel from "../model/cart.model.js";
-import { LOAD_CART_READ_ONLY_LUA, MERGE_CART_LUA, REMOVE_ITEM_LUA } from "../scripts/cart.lua.js";
+import {
+  LOAD_CART_READ_ONLY_LUA,
+  MERGE_CART_LUA,
+  REMOVE_ITEM_LUA,
+} from "../scripts/cart.lua.js";
 import {
   buildReplaceCartMongoOp,
   buildSetCartItemMongoUpdate,
@@ -87,21 +91,25 @@ const loadCart = async (userId, cartId) => {
   if (luaResults.length === 0 && isUser) {
     const mongoCart = await CartModel.findOne({ userId }).lean();
     if (mongoCart?.items.length) {
-      
       const promises = [];
-      
+
       for (const item of mongoCart.items) {
         promises.push(
           redisClient.hSet(
             redisKey,
             `product:${item.modelId}`,
-            item.quantity.toString()
-          )
+            item.quantity.toString(),
+          ),
         );
       }
-      
-      promises.push(redisClient.expireAt(redisKey, getCartExpireAt("USER")));
-      
+
+      promises.push(
+        await redisClient.expireAt(
+          redisKey,
+          new Date(Number(getCartExpireAt("USER")) * 1000),
+        ),
+      );
+
       await Promise.all(promises);
 
       // Nạp lại cấu trúc dữ liệu để xử lý tiếp
@@ -128,7 +136,6 @@ const loadCart = async (userId, cartId) => {
     items: formattedItems,
   };
 };
-
 
 const removeCartItem = async (userId, cartId, modelId) => {
   const ownerId = userId || cartId;

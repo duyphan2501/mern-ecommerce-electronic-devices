@@ -4,31 +4,30 @@ import { Outlet, useNavigate } from "react-router-dom";
 import MyContext from "../Context/MyContext";
 import toast from "react-hot-toast";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+
 const PersistentLogin = () => {
-  const { user, refreshToken, isLoading } = useAuthStore();
-  const { persist } = useContext(MyContext);
+  const { getMe } = useAuthStore.getState();
   const navigator = useNavigate();
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const axiosPrivate = useAxiosPrivate();
+
+  let isGetMeCalled = false;
 
   useEffect(() => {
-    let isMounted = true;
+    if (isGetMeCalled) return;
 
-    const refresh = async () => {
+    const handleGetMe = async () => {
+      isGetMeCalled = true;
       try {
-        if (!persist) throw new Error();
-        if (user) return;
-        await refreshToken();
+        await getMe(axiosPrivate);
       } catch (error) {
-        if (isMounted) {
-          toast.error("You have to login first!");
-          navigator("/login");
-        }
+        console.error(error);
+        isGetMeCalled = false;
       }
     };
-    refresh();
 
-    return () => {
-      isMounted = false;
-    };
+    handleGetMe();
   }, []);
 
   return (

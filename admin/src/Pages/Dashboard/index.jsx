@@ -12,6 +12,7 @@ import {
 } from "../../components/DashboardTables";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import useDashboardStore from "../../store/dashboardStore";
+import useAuthStore from "../../store/authStore";
 
 const GRANULARITY_PARAMS = {
   Daily: "daily",
@@ -22,6 +23,7 @@ const GRANULARITY_PARAMS = {
 const Dashboard = () => {
   const axiosPrivate = useAxiosPrivate();
   const { dashboard, error, getDashboard, isLoading } = useDashboardStore();
+  const user = useAuthStore(s => s.user)
   const [range, setRange] = useState({
     fromDate: dayjs().subtract(29, "day"),
     toDate: dayjs(),
@@ -30,6 +32,7 @@ const Dashboard = () => {
   const handleRangeChange = useCallback((nextRange) => setRange(nextRange), []);
 
   useEffect(() => {
+    if (!user) return;
     const controller = new AbortController();
 
     getDashboard(
@@ -43,7 +46,7 @@ const Dashboard = () => {
     );
 
     return () => controller.abort();
-  }, [axiosPrivate, chartGranularity, getDashboard, range]);
+  }, [axiosPrivate, chartGranularity, getDashboard, range, user]);
 
   const showInitialLoading = isLoading && !dashboard.sales.length;
 

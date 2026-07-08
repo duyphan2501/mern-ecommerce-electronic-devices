@@ -1,3 +1,4 @@
+import PersistentLogin from "./components/PersistentLogin";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Dashboard from "./Pages/Dashboard";
 import Login from "./Pages/Login";
@@ -5,7 +6,6 @@ import ListProduct from "./Pages/Products/ListProduct";
 import CreateProduct from "./Pages/Products/CreateProduct";
 import EditProduct from "./Pages/Products/EditProduct";
 import { Toaster } from "react-hot-toast";
-import PersistentLogin from "./components/PersistentLogin";
 import Layout from "./components/Layout";
 import ListCategory from "./Pages/Category/ListCategory";
 import Orders from "./Pages/Orders";
@@ -18,6 +18,7 @@ import OrderDetail from "./Pages/Orders/OrderDetail";
 import ListBlogs from "./Pages/Blogs/ListBlogs";
 import BlogForm from "./Pages/Blogs/BlogForm";
 import CommonInformation from "./Pages/Settings/CommonInformation";
+
 function App() {
   return (
     <>

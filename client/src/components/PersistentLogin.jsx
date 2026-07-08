@@ -1,51 +1,25 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect } from "react";
 import useAuthStore from "../store/authStore";
 import { Outlet } from "react-router-dom";
-import MyContext from "../Context/MyContext";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const PersistentLogin = () => {
-  const { refreshToken, isLoading } = useAuthStore();
-  const { persist } = useContext(MyContext);
-  const user = useAuthStore((state) => state.user);
-  
-  const [didCheck, setDidCheck] = useState(false);
+  const { getMe } = useAuthStore.getState();
+  const axiosPrivate = useAxiosPrivate();
 
   useEffect(() => {
-    let isMounted = true;
-
-    const verifyRefreshToken = async () => {
+    const handleGetMe = async () => {
       try {
-        if (!user && persist) {
-          await refreshToken();
-        }
+        await getMe(axiosPrivate);
       } catch (error) {
-        console.error("Session expired, please login again.");
-      } finally {
-        if (isMounted) setDidCheck(true);
+        console.error("Silent persistent login failed:", error);
       }
     };
 
-    !user && persist ? verifyRefreshToken() : setDidCheck(true);
+    handleGetMe();
+  }, []);
 
-    return () => {
-      isMounted = false;
-    };
-  }, []); 
-
-  if (!persist) return <Outlet />;
-
-  return (
-    <>
-      {!didCheck || isLoading ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <AiOutlineLoading3Quarters className="animate-spin text-white" size={50} />
-        </div>
-      ) : (
-        <Outlet />
-      )}
-    </>
-  );
+  return <Outlet />;
 };
 
 export default PersistentLogin;

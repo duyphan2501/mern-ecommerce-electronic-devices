@@ -1,7 +1,9 @@
 import { useContext, useEffect } from "react";
 import useAuthStore from "../store/authStore";
 import MyContext from "../Context/MyContext";
-import axiosPrivate from "../API/axiosInstance"
+import axiosPrivate from "../API/axiosInstance";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 // Biến bên ngoài hook để tránh reset khi hook re-render
 let isRefreshing = false;
 let failedQueue = [];
@@ -17,7 +19,7 @@ const processQueue = (error, token = null) => {
 const useAxiosPrivate = () => {
   const { refreshToken } = useAuthStore();
   const { persist } = useContext(MyContext);
-
+  const navigate = useNavigate();
   useEffect(() => {
     // 1. Request Interceptor
     const requestInterceptor = axiosPrivate.interceptors.request.use(
@@ -28,7 +30,7 @@ const useAxiosPrivate = () => {
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     // 2. Response Interceptor
@@ -37,8 +39,7 @@ const useAxiosPrivate = () => {
       async (error) => {
         const prevRequest = error?.config;
 
-        if ((error.response?.status === 401) && !prevRequest?._retry && persist) {
-          
+        if (error.response?.status === 401 && !prevRequest?._retry && persist) {
           if (isRefreshing) {
             // Nếu đang refresh, đẩy request này vào hàng đợi chờ token mới
             return new Promise((resolve, reject) => {
@@ -67,11 +68,20 @@ const useAxiosPrivate = () => {
             processQueue(err, null);
             isRefreshing = false;
             // useAuthStore.getState().logout(); // Logout nếu refresh token hết hạn
+            toast.error("You have to login first!");
+            navigate("/login");
             return Promise.reject(err);
           }
         }
+
+        if (error.response?.status === 403) {
+          toast.error("Permission Denied!");
+          navigate("/login");
+          return Promise.reject(err);
+        }
+
         return Promise.reject(error);
-      }
+      },
     );
 
     // Cleanup: Xóa interceptor cũ khi component unmount hoặc dependency thay đổi

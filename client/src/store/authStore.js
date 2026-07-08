@@ -215,6 +215,21 @@ const useAuthStore = create((set) => ({
       throw error;
     }
   },
+  getMe: async (axiosPrivate) => {
+    set({ isLoading: true, message: null });
+    try {
+      const getMeRes = await axiosPrivate.get(`${API_URL}/api/user/me`);
+      set({
+        user: getMeRes.data.user,
+        isAuthenticated: true,
+        isVerified: true,
+        accessToken: getMeRes.data.accessToken,
+      });
+    } catch (error) {
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 }));
 
 export default useAuthStore;
