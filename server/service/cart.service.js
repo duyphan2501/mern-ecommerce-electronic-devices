@@ -78,7 +78,6 @@ const loadCart = async (userId, cartId) => {
   const isUser = Boolean(userId);
 
   // 1. Đọc nhanh dữ liệu từ Redis qua 1 request LUA
-  // Kết quả trả về mảng phẳng: [modelId1, qty1, status1, modelId2, qty2, status2, ...]
   let luaResults = await redisClient.eval(LOAD_CART_READ_ONLY_LUA, {
     keys: [redisKey],
     arguments: [ownerId],
@@ -88,18 +87,22 @@ const loadCart = async (userId, cartId) => {
   if (luaResults.length === 0 && isUser) {
     const mongoCart = await CartModel.findOne({ userId }).lean();
     if (mongoCart?.items.length) {
-      // Đẩy ngược lại Redis Cart để các request sau không phải sờ vào DB nữa
-      const pipeline = redisClient.pipeline();
+      
+      const promises = [];
+      
       for (const item of mongoCart.items) {
-        pipeline.hSet(
-          redisKey,
-          `product:${item.modelId}`,
-          item.quantity.toString(),
+        promises.push(
+          redisClient.hSet(
+            redisKey,
+            `product:${item.modelId}`,
+            item.quantity.toString()
+          )
         );
       }
-      // Gia hạn giỏ hàng của User theo TTL tiêu chuẩn
-      pipeline.expireAt(redisKey, getCartExpireAt("USER"));
-      await pipeline.exec();
+      
+      promises.push(redisClient.expireAt(redisKey, getCartExpireAt("USER")));
+      
+      await Promise.all(promises);
 
       // Nạp lại cấu trúc dữ liệu để xử lý tiếp
       return await loadCart(userId, null);
@@ -108,20 +111,15 @@ const loadCart = async (userId, cartId) => {
 
   // 3. Phân loại cấu trúc và chuẩn bị format trả về cho Client
   const cartItemsForFormat = [];
-
   for (let i = 0; i < luaResults.length; i += 3) {
     const modelId = luaResults[i];
     const quantity = parseInt(luaResults[i + 1], 10);
     const status = luaResults[i + 2];
 
-    cartItemsForFormat.push({
-      modelId,
-      quantity,
-      status,
-    });
+    cartItemsForFormat.push({ modelId, quantity, status });
   }
 
-  // 4. Format thông tin chi tiết sản phẩm (tên, hình ảnh, giá hiện tại từ DB sản phẩm)
+  // 4. Format thông tin chi tiết sản phẩm
   const formattedItems = await formatCartItemInfo(cartItemsForFormat);
 
   return {
@@ -130,6 +128,7 @@ const loadCart = async (userId, cartId) => {
     items: formattedItems,
   };
 };
+
 
 const removeCartItem = async (userId, cartId, modelId) => {
   const ownerId = userId || cartId;
